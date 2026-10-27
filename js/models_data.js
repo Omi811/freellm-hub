@@ -87,6 +87,116 @@ window.MODELS_CATALOG = [
     "color": "orange"
   },
   {
+    "id": "openrouter/meta-llama/llama-3.3-70b-instruct",
+    "name": "Meta Llama 3.3 70B Instruct",
+    "provider": "openrouter",
+    "provider_name": "OpenRouter / Meta",
+    "category": "fast",
+    "context_window": "131,072 tokens",
+    "speed_rating": "\u26a1\u26a1 Very Fast (~140 t/s)",
+    "free_quota": "OpenRouter Active Key",
+    "description": "Meta's flagship 70B powerhouse matching original Llama 3.1 405B capabilities with 5x the speed and efficiency. Top-tier daily driver.",
+    "tags": [
+      "Llama 3.3 70B",
+      "Flagship Meta",
+      "131k Window",
+      "Arena Leader"
+    ],
+    "litellm_model": "openrouter/meta-llama/llama-3.3-70b-instruct",
+    "key_env_var": "OPENROUTER_API_KEY",
+    "free_key_url": "https://openrouter.ai/keys",
+    "icon": "cpu",
+    "color": "blue"
+  },
+  {
+    "id": "openrouter/deepseek/deepseek-chat",
+    "name": "DeepSeek V3 (685B MoE Frontier)",
+    "provider": "openrouter",
+    "provider_name": "OpenRouter / DeepSeek",
+    "category": "fast",
+    "context_window": "163,840 tokens",
+    "speed_rating": "\u26a1\u26a1\u26a1 Blazing (~160 t/s)",
+    "free_quota": "OpenRouter Active Key",
+    "description": "DeepSeek's raw multi-turn conversational flagship with 685B parameters (MoE). Multi-head latent attention for supreme speed and reasoning.",
+    "tags": [
+      "DeepSeek V3",
+      "685B MoE",
+      "163k Context",
+      "Frontier General"
+    ],
+    "litellm_model": "openrouter/deepseek/deepseek-chat",
+    "key_env_var": "OPENROUTER_API_KEY",
+    "free_key_url": "https://openrouter.ai/keys",
+    "icon": "sparkles",
+    "color": "cyan"
+  },
+  {
+    "id": "openrouter/qwen/qwen-2.5-72b-instruct",
+    "name": "Alibaba Qwen 2.5 72B Instruct",
+    "provider": "openrouter",
+    "provider_name": "OpenRouter / Alibaba",
+    "category": "reasoning",
+    "context_window": "32,768 tokens",
+    "speed_rating": "\u26a1 Fast (~110 t/s)",
+    "free_quota": "OpenRouter Active Key",
+    "description": "Alibaba's flagship 72B dense general-purpose intelligence model; ranks top 3 in global LMSYS Arena benchmarks.",
+    "tags": [
+      "Qwen 2.5 72B",
+      "Dense Giant",
+      "Arena Top 3",
+      "Math & Logic"
+    ],
+    "litellm_model": "openrouter/qwen/qwen-2.5-72b-instruct",
+    "key_env_var": "OPENROUTER_API_KEY",
+    "free_key_url": "https://openrouter.ai/keys",
+    "icon": "globe",
+    "color": "orange"
+  },
+  {
+    "id": "openrouter/google/gemma-2-27b-it",
+    "name": "Google Gemma 2 27B Instruct",
+    "provider": "openrouter",
+    "provider_name": "OpenRouter / Google",
+    "category": "reasoning",
+    "context_window": "8,192 tokens",
+    "speed_rating": "\u26a1\u26a1 Very Fast (~130 t/s)",
+    "free_quota": "OpenRouter Active Key",
+    "description": "Google DeepMind's distilled architectural masterpiece; punches above 70B models in zero-shot reasoning and factual accuracy.",
+    "tags": [
+      "Gemma 2 27B",
+      "Google DeepMind",
+      "Distilled Titan",
+      "High Precision"
+    ],
+    "litellm_model": "openrouter/google/gemma-2-27b-it",
+    "key_env_var": "OPENROUTER_API_KEY",
+    "free_key_url": "https://openrouter.ai/keys",
+    "icon": "cpu",
+    "color": "blue"
+  },
+  {
+    "id": "ollama/flint:latest",
+    "name": "RecursiveSI Flint (Offline Reasoning)",
+    "provider": "ollama",
+    "provider_name": "RecursiveSI / Ollama",
+    "category": "offline",
+    "context_window": "65,536 tokens",
+    "speed_rating": "\ud83d\udcbb Local CPU/GPU Speed",
+    "free_quota": "100% Offline (ollama run flint)",
+    "description": "Trending Hugging Face reasoning model for synthetic hypothesis exploration and logic deduction running 100% privately on your PC.",
+    "tags": [
+      "RecursiveSI Flint",
+      "100% Offline",
+      "Synthetic Logic",
+      "Trending HF"
+    ],
+    "litellm_model": "ollama/flint:latest",
+    "key_env_var": null,
+    "free_key_url": "https://huggingface.co/RecursiveSI/flint",
+    "icon": "hard-drive",
+    "color": "emerald"
+  },
+  {
     "id": "openrouter/nousresearch/hermes-3-llama-3.1-405b",
     "name": "Meta Llama 3.1 405B (Massive Frontier)",
     "provider": "openrouter",
