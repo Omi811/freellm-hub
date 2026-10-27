@@ -121,7 +121,7 @@ class ClientEngine {
 
     // 2. Check for image mode trigger in serverless mode
     const userPrompt = [...messages].reverse().find(m => m.role === "user")?.content || "";
-    const isImageReq = image_mode || ["/image", "@image", "image:"].some(p => userPrompt.trim().toLowerCase().startsWith(p));
+    const isImageReq = image_mode || (model_id && model_id.startsWith("image/")) || ["/image", "@image", "image:"].some(p => userPrompt.trim().toLowerCase().startsWith(p));
 
     if (isImageReq) {
       let cleanPrompt = userPrompt.trim();

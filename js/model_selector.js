@@ -129,6 +129,7 @@ class ModelSelector {
         if (this.activeCategory === "fast" && m.category !== "fast") return false;
         if (this.activeCategory === "reasoning" && m.category !== "reasoning") return false;
         if (this.activeCategory === "code" && m.category !== "code") return false;
+        if (this.activeCategory === "image" && m.category !== "image") return false;
         if (this.activeCategory === "offline" && m.category !== "offline") return false;
       }
 

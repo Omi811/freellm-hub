@@ -1,4 +1,137 @@
 window.MODELS_CATALOG = [
+{
+  "id": "image/black-forest-labs/flux-1-schnell",
+  "name": "FLUX.1 [schnell] (12B Flow Transformer)",
+  "provider": "huggingface",
+  "provider_name": "Black Forest Labs / HF",
+  "category": "image",
+  "context_window": "1024x1024 px \u00b7 4 steps",
+  "speed_rating": "\u26a1\u26a1 Sub-Second Diffusion (~3.6s)",
+  "free_quota": "100% Free via HF Token",
+  "description": "World-leading 12B Rectified Flow Transformer. Unrivaled text rendering inside images, photorealistic human anatomy, and rapid 4-step generation.",
+  "tags": [
+    "FLUX.1 Schnell",
+    "12B Rectified Flow",
+    "Text In Image",
+    "Photorealistic",
+    "Apache 2.0"
+  ],
+  "litellm_model": "image/black-forest-labs/flux-1-schnell",
+  "key_env_var": "HF_TOKEN",
+  "free_key_url": "https://huggingface.co/settings/tokens",
+  "icon": "palette",
+  "color": "pink"
+},
+{
+  "id": "image/stabilityai/stable-diffusion-3.5-large",
+  "name": "Stable Diffusion 3.5 Large (8B MM-DiT)",
+  "provider": "huggingface",
+  "provider_name": "Stability AI / HF",
+  "category": "image",
+  "context_window": "1024x1024 px \u00b7 28 steps",
+  "speed_rating": "\ud83c\udfa8 Studio Grade (~6.5s)",
+  "free_quota": "Permissive Community License",
+  "description": "Stability AI's flagship 8B Multimodal Diffusion Transformer. Outstanding prompt adherence, artistic visual styles, and rich typography.",
+  "tags": [
+    "SD 3.5 Large",
+    "8B MM-DiT",
+    "Permissive License",
+    "Diverse Styles"
+  ],
+  "litellm_model": "image/stabilityai/stable-diffusion-3.5-large",
+  "key_env_var": "HF_TOKEN",
+  "free_key_url": "https://huggingface.co/settings/tokens",
+  "icon": "palette",
+  "color": "purple"
+},
+{
+  "id": "image/bytedance/sdxl-lightning",
+  "name": "SDXL Lightning (ByteDance 6.6B)",
+  "provider": "huggingface",
+  "provider_name": "ByteDance / HF",
+  "category": "image",
+  "context_window": "1024x1024 px \u00b7 2-4 steps",
+  "speed_rating": "\u26a1 Ultra-Fast (~2.2s)",
+  "free_quota": "Open Weights / Unlimited",
+  "description": "Progressive adversarial distilled SDXL producing crisp 1024x1024 imagery in 2 to 4 steps with unmatched community LoRA compatibility.",
+  "tags": [
+    "SDXL Lightning",
+    "6.6B Open Weights",
+    "2-Step Fast",
+    "LoRA Support"
+  ],
+  "litellm_model": "image/bytedance/sdxl-lightning",
+  "key_env_var": "HF_TOKEN",
+  "free_key_url": "https://huggingface.co/settings/tokens",
+  "icon": "zap",
+  "color": "amber"
+},
+{
+  "id": "image/google/imagen-3",
+  "name": "Google Imagen 3 (Gemini Visual Engine)",
+  "provider": "google",
+  "provider_name": "Google AI Studio",
+  "category": "image",
+  "context_window": "1024x1024 px \u00b7 Ultra HDR",
+  "speed_rating": "\ud83c\udf10 Google Cloud TPU",
+  "free_quota": "Google AI Studio Free Tier",
+  "description": "Google's benchmark-setting image foundation model. Unprecedented photorealism, specular reflections, and fine-grained natural lighting.",
+  "tags": [
+    "Imagen 3",
+    "Google DeepMind",
+    "Ultra Photorealism",
+    "Natural Lighting"
+  ],
+  "litellm_model": "image/google/imagen-3",
+  "key_env_var": "GEMINI_API_KEY",
+  "free_key_url": "https://aistudio.google.com/apikey",
+  "icon": "sparkles",
+  "color": "blue"
+},
+{
+  "id": "image/commercial/midjourney-v6.1",
+  "name": "Midjourney v6.1 (Aesthetic Standard)",
+  "provider": "freellm",
+  "provider_name": "Midjourney Inc.",
+  "category": "image",
+  "context_window": "Up to 2048x2048 px",
+  "speed_rating": "\ud83c\udfac Cinematic Rendering",
+  "free_quota": "Commercial Frontier Benchmark",
+  "description": "The global aesthetic gold standard for cinematic photography, concept art, atmospheric volume, and hyper-detailed surrealism.",
+  "tags": [
+    "Midjourney v6.1",
+    "Cinematic",
+    "Aesthetic #1",
+    "Cloud Frontier"
+  ],
+  "litellm_model": "image/commercial/midjourney-v6.1",
+  "key_env_var": null,
+  "free_key_url": "https://midjourney.com",
+  "icon": "film",
+  "color": "emerald"
+},
+{
+  "id": "image/openai/dall-e-3",
+  "name": "OpenAI DALL-E 3 (Conversational)",
+  "provider": "openrouter",
+  "provider_name": "OpenAI / OpenRouter",
+  "category": "image",
+  "context_window": "1024x1024 / 1792x1024",
+  "speed_rating": "\ud83e\udd16 GPT-4 Vision Guided",
+  "free_quota": "OpenRouter Active Key",
+  "description": "Deeply conditioned on GPT-4 prompt expanders. Capable of following extremely nuanced, multi-turn paragraphs of visual direction.",
+  "tags": [
+    "DALL-E 3",
+    "OpenAI",
+    "Prompt Adherence",
+    "Conversational"
+  ],
+  "litellm_model": "image/openai/dall-e-3",
+  "key_env_var": "OPENROUTER_API_KEY",
+  "free_key_url": "https://openrouter.ai/keys",
+  "icon": "cube",
+  "color": "green"
+},
   {
     "id": "freellm/auto",
     "name": "Auto Smart Router (Failover)",
