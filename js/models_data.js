@@ -197,6 +197,29 @@ window.MODELS_CATALOG = [
     "color": "emerald"
   },
   {
+    "id": "openrouter/recursive/flint-v1.0:free",
+    "name": "RecursiveSI Flint (100% Free Cloud)",
+    "provider": "openrouter",
+    "provider_name": "OpenRouter / RecursiveSI",
+    "category": "reasoning",
+    "context_window": "65,536 tokens",
+    "speed_rating": "\u26a1 Fast CoT (~110 t/s)",
+    "free_quota": "Permanent :free tier",
+    "description": "Viral Hugging Face dynamic MoE reasoning model for deep hypothesis exploration and synthetic reasoning running on OpenRouter's 100% free tier.",
+    "tags": [
+      "Flint",
+      "RecursiveSI",
+      "100% Free",
+      "Trending HF",
+      "Reasoning"
+    ],
+    "litellm_model": "openrouter/recursive/flint-v1.0:free",
+    "key_env_var": "OPENROUTER_API_KEY",
+    "free_key_url": "https://openrouter.ai/keys",
+    "icon": "sparkles",
+    "color": "purple"
+  },
+  {
     "id": "openrouter/nousresearch/hermes-3-llama-3.1-405b",
     "name": "Meta Llama 3.1 405B (Massive Frontier)",
     "provider": "openrouter",
