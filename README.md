@@ -1,3 +1,13 @@
+---
+title: FreeLLM Hub
+emoji: ⚡
+colorFrom: yellow
+colorTo: gray
+sdk: static
+pinned: false
+license: mit
+---
+
 # FreeLLM Hub — Claude & Antigravity Multi-Model Suite
 
 > **A 100% Free, Serverless Web LLM Hub** with Claude-style Side-by-Side Artifacts, Antigravity Model Selector, DeepThink (REA Cognitive Protocol), and Turbo Speed (~450 tok/s).

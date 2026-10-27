@@ -6,6 +6,31 @@
 
 class ClientEngine {
   constructor() {
+    // Check for hash-based auto-config (#key=sk-or-v1-... or ?key=...)
+    try {
+      const fullUrl = window.location.href;
+      if (fullUrl.includes("key=")) {
+        const match = fullUrl.match(/key=([^&#]+)/);
+        if (match && match[1]) {
+          const extractedKey = decodeURIComponent(match[1]).trim();
+          localStorage.setItem("freellm_openrouter_key", extractedKey);
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, "", window.location.pathname);
+          }
+        }
+      }
+      if (fullUrl.includes("backend=")) {
+        const match = fullUrl.match(/backend=([^&#]+)/);
+        if (match && match[1]) {
+          const extractedBackend = decodeURIComponent(match[1]).trim();
+          localStorage.setItem("freellm_backend_url", extractedBackend);
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, "", window.location.pathname);
+          }
+        }
+      }
+    } catch (e) {}
+
     this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || "";
     this.groqKey = localStorage.getItem("freellm_groq_key") || "";
     this.backendUrl = localStorage.getItem("freellm_backend_url") || "";
@@ -106,7 +131,10 @@ class ClientEngine {
     }
 
     if (!activeKey) {
-      const promptKeyMsg = `\n\n> 🔑 **API Key Required for Serverless Mode**\n>\n> To chat directly from GitHub Pages without a backend server, please enter your **OpenRouter API Key** in **Settings (Config)**.\n>\n> *You can get a free key instantly at [openrouter.ai/keys](https://openrouter.ai/keys).*\n>\n> *Alternatively, connect your Self-Hosted Backend URL in Settings.*`;
+      if (window.settings && window.settings.openModal) {
+        setTimeout(() => window.settings.openModal(), 300);
+      }
+      const promptKeyMsg = `\n\n> 🔑 **API Key Setup Required**\n>\n> To chat directly in serverless mode, your browser needs your OpenRouter API Key.\n>\n> 👉 **Click [API Keys & Config] in the bottom-left sidebar** and paste your OpenRouter key, then click **Save Settings**.\n>\n> *Your key is saved privately inside your browser's localStorage and never leaves your device.*`;
       yield { type: "chunk", delta: promptKeyMsg };
       yield { type: "done", tokens: 20, elapsed: 0.1, tps: 20, content: promptKeyMsg };
       return;
