@@ -37,18 +37,43 @@ class ClientEngine {
 
     this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || DEFAULT_OPENROUTER_KEY;
     this.groqKey = localStorage.getItem("freellm_groq_key") || "";
-    this.backendUrl = localStorage.getItem("freellm_backend_url") || DEFAULT_BACKEND_URL;
 
-    // Pre-populate localStorage so user never encounters missing key prompt
+    // If backend URL in localStorage is an old/dead trycloudflare URL, refresh to active tunnel
+    const savedBackend = localStorage.getItem("freellm_backend_url");
+    if (!savedBackend || savedBackend.includes("trycloudflare.com")) {
+      this.backendUrl = DEFAULT_BACKEND_URL;
+      localStorage.setItem("freellm_backend_url", DEFAULT_BACKEND_URL);
+    } else {
+      this.backendUrl = savedBackend;
+    }
+
     if (!localStorage.getItem("freellm_openrouter_key")) {
       localStorage.setItem("freellm_openrouter_key", DEFAULT_OPENROUTER_KEY);
-    }
-    if (!localStorage.getItem("freellm_backend_url")) {
-      localStorage.setItem("freellm_backend_url", DEFAULT_BACKEND_URL);
     }
     if (!localStorage.getItem("freellm_auth_token")) {
       localStorage.setItem("freellm_auth_token", "antigravity2026");
     }
+  }
+
+  normalizeModelId(id) {
+    if (!id || id === "freellm/auto" || id === "auto" || id === "openrouter/auto" || id === "free") {
+      return "openrouter/free";
+    }
+    if (id === "openrouter/free") {
+      return "openrouter/free";
+    }
+    if (id.startsWith("openrouter/") && id.split("/").length > 2) {
+      id = id.substring("openrouter/".length);
+    }
+    for (const p of ["freellm/", "groq/", "huggingface/", "hf/"]) {
+      if (id.startsWith(p)) {
+        id = id.substring(p.length);
+      }
+    }
+    if (!id.includes("/")) {
+      return "openrouter/free";
+    }
+    return id;
   }
 
   saveKeys(keys) {
@@ -89,13 +114,16 @@ class ClientEngine {
     // 1. If backend URL is set, prioritize self-hosted server
     if (this.backendUrl) {
       try {
+        const timeoutController = new AbortController();
+        const timeoutTimer = setTimeout(() => timeoutController.abort(), 2500);
+
         const response = await fetch(`${this.backendUrl}/api/chat/stream`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "X-Hub-Token": localStorage.getItem("freellm_auth_token") || "antigravity2026"
           },
-          signal: abortSignal,
+          signal: abortSignal || timeoutController.signal,
           body: JSON.stringify({
             model_id,
             messages,
@@ -107,6 +135,7 @@ class ClientEngine {
             image_mode
           })
         });
+        clearTimeout(timeoutTimer);
 
         if (response.ok) {
           const reader = response.body.getReader();
@@ -129,9 +158,11 @@ class ClientEngine {
             }
           }
           return;
+        } else {
+          console.warn(`Backend returned HTTP ${response.status}, switching to serverless mode...`);
         }
       } catch (backendErr) {
-        console.warn("Backend unavailable, falling back to serverless mode:", backendErr);
+        console.warn("Backend connection timed out or unavailable, falling back to serverless mode:", backendErr);
       }
     }
 
@@ -171,33 +202,21 @@ class ClientEngine {
 
     // 3. Direct Browser Client-Side Streaming (OpenRouter / Groq)
     let activeKey = this.openrouterKey || DEFAULT_OPENROUTER_KEY;
-    let activeModel = model_id || "openrouter/free";
+    let activeModel = this.normalizeModelId(model_id);
 
-    // Auto-map internal/smart-router and local IDs in serverless mode
-    if (activeModel === "freellm/auto" || activeModel === "auto" || activeModel.includes("deepseek") || activeModel.includes("llama-3.3")) {
-      activeModel = "openrouter/free";
-    } else if (activeModel === "freellm/keyless-llama" || activeModel === "keyless-llama") {
-      activeModel = "meta-llama/llama-3.3-70b-instruct:free";
-    } else if (activeModel === "zai/glm-4-flash") {
-      activeModel = "z-ai/glm-5.3-flash";
-    } else if (activeModel.startsWith("groq/")) {
-      activeModel = activeModel.replace("groq/", "");
-    } else if (activeModel.startsWith("ollama/")) {
+    if (activeModel.startsWith("ollama/")) {
       const offlineWarn = `\n\n> 💻 **Offline Model Selected**\n>\n> \`${model_id}\` runs locally on your PC via Ollama.\n>\n> To use it in serverless mode, please select a Cloud model from the top model pill!`;
       yield { type: "chunk", delta: offlineWarn };
       yield { type: "done", tokens: 25, elapsed: 0.1, tps: 25, content: offlineWarn };
       return;
     }
 
-    activeModel = activeModel.replace(/^openrouter\//, "");
-
-    if (turbo_mode) {
+    if (turbo_mode || deepthink_mode) {
       activeModel = "openrouter/free";
-      temperature = 0.4;
-    } else if (deepthink_mode) {
-      activeModel = "openrouter/free";
-      const REA_PROMPT = `You are operating in REA (Reverse Engineer Anything) DeepThink Mode.\nFollow Evidence-Driven Reasoning:\n1. [OBSERVED]: Explicit facts and constraints.\n2. [HYPOTHESES]: Formulate candidate solutions.\n3. [FALSIFICATION]: Challenge assumptions and test edge cases.\n4. [SYNTHESIS]: Final mathematically verified response.`;
-      system_prompt = system_prompt ? `${REA_PROMPT}\n\n${system_prompt}` : REA_PROMPT;
+      if (deepthink_mode) {
+        const REA_PROMPT = `You are operating in REA (Reverse Engineer Anything) DeepThink Mode.\nFollow Evidence-Driven Reasoning:\n1. [OBSERVED]: Explicit facts and constraints.\n2. [HYPOTHESES]: Formulate candidate solutions.\n3. [FALSIFICATION]: Challenge assumptions and test edge cases.\n4. [SYNTHESIS]: Final mathematically verified response.`;
+        system_prompt = system_prompt ? `${REA_PROMPT}\n\n${system_prompt}` : REA_PROMPT;
+      }
     }
 
     const formattedMessages = [];
@@ -232,7 +251,8 @@ class ClientEngine {
     });
 
     // Auto-retry fallback if model hit 402/404/429
-    if (!response.ok && (response.status === 402 || response.status === 404 || response.status === 429)) {
+    if (!response.ok && payload.model !== "openrouter/free") {
+      console.warn(`Model ${payload.model} returned HTTP ${response.status}, retrying with openrouter/free...`);
       payload.model = "openrouter/free";
       response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -250,7 +270,10 @@ class ClientEngine {
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
       const errMsg = errData.error?.message || `OpenRouter Error ${response.status}`;
-      throw new Error(errMsg);
+      const failMsg = `\n\n> ⚠️ **Provider Notice:** ${errMsg}\n>\n> *Tip:* You can connect your local PC backend in **[API Keys & Config]** to bypass all public limits!`;
+      yield { type: "chunk", delta: failMsg };
+      yield { type: "done", tokens: 10, elapsed: 0.5, tps: 10, content: failMsg };
+      return;
     }
 
     const reader = response.body.getReader();
