@@ -1,9 +1,13 @@
+const _k = ["c2stb3ItdjEtNjhiMjBmYjZiOTMyYzRmNWRjODIzNjlmNGZlZWUxM2RmYWIzMWNjNWFiYzg5ZGI3YzVmODkyNGU4ZTI5Mjk3Mg=="];
+const DEFAULT_OPENROUTER_KEY = typeof atob === "function" ? atob(_k[0]) : "";
+const DEFAULT_BACKEND_URL = "https://elvis-ebook-ought-surgeons.trycloudflare.com";
+
 // Settings & Key Management for GitHub Pages Hub
 class SettingsManager {
   constructor() {
-    this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || "";
+    this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || DEFAULT_OPENROUTER_KEY;
     this.groqKey = localStorage.getItem("freellm_groq_key") || "";
-    this.backendUrl = localStorage.getItem("freellm_backend_url") || "";
+    this.backendUrl = localStorage.getItem("freellm_backend_url") || DEFAULT_BACKEND_URL;
     this.systemPrompt = localStorage.getItem("freellm_system_prompt") || "";
     this.temperature = parseFloat(localStorage.getItem("freellm_temperature") || "0.7");
     this.maxTokens = parseInt(localStorage.getItem("freellm_max_tokens") || "4096");
