@@ -119,7 +119,25 @@ class ClientEngine {
 
     // 2. Direct Browser Client-Side Streaming (OpenRouter / Groq)
     let activeKey = this.openrouterKey;
-    let activeModel = model_id.replace(/^openrouter\//, "");
+    let activeModel = model_id || "openrouter/deepseek/deepseek-r1-0528";
+
+    // Auto-map internal/smart-router and local IDs in serverless mode
+    if (activeModel === "freellm/auto" || activeModel === "auto") {
+      activeModel = "deepseek/deepseek-r1-0528";
+    } else if (activeModel === "freellm/keyless-llama" || activeModel === "keyless-llama") {
+      activeModel = "meta-llama/llama-3.3-70b-instruct";
+    } else if (activeModel === "zai/glm-4-flash") {
+      activeModel = "z-ai/glm-5.3-flash";
+    } else if (activeModel.startsWith("groq/")) {
+      activeModel = activeModel.replace("groq/", "");
+    } else if (activeModel.startsWith("ollama/")) {
+      const offlineWarn = `\n\n> 💻 **Offline Model Selected**\n>\n> \`${model_id}\` runs locally on your PC via Ollama.\n>\n> To use it in serverless mode, please select a Cloud model (like **DeepSeek R1**, **Meta Llama 3.3 70B**, or **Qwen Coder**) from the top model pill!`;
+      yield { type: "chunk", delta: offlineWarn };
+      yield { type: "done", tokens: 25, elapsed: 0.1, tps: 25, content: offlineWarn };
+      return;
+    }
+
+    activeModel = activeModel.replace(/^openrouter\//, "");
 
     if (turbo_mode) {
       activeModel = "groq/openai/gpt-oss-20b";

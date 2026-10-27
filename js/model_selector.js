@@ -17,10 +17,11 @@ class ModelSelector {
     this.providers = window.PROVIDERS_CONFIG || {};
 
     const saved = localStorage.getItem("freellm_selected_model");
-    if (saved && this.models.some(m => m.id === saved)) {
+    if (saved && saved !== "freellm/auto" && saved !== "freellm/keyless-llama" && this.models.some(m => m.id === saved)) {
       this.selectedModelId = saved;
-    } else if (this.models.length > 0) {
-      this.selectedModelId = this.models[0].id;
+    } else {
+      this.selectedModelId = "openrouter/deepseek/deepseek-r1-0528";
+      localStorage.setItem("freellm_selected_model", this.selectedModelId);
     }
 
     this.renderTriggerPill();
