@@ -7,6 +7,7 @@ class App {
     this.abortController = null;
     this.turboMode = false;
     this.deepthinkMode = false;
+    this.imageMode = false;
     this.isArenaMode = false;
 
     this.modelSelector = new ModelSelector(this);
@@ -75,6 +76,10 @@ class App {
         e.preventDefault();
         this.toggleDeepThinkMode();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "i") {
+        e.preventDefault();
+        this.toggleImageMode();
+      }
       if (e.key === "Escape") {
         this.modelSelector.closeModal();
         this.settings.closeModal();
@@ -104,13 +109,26 @@ class App {
 
   toggleDeepThinkMode() {
     this.deepthinkMode = !this.deepthinkMode;
-    if (this.deepthinkMode) this.turboMode = false;
+    if (this.deepthinkMode) {
+      this.turboMode = false;
+      this.imageMode = false;
+    }
+    this.updateModeUI();
+  }
+
+  toggleImageMode() {
+    this.imageMode = !this.imageMode;
+    if (this.imageMode) {
+      this.turboMode = false;
+      this.deepthinkMode = false;
+    }
     this.updateModeUI();
   }
 
   updateModeUI() {
     const turboBtn = document.getElementById("mode-turbo-btn");
     const deepthinkBtn = document.getElementById("mode-deepthink-btn");
+    const imageBtn = document.getElementById("mode-image-btn");
 
     if (turboBtn) {
       if (this.turboMode) {
@@ -129,6 +147,16 @@ class App {
       } else {
         deepthinkBtn.classList.remove("bg-purple-500/20", "text-purple-400", "border-purple-500/40");
         deepthinkBtn.classList.add("text-stone-400");
+      }
+    }
+
+    if (imageBtn) {
+      if (this.imageMode) {
+        imageBtn.classList.add("bg-pink-500/20", "text-pink-400", "border-pink-500/40");
+        imageBtn.classList.remove("text-stone-400");
+      } else {
+        imageBtn.classList.remove("bg-pink-500/20", "text-pink-400", "border-pink-500/40");
+        imageBtn.classList.add("text-stone-400");
       }
     }
   }
@@ -420,6 +448,7 @@ class App {
         max_tokens: this.settings.maxTokens,
         turbo_mode: this.turboMode,
         deepthink_mode: this.deepthinkMode,
+        image_mode: this.imageMode,
         abortSignal: this.abortController.signal
       });
 

@@ -63,6 +63,7 @@ class ClientEngine {
     max_tokens = 4096,
     turbo_mode = false,
     deepthink_mode = false,
+    image_mode = false,
     abortSignal = null
   }) {
     const startTime = Date.now();
@@ -86,7 +87,8 @@ class ClientEngine {
           temperature,
           max_tokens,
           turbo_mode,
-          deepthink_mode
+          deepthink_mode,
+          image_mode
         })
       });
 
@@ -114,6 +116,40 @@ class ClientEngine {
           }
         }
       }
+      return;
+    }
+
+    // 2. Check for image mode trigger in serverless mode
+    const userPrompt = [...messages].reverse().find(m => m.role === "user")?.content || "";
+    const isImageReq = image_mode || ["/image", "@image", "image:"].some(p => userPrompt.trim().toLowerCase().startsWith(p));
+
+    if (isImageReq) {
+      let cleanPrompt = userPrompt.trim();
+      for (const prefix of ["/image", "@image", "image:"]) {
+        if (cleanPrompt.toLowerCase().startsWith(prefix)) {
+          cleanPrompt = cleanPrompt.substring(prefix.length).trim();
+        }
+      }
+      if (!cleanPrompt) cleanPrompt = "a futuristic neon cyberpunk aesthetic artwork, 8k render, photorealistic";
+
+      yield { type: "chunk", delta: `🎨 **Initializing Image Generation...**\n\n*Prompt:* "${cleanPrompt}"\n\nRendering visual artwork...\n\n` };
+      
+      const seed = Math.floor(Math.random() * 999999);
+      const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=512&height=512&nologo=true&seed=${seed}`;
+      
+      const artifactCard = `<antArtifact identifier="gen-img-${Date.now()}" type="html" title="Visual Artwork: ${cleanPrompt.substring(0, 25)}">\n` +
+        `<div style="text-align: center; background: #0c0c0e; padding: 18px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">\n` +
+        `  <img src="${imgUrl}" alt="${cleanPrompt}" style="max-width: 100%; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); margin: 0 auto; display: block;" />\n` +
+        `  <div style="margin-top: 12px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #a1a1aa; font-size: 13px;">\n` +
+        `    <span style="color: #f59e0b; font-weight: 600;">✦ AI Visual Diffusion Engine</span> · 512x512 · Seed: ${seed}\n` +
+        `  </div>\n` +
+        `</div>\n` +
+        `</antArtifact>\n\n` +
+        `![Artwork](${imgUrl})\n\n` +
+        `✨ **Generation Complete**\n- **Prompt:** ${cleanPrompt}\n- **Seed:** \`${seed}\`\n- **Renderer:** Cloud Diffusion Node`;
+
+      yield { type: "chunk", delta: artifactCard };
+      yield { type: "done", tokens: 35, elapsed: 1.5, tps: 35, content: artifactCard };
       return;
     }
 
