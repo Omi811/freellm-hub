@@ -4,11 +4,11 @@
  * as well as hybrid bridge connection to self-hosted FastAPI backend.
  */
 
-const _k = ["c2stb3ItdjEtNjhiMjBmYjZiOTMyYzRmNWRjODIzNjlmNGZlZWUxM2RmYWIzMWNjNWFiYzg5ZGI3YzVmODkyNGU4ZTI5Mjk3Mg=="];
-const _gk = ["Z3NrX0VVQThVTjBGcWJPek9waVplOGI3V0dkeWIwRllJdEhLWWVjUGx1dE9HM0p4aWhzYWxQNWQ="];
-const DEFAULT_OPENROUTER_KEY = typeof atob === "function" ? atob(_k[0]) : "";
-const DEFAULT_GROQ_KEY = typeof atob === "function" ? atob(_gk[0]) : "";
-const DEFAULT_BACKEND_URL = "https://eva-dylan-society-fixes.trycloudflare.com";
+window.HUB_CONFIG = {
+  defaultOpenrouterKey: typeof atob === "function" ? atob("c2stb3ItdjEtNjhiMjBmYjZiOTMyYzRmNWRjODIzNjlmNGZlZWUxM2RmYWIzMWNjNWFiYzg5ZGI3YzVmODkyNGU4ZTI5Mjk3Mg==") : "",
+  defaultGroqKey: typeof atob === "function" ? atob("Z3NrX0VVQThVTjBGcWJPek9waVplOGI3V0dkeWIwRllJdEhLWWVjUGx1dE9HM0p4aWhzYWxQNWQ=") : "",
+  defaultBackendUrl: "https://eva-dylan-society-fixes.trycloudflare.com"
+};
 
 class ClientEngine {
   constructor() {
@@ -37,23 +37,24 @@ class ClientEngine {
       }
     } catch (e) {}
 
-    this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || DEFAULT_OPENROUTER_KEY;
-    this.groqKey = localStorage.getItem("freellm_groq_key") || DEFAULT_GROQ_KEY;
+    const cfg = window.HUB_CONFIG;
+    this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || cfg.defaultOpenrouterKey;
+    this.groqKey = localStorage.getItem("freellm_groq_key") || cfg.defaultGroqKey;
 
     // If backend URL in localStorage is an old/dead trycloudflare URL, refresh to active tunnel
     const savedBackend = localStorage.getItem("freellm_backend_url");
     if (!savedBackend || savedBackend.includes("trycloudflare.com")) {
-      this.backendUrl = DEFAULT_BACKEND_URL;
-      localStorage.setItem("freellm_backend_url", DEFAULT_BACKEND_URL);
+      this.backendUrl = cfg.defaultBackendUrl;
+      localStorage.setItem("freellm_backend_url", cfg.defaultBackendUrl);
     } else {
       this.backendUrl = savedBackend;
     }
 
     if (!localStorage.getItem("freellm_openrouter_key")) {
-      localStorage.setItem("freellm_openrouter_key", DEFAULT_OPENROUTER_KEY);
+      localStorage.setItem("freellm_openrouter_key", cfg.defaultOpenrouterKey);
     }
     if (!localStorage.getItem("freellm_groq_key")) {
-      localStorage.setItem("freellm_groq_key", DEFAULT_GROQ_KEY);
+      localStorage.setItem("freellm_groq_key", cfg.defaultGroqKey);
     }
     if (!localStorage.getItem("freellm_auth_token")) {
       localStorage.setItem("freellm_auth_token", "antigravity2026");
@@ -97,7 +98,8 @@ class ClientEngine {
   }
 
   hasDirectKeys() {
-    return Boolean(this.openrouterKey || this.groqKey || DEFAULT_OPENROUTER_KEY || DEFAULT_GROQ_KEY);
+    const cfg = window.HUB_CONFIG || {};
+    return Boolean(this.openrouterKey || this.groqKey || cfg.defaultOpenrouterKey || cfg.defaultGroqKey);
   }
 
   async *streamChat({
@@ -215,7 +217,7 @@ class ClientEngine {
     }
 
     // 3. Direct Browser Client-Side Streaming (OpenRouter / Groq)
-    let activeKey = this.openrouterKey || DEFAULT_OPENROUTER_KEY;
+    let activeKey = this.openrouterKey || (window.HUB_CONFIG && window.HUB_CONFIG.defaultOpenrouterKey) || "";
     let activeModel = this.normalizeModelId(model_id);
 
     if (activeModel.startsWith("ollama/")) {

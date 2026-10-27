@@ -458,9 +458,9 @@ class App {
       const stream = window.clientEngine.streamChat({
         model_id: selectedModel.id,
         messages: this.currentChat.messages.slice(0, -1),
-        system_prompt: this.settings.systemPrompt,
-        temperature: this.settings.temperature,
-        max_tokens: this.settings.maxTokens,
+        system_prompt: (this.settings && this.settings.systemPrompt) || (window.settings && window.settings.systemPrompt) || "",
+        temperature: (this.settings && this.settings.temperature) ?? (window.settings && window.settings.temperature) ?? 0.7,
+        max_tokens: (this.settings && this.settings.maxTokens) ?? (window.settings && window.settings.maxTokens) ?? 4096,
         turbo_mode: this.turboMode,
         deepthink_mode: this.deepthinkMode,
         image_mode: this.imageMode,

@@ -1,19 +1,16 @@
-const _k = ["c2stb3ItdjEtNjhiMjBmYjZiOTMyYzRmNWRjODIzNjlmNGZlZWUxM2RmYWIzMWNjNWFiYzg5ZGI3YzVmODkyNGU4ZTI5Mjk3Mg=="];
-const _gk = ["Z3NrX0VVQThVTjBGcWJPek9waVplOGI3V0dkeWIwRllJdEhLWWVjUGx1dE9HM0p4aWhzYWxQNWQ="];
-const DEFAULT_OPENROUTER_KEY = typeof atob === "function" ? atob(_k[0]) : "";
-const DEFAULT_GROQ_KEY = typeof atob === "function" ? atob(_gk[0]) : "";
-const DEFAULT_BACKEND_URL = "https://eva-dylan-society-fixes.trycloudflare.com";
-
 // Settings & Key Management for GitHub Pages Hub
 class SettingsManager {
   constructor() {
     window.settings = this;
-    this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || DEFAULT_OPENROUTER_KEY;
-    this.groqKey = localStorage.getItem("freellm_groq_key") || DEFAULT_GROQ_KEY;
+    const cfg = window.HUB_CONFIG || {};
+    this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || cfg.defaultOpenrouterKey || "";
+    this.groqKey = localStorage.getItem("freellm_groq_key") || cfg.defaultGroqKey || "";
     const savedBackend = localStorage.getItem("freellm_backend_url");
     if (!savedBackend || savedBackend.includes("trycloudflare.com")) {
-      this.backendUrl = DEFAULT_BACKEND_URL;
-      localStorage.setItem("freellm_backend_url", DEFAULT_BACKEND_URL);
+      this.backendUrl = cfg.defaultBackendUrl || "";
+      if (this.backendUrl) {
+        localStorage.setItem("freellm_backend_url", this.backendUrl);
+      }
     } else {
       this.backendUrl = savedBackend;
     }
