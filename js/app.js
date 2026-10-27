@@ -1,6 +1,7 @@
 // FreeLLM Hub — Client-Side Application Controller for GitHub Pages
 class App {
   constructor() {
+    window.app = this;
     this.chats = [];
     this.currentChat = null;
     this.isStreaming = false;
@@ -11,7 +12,19 @@ class App {
     this.isArenaMode = false;
 
     this.modelSelector = new ModelSelector(this);
+    window.modelSelector = this.modelSelector;
     this.settings = new SettingsManager();
+    window.settings = this.settings;
+  }
+
+  escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
   init() {
@@ -261,7 +274,7 @@ class App {
         return `
           <div class="flex justify-end mb-6">
             <div class="max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 bg-stone-800 border border-stone-700/80 text-stone-100 text-[0.95rem] shadow-sm leading-relaxed whitespace-pre-wrap">
-              ${msg.content}
+              ${this.escapeHtml(msg.content)}
             </div>
           </div>
         `;
@@ -286,7 +299,7 @@ class App {
               <svg class="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
               <span>Thinking Process (${msg.thinking.length} characters)</span>
             </div>
-            <div class="thinking-body hidden">${this.formatMarkdown(msg.thinking)}</div>
+            <div class="thinking-body hidden" id="msg-thinking-${index}">${this.formatMarkdown(msg.thinking)}</div>
           </div>
         ` : '';
 
@@ -351,11 +364,12 @@ class App {
   postRenderCodeBlocks() {
     document.querySelectorAll(".prose pre code").forEach(el => {
       const pre = el.parentElement;
-      if (pre.parentElement.classList.contains("code-block-wrapper")) return;
+      if (!pre || !pre.parentElement || pre.parentElement.classList.contains("code-block-wrapper")) return;
 
       const wrapper = document.createElement("div");
       wrapper.className = "code-block-wrapper";
-      const lang = (el.className.match(/language-(\w+)/) || [, "code"])[1];
+      const langMatch = el.className ? el.className.match(/language-([a-zA-Z0-9_-]+)/) : null;
+      const lang = langMatch ? langMatch[1] : "code";
 
       const header = document.createElement("div");
       header.className = "code-header";
@@ -422,14 +436,15 @@ class App {
 
     this.currentChat.messages.push({ role: "user", content: prompt });
 
-    const assistantIndex = this.currentChat.messages.length;
-    this.currentChat.messages.push({
+    const assistantMsg = {
       role: "assistant",
       model_used: selectedModel.id,
       content: "",
       thinking: "",
       meta: null
-    });
+    };
+    this.currentChat.messages.push(assistantMsg);
+    const assistantIndex = this.currentChat.messages.length - 1;
 
     this.renderMessages();
     this.isStreaming = true;
@@ -455,18 +470,32 @@ class App {
       for await (const chunk of stream) {
         if (chunk.type === "thinking") {
           thinkingText += chunk.delta;
-          this.currentChat.messages[assistantIndex].thinking = thinkingText;
+          assistantMsg.thinking = thinkingText;
+          const thEl = document.getElementById(`msg-thinking-${assistantIndex}`);
+          if (thEl) {
+            thEl.innerHTML = this.formatMarkdown(thinkingText);
+            thEl.classList.remove("hidden");
+          } else {
+            this.renderMessages();
+          }
         } else if (chunk.type === "chunk") {
           fullText += chunk.delta;
-          this.currentChat.messages[assistantIndex].content = fullText;
+          assistantMsg.content = fullText;
+          const cEl = document.getElementById(`msg-content-${assistantIndex}`);
+          if (cEl) {
+            cEl.innerHTML = this.formatMarkdown(fullText);
+            this.scrollToBottom();
+          } else {
+            this.renderMessages();
+          }
         } else if (chunk.type === "done") {
-          this.currentChat.messages[assistantIndex].meta = {
+          assistantMsg.meta = {
             tps: chunk.tps,
             elapsed: chunk.elapsed,
             tokens: chunk.tokens
           };
+          this.renderMessages();
         }
-        this.renderMessages();
       }
 
       // Save to chats list
@@ -480,12 +509,14 @@ class App {
 
     } catch (err) {
       if (err.name !== "AbortError") {
-        this.currentChat.messages[assistantIndex].content += `\n\n> ⚠️ **Error:** ${err.message}`;
+        assistantMsg.content += `\n\n> ⚠️ **Notice:** ${err.message || err}`;
         this.renderMessages();
       }
     } finally {
       this.isStreaming = false;
       this.toggleStreamButtons(false);
+      const input = document.getElementById("chat-input-textarea");
+      if (input) input.focus();
     }
   }
 
@@ -558,7 +589,15 @@ class App {
   }
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  window.app = new App();
-  window.app.init();
-});
+function startApp() {
+  if (!window.app) {
+    window.app = new App();
+    window.app.init();
+  }
+}
+
+if (document.readyState === "loading") {
+  window.addEventListener("DOMContentLoaded", startApp);
+} else {
+  startApp();
+}

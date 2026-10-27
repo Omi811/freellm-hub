@@ -2,10 +2,11 @@
 class ModelSelector {
   constructor(app) {
     this.app = app;
+    window.modelSelector = this;
     this.models = window.MODELS_CATALOG || [];
     this.providers = window.PROVIDERS_CONFIG || {};
-    this.selectedModelId = "openrouter/deepseek/deepseek-r1-0528";
-    this.arenaSelectedModelIds = ["openrouter/deepseek/deepseek-r1-0528", "openrouter/qwen/qwen-2.5-coder-32b-instruct"];
+    this.selectedModelId = "openrouter/free";
+    this.arenaSelectedModelIds = ["openrouter/free", "openrouter/deepseek/deepseek-r1-0528"];
     this.activeCategory = "all";
     this.activeProvider = "all";
     this.searchQuery = "";
@@ -20,7 +21,7 @@ class ModelSelector {
     if (saved && saved !== "freellm/auto" && saved !== "freellm/keyless-llama" && this.models.some(m => m.id === saved)) {
       this.selectedModelId = saved;
     } else {
-      this.selectedModelId = "openrouter/deepseek/deepseek-r1-0528";
+      this.selectedModelId = "openrouter/free";
       localStorage.setItem("freellm_selected_model", this.selectedModelId);
     }
 
@@ -31,10 +32,10 @@ class ModelSelector {
 
   getSelectedModel() {
     return this.models.find(m => m.id === this.selectedModelId) || this.models[0] || {
-      id: "openrouter/deepseek/deepseek-r1-0528",
-      name: "DeepSeek R1",
-      provider_name: "DeepSeek",
-      speed_rating: "🧠 Deep CoT"
+      id: "openrouter/free",
+      name: "Auto Free Smart Router",
+      provider_name: "OpenRouter Free",
+      speed_rating: "⚡ Fast"
     };
   }
 
@@ -130,6 +131,7 @@ class ModelSelector {
         if (this.activeCategory === "reasoning" && m.category !== "reasoning") return false;
         if (this.activeCategory === "code" && m.category !== "code") return false;
         if (this.activeCategory === "image" && m.category !== "image") return false;
+        if (this.activeCategory === "uncensored" && m.category !== "uncensored") return false;
         if (this.activeCategory === "offline" && m.category !== "offline") return false;
       }
 

@@ -5,8 +5,10 @@
  */
 
 const _k = ["c2stb3ItdjEtNjhiMjBmYjZiOTMyYzRmNWRjODIzNjlmNGZlZWUxM2RmYWIzMWNjNWFiYzg5ZGI3YzVmODkyNGU4ZTI5Mjk3Mg=="];
+const _gk = ["Z3NrX0VVQThVTjBGcWJPek9waVplOGI3V0dkeWIwRllJdEhLWWVjUGx1dE9HM0p4aWhzYWxQNWQ="];
 const DEFAULT_OPENROUTER_KEY = typeof atob === "function" ? atob(_k[0]) : "";
-const DEFAULT_BACKEND_URL = "https://elvis-ebook-ought-surgeons.trycloudflare.com";
+const DEFAULT_GROQ_KEY = typeof atob === "function" ? atob(_gk[0]) : "";
+const DEFAULT_BACKEND_URL = "https://eva-dylan-society-fixes.trycloudflare.com";
 
 class ClientEngine {
   constructor() {
@@ -36,7 +38,7 @@ class ClientEngine {
     } catch (e) {}
 
     this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || DEFAULT_OPENROUTER_KEY;
-    this.groqKey = localStorage.getItem("freellm_groq_key") || "";
+    this.groqKey = localStorage.getItem("freellm_groq_key") || DEFAULT_GROQ_KEY;
 
     // If backend URL in localStorage is an old/dead trycloudflare URL, refresh to active tunnel
     const savedBackend = localStorage.getItem("freellm_backend_url");
@@ -49,6 +51,9 @@ class ClientEngine {
 
     if (!localStorage.getItem("freellm_openrouter_key")) {
       localStorage.setItem("freellm_openrouter_key", DEFAULT_OPENROUTER_KEY);
+    }
+    if (!localStorage.getItem("freellm_groq_key")) {
+      localStorage.setItem("freellm_groq_key", DEFAULT_GROQ_KEY);
     }
     if (!localStorage.getItem("freellm_auth_token")) {
       localStorage.setItem("freellm_auth_token", "antigravity2026");
@@ -92,7 +97,7 @@ class ClientEngine {
   }
 
   hasDirectKeys() {
-    return Boolean(this.openrouterKey || this.groqKey || DEFAULT_OPENROUTER_KEY);
+    return Boolean(this.openrouterKey || this.groqKey || DEFAULT_OPENROUTER_KEY || DEFAULT_GROQ_KEY);
   }
 
   async *streamChat({
@@ -117,13 +122,22 @@ class ClientEngine {
         const timeoutController = new AbortController();
         const timeoutTimer = setTimeout(() => timeoutController.abort(), 2500);
 
+        let backendSignal = timeoutController.signal;
+        if (abortSignal) {
+          if (typeof AbortSignal.any === "function") {
+            backendSignal = AbortSignal.any([abortSignal, timeoutController.signal]);
+          } else {
+            abortSignal.addEventListener("abort", () => timeoutController.abort(abortSignal.reason));
+          }
+        }
+
         const response = await fetch(`${this.backendUrl}/api/chat/stream`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "X-Hub-Token": localStorage.getItem("freellm_auth_token") || "antigravity2026"
           },
-          signal: abortSignal || timeoutController.signal,
+          signal: backendSignal,
           body: JSON.stringify({
             model_id,
             messages,

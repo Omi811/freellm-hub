@@ -1,13 +1,22 @@
 const _k = ["c2stb3ItdjEtNjhiMjBmYjZiOTMyYzRmNWRjODIzNjlmNGZlZWUxM2RmYWIzMWNjNWFiYzg5ZGI3YzVmODkyNGU4ZTI5Mjk3Mg=="];
+const _gk = ["Z3NrX0VVQThVTjBGcWJPek9waVplOGI3V0dkeWIwRllJdEhLWWVjUGx1dE9HM0p4aWhzYWxQNWQ="];
 const DEFAULT_OPENROUTER_KEY = typeof atob === "function" ? atob(_k[0]) : "";
-const DEFAULT_BACKEND_URL = "https://elvis-ebook-ought-surgeons.trycloudflare.com";
+const DEFAULT_GROQ_KEY = typeof atob === "function" ? atob(_gk[0]) : "";
+const DEFAULT_BACKEND_URL = "https://eva-dylan-society-fixes.trycloudflare.com";
 
 // Settings & Key Management for GitHub Pages Hub
 class SettingsManager {
   constructor() {
+    window.settings = this;
     this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || DEFAULT_OPENROUTER_KEY;
-    this.groqKey = localStorage.getItem("freellm_groq_key") || "";
-    this.backendUrl = localStorage.getItem("freellm_backend_url") || DEFAULT_BACKEND_URL;
+    this.groqKey = localStorage.getItem("freellm_groq_key") || DEFAULT_GROQ_KEY;
+    const savedBackend = localStorage.getItem("freellm_backend_url");
+    if (!savedBackend || savedBackend.includes("trycloudflare.com")) {
+      this.backendUrl = DEFAULT_BACKEND_URL;
+      localStorage.setItem("freellm_backend_url", DEFAULT_BACKEND_URL);
+    } else {
+      this.backendUrl = savedBackend;
+    }
     this.systemPrompt = localStorage.getItem("freellm_system_prompt") || "";
     this.temperature = parseFloat(localStorage.getItem("freellm_temperature") || "0.7");
     this.maxTokens = parseInt(localStorage.getItem("freellm_max_tokens") || "4096");
