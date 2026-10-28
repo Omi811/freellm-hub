@@ -279,11 +279,23 @@
             <div class="flex items-center bg-stone-900 border border-stone-800 rounded-lg p-0.5 text-xs">
               <button id="artifact-tab-preview" class="px-2.5 py-1 rounded-md bg-stone-800 text-stone-100 font-medium">Preview</button>
               <button id="artifact-tab-code" class="px-2.5 py-1 rounded-md text-stone-400 hover:text-stone-200">Code</button>
+              <button id="artifact-tab-console" class="px-2.5 py-1 rounded-md text-stone-400 hover:text-stone-200">Console</button>
             </div>
             <button id="close-artifacts-btn" class="p-1.5 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
           </div>
+        </div>
+
+        <!-- Error Notification Banner for Runtime Code Exceptions -->
+        <div id="artifact-error-banner" class="hidden px-3 py-2 bg-red-950/90 border-b border-red-500/40 flex items-center justify-between text-xs text-red-200">
+          <div class="flex items-center gap-2 truncate pr-2">
+            <span>⚠️</span>
+            <span id="artifact-error-msg" class="truncate font-mono">Error details</span>
+          </div>
+          <button id="artifact-fix-btn" class="px-2.5 py-1 rounded-md bg-red-800 hover:bg-red-700 text-white font-medium whitespace-nowrap cursor-pointer transition-all">
+            🛠️ Fix with AI
+          </button>
         </div>
 
         <!-- Panel Body -->
@@ -293,6 +305,9 @@
           </div>
           <div id="artifact-code-view" class="hidden w-full h-full overflow-auto p-4 bg-[#0f0f11]">
             <pre><code id="artifact-code-content" class="text-xs font-mono text-stone-200 leading-relaxed"></code></pre>
+          </div>
+          <div id="artifact-console-view" class="hidden w-full h-full overflow-auto p-4 bg-[#09090b] text-xs font-mono text-stone-300 space-y-1.5">
+            <div class="text-stone-500 italic pb-1 border-b border-stone-800">[Console ready. Runtime errors and console.log will appear here.]</div>
           </div>
         </div>
       </div>
@@ -317,22 +332,33 @@
 
       <!-- Search & Filters -->
       <div class="p-4 border-b border-stone-800 bg-stone-900/40 space-y-3">
-        <div class="relative">
-          <input
-            id="model-search-input"
-            type="text"
-            placeholder="Search by name, provider, specialty (e.g. Kimi, GLM, Granite, DeepSeek, Coder)..."
-            class="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-2 text-xs text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500/50"
-          />
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1">
+            <input
+              id="model-search-input"
+              type="text"
+              placeholder="Search by name, provider, verified group (Keyless, BYOK, Offline)..."
+              class="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-2 text-xs text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500/50"
+            />
+          </div>
+          <button id="toggle-privacy-btn"
+                  onclick="window.modelSelector.toggleZeroRetentionFilter(); this.classList.toggle('bg-emerald-500/20'); this.classList.toggle('text-emerald-400'); this.classList.toggle('border-emerald-500/40');"
+                  title="Zero-Retention Filter: Show only privacy-safe, non-logging models"
+                  class="px-3 py-2 rounded-xl border border-stone-800 bg-stone-950 text-xs text-stone-400 hover:text-stone-200 cursor-pointer flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <span>🛡️ Zero-Retention</span>
+          </button>
         </div>
 
-        <div class="flex flex-wrap gap-1.5 text-xs">
-          <button class="category-pill active-pill px-3 py-1 rounded-lg bg-amber-500 text-stone-950 font-medium" data-category="all">All Models</button>
-          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-stone-300 hover:bg-stone-700" data-category="reasoning">🧠 Reasoning</button>
-          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-stone-300 hover:bg-stone-700" data-category="code">💻 Coding</button>
-          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-stone-300 hover:bg-stone-700" data-category="fast">⚡ Fast</button>
-          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-pink-400 hover:bg-stone-700" data-category="image">🎨 Image Gen</button>
-          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-red-400 hover:bg-stone-700" data-category="uncensored">🔓 Uncensored</button>
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+          <button class="category-pill active-pill px-3 py-1 rounded-lg bg-amber-500 text-stone-950 font-medium whitespace-nowrap" data-category="all">All Models</button>
+          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-amber-400 hover:bg-stone-700 whitespace-nowrap" data-category="keyless">⚡ Keyless</button>
+          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-purple-400 hover:bg-stone-700 whitespace-nowrap" data-category="byok">🔑 BYOK</button>
+          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-cyan-400 hover:bg-stone-700 whitespace-nowrap" data-category="offline">💻 100% Offline</button>
+          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-stone-300 hover:bg-stone-700 whitespace-nowrap" data-category="reasoning">🧠 Reasoning</button>
+          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-stone-300 hover:bg-stone-700 whitespace-nowrap" data-category="code">💻 Coding</button>
+          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-stone-300 hover:bg-stone-700 whitespace-nowrap" data-category="fast">⚡ Fast</button>
+          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-red-400 hover:bg-stone-700 whitespace-nowrap" data-category="uncensored">🔓 Uncensored</button>
+          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-pink-400 hover:bg-stone-700 whitespace-nowrap" data-category="image">🎨 Image Gen</button>
         </div>
       </div>
 
@@ -418,6 +444,26 @@
             <input id="tokens-slider" type="range" min="512" max="16384" step="512" value="4096" class="w-full accent-amber-500">
           </div>
         </div>
+
+        <!-- IndexedDB Storage & Backup (.json) Section -->
+        <div class="pt-3 border-t border-stone-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Local Storage & Backups</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">IndexedDB Active</span>
+          </div>
+          <p class="text-xs text-stone-400 leading-relaxed">
+            All chats and Artifacts are stored locally with unlimited capacity. Backup your data or restore to another device anytime.
+          </p>
+          <div class="flex items-center gap-2 pt-1">
+            <button type="button" onclick="window.hubStorage.exportBackup()" class="flex-1 py-1.5 px-3 rounded-lg bg-stone-800 hover:bg-stone-750 border border-stone-700/60 text-xs text-stone-200 font-medium flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>📥 Export Backup (.json)</span>
+            </button>
+            <button type="button" onclick="document.getElementById('import-file-input').click()" class="flex-1 py-1.5 px-3 rounded-lg bg-stone-800 hover:bg-stone-750 border border-stone-700/60 text-xs text-stone-200 font-medium flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>📤 Import Backup (.json)</span>
+            </button>
+            <input id="import-file-input" type="file" accept=".json" class="hidden" onchange="window.app.handleImportBackup(this)">
+          </div>
+        </div>
       </div>
 
       <div class="p-3 border-t border-stone-800 bg-stone-950/60 flex justify-end gap-2">
@@ -429,6 +475,7 @@
   </div>
 
   <!-- Scripts -->
+  <script src="./js/storage.js"></script>
   <script src="./js/models_data.js"></script>
   <script src="./js/client_engine.js"></script>
   <script src="./js/model_selector.js"></script>

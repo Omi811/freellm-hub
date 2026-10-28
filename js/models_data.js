@@ -1,228 +1,271 @@
 window.MODELS_CATALOG = [
-{
-  "id": "ollama/dolphin3:8b",
-  "name": "Dolphin 3.0 (8B Uncensored - Local)",
-  "provider": "ollama",
-  "provider_name": "Cognitive Computations / Ollama",
-  "category": "uncensored",
-  "context_window": "128k tokens",
-  "speed_rating": "⚡⚡ High Speed Local",
-  "free_quota": "100% Free and Offline (ollama run dolphin3:8b)",
-  "description": "Eric Hartford's premier uncensored model fine-tuned on Llama 3.1. Zero alignment guardrails, zero preachy refusals, full creative and technical freedom.",
-  "tags": ["Uncensored", "Cognitive Computations", "Llama 3.1", "100% Offline", "Zero Refusal"],
-  "litellm_model": "ollama/dolphin3:8b",
-  "key_env_var": null,
-  "free_key_url": "https://ollama.com/library/dolphin3",
-  "icon": "shield-off",
-  "color": "red"
-},
-{
-  "id": "ollama/dolphin-mixtral:8x7b",
-  "name": "Dolphin Mixtral (8x7B MoE Uncensored)",
-  "provider": "ollama",
-  "provider_name": "Cognitive Computations / Ollama",
-  "category": "uncensored",
-  "context_window": "32k tokens",
-  "speed_rating": "🧠 MoE Architecture",
-  "free_quota": "100% Free and Offline (ollama run dolphin-mixtral:8x7b)",
-  "description": "Massive Mixture-of-Experts uncensored powerhouse. Exceptional reasoning, coding, and creative generation without corporate censorship.",
-  "tags": ["Uncensored", "MoE", "Mixtral", "100% Offline"],
-  "litellm_model": "ollama/dolphin-mixtral:8x7b",
-  "key_env_var": null,
-  "free_key_url": "https://ollama.com/library/dolphin-mixtral",
-  "icon": "shield-off",
-  "color": "red"
-},
-{
-  "id": "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition",
-  "name": "Dolphin Mistral 24B (Venice Uncensored)",
-  "provider": "openrouter",
-  "provider_name": "Cognitive Computations / Venice",
-  "category": "uncensored",
-  "context_window": "128k tokens",
-  "speed_rating": "⚡ Fast Cloud",
-  "free_quota": "Cloud Micro-Tier via OpenRouter",
-  "description": "Official Venice Edition 24B Mistral NeMo uncensored model. Built for unrestricted creative writing, technical queries, and open roleplay.",
-  "tags": ["Uncensored", "Venice Edition", "Mistral 24B", "128k Context"],
-  "litellm_model": "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition",
-  "key_env_var": "OPENROUTER_API_KEY",
-  "free_key_url": "https://openrouter.ai/keys",
-  "icon": "shield-off",
-  "color": "red"
-},
-{
-  "id": "openrouter/nousresearch/hermes-3-llama-3.1-70b",
-  "name": "Hermes 3 (70B Unaligned Frontier)",
-  "provider": "openrouter",
-  "provider_name": "Nous Research",
-  "category": "uncensored",
-  "context_window": "131k tokens",
-  "speed_rating": "🧠 Frontier 70B",
-  "free_quota": "Cloud Micro-Tier via OpenRouter",
-  "description": "Nous Research's flagship steerable frontier model. Designed without corporate moralizing, with high compliance, complex reasoning, and full persona steering.",
-  "tags": ["Unaligned", "Nous Research", "Llama 3.1 70B", "Steerable"],
-  "litellm_model": "openrouter/nousresearch/hermes-3-llama-3.1-70b",
-  "key_env_var": "OPENROUTER_API_KEY",
-  "free_key_url": "https://openrouter.ai/keys",
-  "icon": "zap",
-  "color": "amber"
-},
-{
-  "id": "openrouter/free",
-  "name": "Auto Free Smart Router (Zero Setup)",
-  "provider": "openrouter",
-  "provider_name": "OpenRouter Free",
-  "category": "fast",
-  "context_window": "128k context · Auto-fallback",
-  "speed_rating": "⚡ High Speed (~85 tok/s)",
-  "free_quota": "100% Free / Unlimited",
-  "description": "Intelligent automated routing across frontier open weights LLMs. Zero rate-limit failover, optimal response quality, and immediate streaming without credit constraints.",
-  "tags": [
-    "Auto Router",
-    "Zero Cost",
-    "High Availability",
-    "Open Weights",
-    "Instant"
-  ],
-  "litellm_model": "openrouter/free",
-  "key_env_var": "OPENROUTER_API_KEY",
-  "free_key_url": "https://openrouter.ai/keys",
-  "icon": "zap",
-  "color": "amber"
-},
-{
-  "id": "image/black-forest-labs/flux-1-schnell",
-  "name": "FLUX.1 [schnell] (12B Flow Transformer)",
-  "provider": "huggingface",
-  "provider_name": "Black Forest Labs / HF",
-  "category": "image",
-  "context_window": "1024x1024 px \u00b7 4 steps",
-  "speed_rating": "\u26a1\u26a1 Sub-Second Diffusion (~3.6s)",
-  "free_quota": "100% Free via HF Token",
-  "description": "World-leading 12B Rectified Flow Transformer. Unrivaled text rendering inside images, photorealistic human anatomy, and rapid 4-step generation.",
-  "tags": [
-    "FLUX.1 Schnell",
-    "12B Rectified Flow",
-    "Text In Image",
-    "Photorealistic",
-    "Apache 2.0"
-  ],
-  "litellm_model": "image/black-forest-labs/flux-1-schnell",
-  "key_env_var": "HF_TOKEN",
-  "free_key_url": "https://huggingface.co/settings/tokens",
-  "icon": "palette",
-  "color": "pink"
-},
-{
-  "id": "image/stabilityai/stable-diffusion-3.5-large",
-  "name": "Stable Diffusion 3.5 Large (8B MM-DiT)",
-  "provider": "huggingface",
-  "provider_name": "Stability AI / HF",
-  "category": "image",
-  "context_window": "1024x1024 px \u00b7 28 steps",
-  "speed_rating": "\ud83c\udfa8 Studio Grade (~6.5s)",
-  "free_quota": "Permissive Community License",
-  "description": "Stability AI's flagship 8B Multimodal Diffusion Transformer. Outstanding prompt adherence, artistic visual styles, and rich typography.",
-  "tags": [
-    "SD 3.5 Large",
-    "8B MM-DiT",
-    "Permissive License",
-    "Diverse Styles"
-  ],
-  "litellm_model": "image/stabilityai/stable-diffusion-3.5-large",
-  "key_env_var": "HF_TOKEN",
-  "free_key_url": "https://huggingface.co/settings/tokens",
-  "icon": "palette",
-  "color": "purple"
-},
-{
-  "id": "image/bytedance/sdxl-lightning",
-  "name": "SDXL Lightning (ByteDance 6.6B)",
-  "provider": "huggingface",
-  "provider_name": "ByteDance / HF",
-  "category": "image",
-  "context_window": "1024x1024 px \u00b7 2-4 steps",
-  "speed_rating": "\u26a1 Ultra-Fast (~2.2s)",
-  "free_quota": "Open Weights / Unlimited",
-  "description": "Progressive adversarial distilled SDXL producing crisp 1024x1024 imagery in 2 to 4 steps with unmatched community LoRA compatibility.",
-  "tags": [
-    "SDXL Lightning",
-    "6.6B Open Weights",
-    "2-Step Fast",
-    "LoRA Support"
-  ],
-  "litellm_model": "image/bytedance/sdxl-lightning",
-  "key_env_var": "HF_TOKEN",
-  "free_key_url": "https://huggingface.co/settings/tokens",
-  "icon": "zap",
-  "color": "amber"
-},
-{
-  "id": "image/google/imagen-3",
-  "name": "Google Imagen 3 (Gemini Visual Engine)",
-  "provider": "google",
-  "provider_name": "Google AI Studio",
-  "category": "image",
-  "context_window": "1024x1024 px \u00b7 Ultra HDR",
-  "speed_rating": "\ud83c\udf10 Google Cloud TPU",
-  "free_quota": "Google AI Studio Free Tier",
-  "description": "Google's benchmark-setting image foundation model. Unprecedented photorealism, specular reflections, and fine-grained natural lighting.",
-  "tags": [
-    "Imagen 3",
-    "Google DeepMind",
-    "Ultra Photorealism",
-    "Natural Lighting"
-  ],
-  "litellm_model": "image/google/imagen-3",
-  "key_env_var": "GEMINI_API_KEY",
-  "free_key_url": "https://aistudio.google.com/apikey",
-  "icon": "sparkles",
-  "color": "blue"
-},
-{
-  "id": "image/commercial/midjourney-v6.1",
-  "name": "Midjourney v6.1 (Aesthetic Standard)",
-  "provider": "freellm",
-  "provider_name": "Midjourney Inc.",
-  "category": "image",
-  "context_window": "Up to 2048x2048 px",
-  "speed_rating": "\ud83c\udfac Cinematic Rendering",
-  "free_quota": "Commercial Frontier Benchmark",
-  "description": "The global aesthetic gold standard for cinematic photography, concept art, atmospheric volume, and hyper-detailed surrealism.",
-  "tags": [
-    "Midjourney v6.1",
-    "Cinematic",
-    "Aesthetic #1",
-    "Cloud Frontier"
-  ],
-  "litellm_model": "image/commercial/midjourney-v6.1",
-  "key_env_var": null,
-  "free_key_url": "https://midjourney.com",
-  "icon": "film",
-  "color": "emerald"
-},
-{
-  "id": "image/openai/dall-e-3",
-  "name": "OpenAI DALL-E 3 (Conversational)",
-  "provider": "openrouter",
-  "provider_name": "OpenAI / OpenRouter",
-  "category": "image",
-  "context_window": "1024x1024 / 1792x1024",
-  "speed_rating": "\ud83e\udd16 GPT-4 Vision Guided",
-  "free_quota": "OpenRouter Active Key",
-  "description": "Deeply conditioned on GPT-4 prompt expanders. Capable of following extremely nuanced, multi-turn paragraphs of visual direction.",
-  "tags": [
-    "DALL-E 3",
-    "OpenAI",
-    "Prompt Adherence",
-    "Conversational"
-  ],
-  "litellm_model": "image/openai/dall-e-3",
-  "key_env_var": "OPENROUTER_API_KEY",
-  "free_key_url": "https://openrouter.ai/keys",
-  "icon": "cube",
-  "color": "green"
-},
+  {
+    "id": "ollama/dolphin3:8b",
+    "name": "Dolphin 3.0 (8B Uncensored - Local)",
+    "provider": "ollama",
+    "provider_name": "Cognitive Computations / Ollama",
+    "category": "uncensored",
+    "context_window": "128k tokens",
+    "speed_rating": "\u26a1\u26a1 High Speed Local",
+    "free_quota": "100% Free and Offline (ollama run dolphin3:8b)",
+    "description": "Eric Hartford's premier uncensored model fine-tuned on Llama 3.1. Zero alignment guardrails, zero preachy refusals, full creative and technical freedom.",
+    "tags": [
+      "Uncensored",
+      "Cognitive Computations",
+      "Llama 3.1",
+      "100% Offline",
+      "Zero Refusal"
+    ],
+    "litellm_model": "ollama/dolphin3:8b",
+    "key_env_var": null,
+    "free_key_url": "https://ollama.com/library/dolphin3",
+    "icon": "shield-off",
+    "color": "red",
+    "group": "local_ollama",
+    "data_retention": "zero_retention"
+  },
+  {
+    "id": "ollama/dolphin-mixtral:8x7b",
+    "name": "Dolphin Mixtral (8x7B MoE Uncensored)",
+    "provider": "ollama",
+    "provider_name": "Cognitive Computations / Ollama",
+    "category": "uncensored",
+    "context_window": "32k tokens",
+    "speed_rating": "\ud83e\udde0 MoE Architecture",
+    "free_quota": "100% Free and Offline (ollama run dolphin-mixtral:8x7b)",
+    "description": "Massive Mixture-of-Experts uncensored powerhouse. Exceptional reasoning, coding, and creative generation without corporate censorship.",
+    "tags": [
+      "Uncensored",
+      "MoE",
+      "Mixtral",
+      "100% Offline"
+    ],
+    "litellm_model": "ollama/dolphin-mixtral:8x7b",
+    "key_env_var": null,
+    "free_key_url": "https://ollama.com/library/dolphin-mixtral",
+    "icon": "shield-off",
+    "color": "red",
+    "group": "local_ollama",
+    "data_retention": "zero_retention"
+  },
+  {
+    "id": "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition",
+    "name": "Dolphin Mistral 24B (Venice Uncensored)",
+    "provider": "openrouter",
+    "provider_name": "Cognitive Computations / Venice",
+    "category": "uncensored",
+    "context_window": "128k tokens",
+    "speed_rating": "\u26a1 Fast Cloud",
+    "free_quota": "Cloud Micro-Tier via OpenRouter",
+    "description": "Official Venice Edition 24B Mistral NeMo uncensored model. Built for unrestricted creative writing, technical queries, and open roleplay.",
+    "tags": [
+      "Uncensored",
+      "Venice Edition",
+      "Mistral 24B",
+      "128k Context"
+    ],
+    "litellm_model": "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition",
+    "key_env_var": "OPENROUTER_API_KEY",
+    "free_key_url": "https://openrouter.ai/keys",
+    "icon": "shield-off",
+    "color": "red",
+    "group": "byok",
+    "data_retention": "zero_retention"
+  },
+  {
+    "id": "openrouter/nousresearch/hermes-3-llama-3.1-70b",
+    "name": "Hermes 3 (70B Unaligned Frontier)",
+    "provider": "openrouter",
+    "provider_name": "Nous Research",
+    "category": "uncensored",
+    "context_window": "131k tokens",
+    "speed_rating": "\ud83e\udde0 Frontier 70B",
+    "free_quota": "Cloud Micro-Tier via OpenRouter",
+    "description": "Nous Research's flagship steerable frontier model. Designed without corporate moralizing, with high compliance, complex reasoning, and full persona steering.",
+    "tags": [
+      "Unaligned",
+      "Nous Research",
+      "Llama 3.1 70B",
+      "Steerable"
+    ],
+    "litellm_model": "openrouter/nousresearch/hermes-3-llama-3.1-70b",
+    "key_env_var": "OPENROUTER_API_KEY",
+    "free_key_url": "https://openrouter.ai/keys",
+    "icon": "zap",
+    "color": "amber",
+    "group": "byok",
+    "data_retention": "standard_logging"
+  },
+  {
+    "id": "openrouter/free",
+    "name": "Auto Free Smart Router (Zero Setup)",
+    "provider": "openrouter",
+    "provider_name": "OpenRouter Free",
+    "category": "fast",
+    "context_window": "128k context \u00b7 Auto-fallback",
+    "speed_rating": "\u26a1 High Speed (~85 tok/s)",
+    "free_quota": "100% Free / Unlimited",
+    "description": "Intelligent automated routing across frontier open weights LLMs. Zero rate-limit failover, optimal response quality, and immediate streaming without credit constraints.",
+    "tags": [
+      "Auto Router",
+      "Zero Cost",
+      "High Availability",
+      "Open Weights",
+      "Instant"
+    ],
+    "litellm_model": "openrouter/free",
+    "key_env_var": "OPENROUTER_API_KEY",
+    "free_key_url": "https://openrouter.ai/keys",
+    "icon": "zap",
+    "color": "amber",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
+  },
+  {
+    "id": "image/black-forest-labs/flux-1-schnell",
+    "name": "FLUX.1 [schnell] (12B Flow Transformer)",
+    "provider": "huggingface",
+    "provider_name": "Black Forest Labs / HF",
+    "category": "image",
+    "context_window": "1024x1024 px \u00b7 4 steps",
+    "speed_rating": "\u26a1\u26a1 Sub-Second Diffusion (~3.6s)",
+    "free_quota": "100% Free via HF Token",
+    "description": "World-leading 12B Rectified Flow Transformer. Unrivaled text rendering inside images, photorealistic human anatomy, and rapid 4-step generation.",
+    "tags": [
+      "FLUX.1 Schnell",
+      "12B Rectified Flow",
+      "Text In Image",
+      "Photorealistic",
+      "Apache 2.0"
+    ],
+    "litellm_model": "image/black-forest-labs/flux-1-schnell",
+    "key_env_var": "HF_TOKEN",
+    "free_key_url": "https://huggingface.co/settings/tokens",
+    "icon": "palette",
+    "color": "pink",
+    "group": "byok",
+    "data_retention": "standard_logging"
+  },
+  {
+    "id": "image/stabilityai/stable-diffusion-3.5-large",
+    "name": "Stable Diffusion 3.5 Large (8B MM-DiT)",
+    "provider": "huggingface",
+    "provider_name": "Stability AI / HF",
+    "category": "image",
+    "context_window": "1024x1024 px \u00b7 28 steps",
+    "speed_rating": "\ud83c\udfa8 Studio Grade (~6.5s)",
+    "free_quota": "Permissive Community License",
+    "description": "Stability AI's flagship 8B Multimodal Diffusion Transformer. Outstanding prompt adherence, artistic visual styles, and rich typography.",
+    "tags": [
+      "SD 3.5 Large",
+      "8B MM-DiT",
+      "Permissive License",
+      "Diverse Styles"
+    ],
+    "litellm_model": "image/stabilityai/stable-diffusion-3.5-large",
+    "key_env_var": "HF_TOKEN",
+    "free_key_url": "https://huggingface.co/settings/tokens",
+    "icon": "palette",
+    "color": "purple",
+    "group": "byok",
+    "data_retention": "standard_logging"
+  },
+  {
+    "id": "image/bytedance/sdxl-lightning",
+    "name": "SDXL Lightning (ByteDance 6.6B)",
+    "provider": "huggingface",
+    "provider_name": "ByteDance / HF",
+    "category": "image",
+    "context_window": "1024x1024 px \u00b7 2-4 steps",
+    "speed_rating": "\u26a1 Ultra-Fast (~2.2s)",
+    "free_quota": "Open Weights / Unlimited",
+    "description": "Progressive adversarial distilled SDXL producing crisp 1024x1024 imagery in 2 to 4 steps with unmatched community LoRA compatibility.",
+    "tags": [
+      "SDXL Lightning",
+      "6.6B Open Weights",
+      "2-Step Fast",
+      "LoRA Support"
+    ],
+    "litellm_model": "image/bytedance/sdxl-lightning",
+    "key_env_var": "HF_TOKEN",
+    "free_key_url": "https://huggingface.co/settings/tokens",
+    "icon": "zap",
+    "color": "amber",
+    "group": "byok",
+    "data_retention": "standard_logging"
+  },
+  {
+    "id": "image/google/imagen-3",
+    "name": "Google Imagen 3 (Gemini Visual Engine)",
+    "provider": "google",
+    "provider_name": "Google AI Studio",
+    "category": "image",
+    "context_window": "1024x1024 px \u00b7 Ultra HDR",
+    "speed_rating": "\ud83c\udf10 Google Cloud TPU",
+    "free_quota": "Google AI Studio Free Tier",
+    "description": "Google's benchmark-setting image foundation model. Unprecedented photorealism, specular reflections, and fine-grained natural lighting.",
+    "tags": [
+      "Imagen 3",
+      "Google DeepMind",
+      "Ultra Photorealism",
+      "Natural Lighting"
+    ],
+    "litellm_model": "image/google/imagen-3",
+    "key_env_var": "GEMINI_API_KEY",
+    "free_key_url": "https://aistudio.google.com/apikey",
+    "icon": "sparkles",
+    "color": "blue",
+    "group": "byok",
+    "data_retention": "standard_logging"
+  },
+  {
+    "id": "image/pollinations/flux",
+    "name": "FLUX.1 Schnell (Verified Keyless)",
+    "provider": "pollinations",
+    "provider_name": "Black Forest Labs / Pollinations",
+    "category": "image",
+    "context_window": "Up to 2048x2048 px",
+    "speed_rating": "\ud83c\udfac Cinematic Rendering",
+    "free_quota": "100% Free & Unlimited Keyless Generation",
+    "description": "State-of-the-art open diffusion weights by Black Forest Labs. Fast photorealistic generation with zero API key required.",
+    "tags": [
+      "FLUX.1",
+      "Verified Keyless",
+      "Instant Gen",
+      "Open Weights"
+    ],
+    "litellm_model": "image/pollinations/flux",
+    "key_env_var": null,
+    "free_key_url": "https://pollinations.ai",
+    "icon": "film",
+    "color": "emerald",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
+  },
+  {
+    "id": "image/openai/dall-e-3",
+    "name": "OpenAI DALL-E 3 (Conversational)",
+    "provider": "openrouter",
+    "provider_name": "OpenAI / OpenRouter",
+    "category": "image",
+    "context_window": "1024x1024 / 1792x1024",
+    "speed_rating": "\ud83e\udd16 GPT-4 Vision Guided",
+    "free_quota": "OpenRouter Active Key",
+    "description": "Deeply conditioned on GPT-4 prompt expanders. Capable of following extremely nuanced, multi-turn paragraphs of visual direction.",
+    "tags": [
+      "DALL-E 3",
+      "OpenAI",
+      "Prompt Adherence",
+      "Conversational"
+    ],
+    "litellm_model": "image/openai/dall-e-3",
+    "key_env_var": "OPENROUTER_API_KEY",
+    "free_key_url": "https://openrouter.ai/keys",
+    "icon": "cube",
+    "color": "green",
+    "group": "byok",
+    "data_retention": "standard_logging"
+  },
   {
     "id": "freellm/auto",
     "name": "Auto Smart Router (Failover)",
@@ -243,7 +286,9 @@ window.MODELS_CATALOG = [
     "key_env_var": null,
     "free_key_url": null,
     "icon": "sparkles",
-    "color": "amber"
+    "color": "amber",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
   },
   {
     "id": "freellm/keyless-llama",
@@ -264,7 +309,9 @@ window.MODELS_CATALOG = [
     "key_env_var": null,
     "free_key_url": null,
     "icon": "shield-check",
-    "color": "emerald"
+    "color": "emerald",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/deepseek/deepseek-r1-0528",
@@ -286,7 +333,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "brain",
-    "color": "cyan"
+    "color": "cyan",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/qwen/qwq-32b-preview",
@@ -308,7 +357,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "globe",
-    "color": "orange"
+    "color": "orange",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/meta-llama/llama-3.3-70b-instruct",
@@ -330,7 +381,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "cpu",
-    "color": "blue"
+    "color": "blue",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/deepseek/deepseek-chat",
@@ -352,7 +405,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "sparkles",
-    "color": "cyan"
+    "color": "cyan",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/qwen/qwen-2.5-72b-instruct",
@@ -374,7 +429,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "globe",
-    "color": "orange"
+    "color": "orange",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/google/gemma-2-27b-it",
@@ -396,7 +453,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "cpu",
-    "color": "blue"
+    "color": "blue",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "ollama/flint:latest",
@@ -418,7 +477,9 @@ window.MODELS_CATALOG = [
     "key_env_var": null,
     "free_key_url": "https://huggingface.co/RecursiveSI/flint",
     "icon": "hard-drive",
-    "color": "emerald"
+    "color": "emerald",
+    "group": "local_ollama",
+    "data_retention": "zero_retention"
   },
   {
     "id": "openrouter/recursive/flint-v1.0:free",
@@ -441,7 +502,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "sparkles",
-    "color": "purple"
+    "color": "purple",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/nousresearch/hermes-3-llama-3.1-405b",
@@ -462,7 +525,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "cpu",
-    "color": "purple"
+    "color": "purple",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
@@ -483,7 +548,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "zap",
-    "color": "emerald"
+    "color": "emerald",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/qwen/qwen-2.5-coder-32b-instruct",
@@ -505,7 +572,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "code-2",
-    "color": "emerald"
+    "color": "emerald",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/mistralai/codestral-2508",
@@ -527,7 +596,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "terminal",
-    "color": "orange"
+    "color": "orange",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/microsoft/phi-4",
@@ -549,7 +620,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "cpu",
-    "color": "blue"
+    "color": "blue",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/cohere/north-mini-code:free",
@@ -571,7 +644,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "code-2",
-    "color": "purple"
+    "color": "purple",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/liquid/lfm-2.5-2.6b:free",
@@ -593,7 +668,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "gauge",
-    "color": "cyan"
+    "color": "cyan",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/mistralai/mistral-nemo",
@@ -615,7 +692,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "globe",
-    "color": "orange"
+    "color": "orange",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "ollama/llama3.2:latest",
@@ -637,7 +716,9 @@ window.MODELS_CATALOG = [
     "key_env_var": null,
     "free_key_url": "https://ollama.com/download",
     "icon": "hard-drive",
-    "color": "emerald"
+    "color": "emerald",
+    "group": "local_ollama",
+    "data_retention": "zero_retention"
   },
   {
     "id": "ollama/deepseek-r1:1.5b",
@@ -659,7 +740,9 @@ window.MODELS_CATALOG = [
     "key_env_var": null,
     "free_key_url": "https://ollama.com/download",
     "icon": "brain",
-    "color": "emerald"
+    "color": "emerald",
+    "group": "local_ollama",
+    "data_retention": "zero_retention"
   },
   {
     "id": "ollama/qwen2.5-coder:1.5b",
@@ -680,7 +763,9 @@ window.MODELS_CATALOG = [
     "key_env_var": null,
     "free_key_url": "https://ollama.com/download",
     "icon": "code-2",
-    "color": "emerald"
+    "color": "emerald",
+    "group": "local_ollama",
+    "data_retention": "zero_retention"
   },
   {
     "id": "groq/openai/gpt-oss-120b",
@@ -702,7 +787,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "GROQ_API_KEY",
     "free_key_url": "https://console.groq.com/keys",
     "icon": "brain",
-    "color": "orange"
+    "color": "orange",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "groq/openai/gpt-oss-20b",
@@ -724,7 +811,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "GROQ_API_KEY",
     "free_key_url": "https://console.groq.com/keys",
     "icon": "gauge",
-    "color": "amber"
+    "color": "amber",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "groq/qwen/qwen3.8-27b",
@@ -745,7 +834,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "GROQ_API_KEY",
     "free_key_url": "https://console.groq.com/keys",
     "icon": "globe",
-    "color": "orange"
+    "color": "orange",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
@@ -767,7 +858,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "cpu",
-    "color": "emerald"
+    "color": "emerald",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/nvidia/nemotron-3.5-lightning:free",
@@ -788,7 +881,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "zap",
-    "color": "emerald"
+    "color": "emerald",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/nvidia/nemotron-3.5-super-vl:free",
@@ -810,7 +905,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "eye",
-    "color": "teal"
+    "color": "teal",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/qwen/qwen2.5-vl-72b-instruct",
@@ -832,7 +929,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "eye",
-    "color": "teal"
+    "color": "teal",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/nvidia/nemotron-3-super-120b-a12b:free",
@@ -854,7 +953,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "cpu",
-    "color": "emerald"
+    "color": "emerald",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/google/gemma-4-26b-a4b-it:free",
@@ -875,11 +976,13 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "boxes",
-    "color": "blue"
+    "color": "blue",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
   },
   {
-    "id": "gemini/gemini-3.5-flash-lite",
-    "name": "Gemini 3.5 Flash-Lite",
+    "id": "gemini/gemini-2.5-flash-lite",
+    "name": "Gemini 2.5 Flash-Lite (Verified Upstream)",
     "provider": "google",
     "provider_name": "Google AI Studio",
     "category": "fast",
@@ -893,15 +996,17 @@ window.MODELS_CATALOG = [
       "Low Latency",
       "Verified Active"
     ],
-    "litellm_model": "gemini/gemini-3.5-flash-lite",
+    "litellm_model": "gemini/gemini-2.5-flash-lite",
     "key_env_var": "GEMINI_API_KEY",
     "free_key_url": "https://aistudio.google.com/apikey",
     "icon": "zap",
-    "color": "cyan"
+    "color": "cyan",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
-    "id": "gemini/gemini-3.8-flash",
-    "name": "Gemini 3.8 Flash",
+    "id": "gemini/gemini-2.5-flash",
+    "name": "Gemini 2.5 Flash (Verified Upstream)",
     "provider": "google",
     "provider_name": "Google AI Studio",
     "category": "multimodal",
@@ -915,11 +1020,13 @@ window.MODELS_CATALOG = [
       "Flagship",
       "Reasoning"
     ],
-    "litellm_model": "gemini/gemini-3.8-flash",
+    "litellm_model": "gemini/gemini-2.5-flash",
     "key_env_var": "GEMINI_API_KEY",
     "free_key_url": "https://aistudio.google.com/apikey",
     "icon": "cpu",
-    "color": "blue"
+    "color": "blue",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "gemini/gemma-4-26b-a4b-it",
@@ -940,7 +1047,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "GEMINI_API_KEY",
     "free_key_url": "https://aistudio.google.com/apikey",
     "icon": "boxes",
-    "color": "indigo"
+    "color": "indigo",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "cohere/command-r-plus-08-2024",
@@ -962,7 +1071,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "COHERE_API_KEY",
     "free_key_url": "https://dashboard.cohere.com/api-keys",
     "icon": "shield",
-    "color": "purple"
+    "color": "purple",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "cohere/command-r-08-2024",
@@ -983,7 +1094,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "COHERE_API_KEY",
     "free_key_url": "https://dashboard.cohere.com/api-keys",
     "icon": "file-text",
-    "color": "violet"
+    "color": "violet",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "cerebras/llama3.1-8b",
@@ -1004,7 +1117,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "CEREBRAS_API_KEY",
     "free_key_url": "https://cloud.cerebras.ai",
     "icon": "gauge",
-    "color": "amber"
+    "color": "amber",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "cerebras/llama-3.3-70b",
@@ -1025,7 +1140,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "CEREBRAS_API_KEY",
     "free_key_url": "https://cloud.cerebras.ai",
     "icon": "cpu",
-    "color": "amber"
+    "color": "amber",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "github/gpt-4o",
@@ -1046,7 +1163,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "GITHUB_TOKEN",
     "free_key_url": "https://github.com/settings/tokens",
     "icon": "sparkles",
-    "color": "sky"
+    "color": "sky",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "github/gpt-4o-mini",
@@ -1067,7 +1186,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "GITHUB_TOKEN",
     "free_key_url": "https://github.com/settings/tokens",
     "icon": "zap",
-    "color": "sky"
+    "color": "sky",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/z-ai/glm-5.3-flash",
@@ -1090,7 +1211,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "globe",
-    "color": "yellow"
+    "color": "yellow",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/z-ai/glm-5.3-prime",
@@ -1112,7 +1235,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "brain",
-    "color": "orange"
+    "color": "orange",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "zai/glm-4-flash",
@@ -1133,7 +1258,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "ZAI_API_KEY",
     "free_key_url": "https://z.ai/manage-apikey/apikey-list",
     "icon": "globe",
-    "color": "yellow"
+    "color": "yellow",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/moonshotai/kimi-k2.5",
@@ -1155,7 +1282,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "sparkles",
-    "color": "cyan"
+    "color": "cyan",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/moonshotai/kimi-k2-thinking",
@@ -1177,7 +1306,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "brain",
-    "color": "purple"
+    "color": "purple",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/moonshotai/kimi-k2.7-code",
@@ -1199,7 +1330,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "code-2",
-    "color": "emerald"
+    "color": "emerald",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "openrouter/ibm-granite/granite-4.2-8b",
@@ -1221,7 +1354,9 @@ window.MODELS_CATALOG = [
     "key_env_var": "OPENROUTER_API_KEY",
     "free_key_url": "https://openrouter.ai/keys",
     "icon": "shield-check",
-    "color": "blue"
+    "color": "blue",
+    "group": "byok",
+    "data_retention": "standard_logging"
   },
   {
     "id": "ollama/granite3.1-dense:8b",
@@ -1243,7 +1378,9 @@ window.MODELS_CATALOG = [
     "key_env_var": null,
     "free_key_url": "https://ollama.com/library/granite3.1-dense",
     "icon": "hard-drive",
-    "color": "blue"
+    "color": "blue",
+    "group": "local_ollama",
+    "data_retention": "zero_retention"
   },
   {
     "id": "ollama/granite-code:8b",
@@ -1265,7 +1402,9 @@ window.MODELS_CATALOG = [
     "key_env_var": null,
     "free_key_url": "https://ollama.com/library/granite-code",
     "icon": "terminal",
-    "color": "emerald"
+    "color": "emerald",
+    "group": "local_ollama",
+    "data_retention": "zero_retention"
   }
 ];
 
@@ -1350,5 +1489,27 @@ window.PROVIDERS_CONFIG = {
     "badge_color": "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
     "free_tier_info": "Permanent Free Tier for GLM-4 Flash",
     "get_key_url": "https://z.ai/manage-apikey/apikey-list"
+  }
+};
+
+
+// Dynamic OpenRouter Live Models Fetcher
+window.loadDynamicOpenRouterModels = async function() {
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/models");
+    if (!res.ok) return;
+    const json = await res.json();
+    const liveModels = json.data || [];
+    const freeLive = liveModels.filter(m => m.id.endsWith(":free") || m.id === "openrouter/free");
+    console.log(`Live OpenRouter check: Found ${freeLive.length} active free endpoints`);
+    freeLive.forEach(live => {
+      const existing = window.MODELS_CATALOG.find(m => m.id.includes(live.id));
+      if (existing) {
+        existing.live_verified = true;
+        existing.upstream_context = live.context_length;
+      }
+    });
+  } catch (err) {
+    console.warn("Dynamic models check skipped:", err);
   }
 };

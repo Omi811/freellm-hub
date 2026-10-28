@@ -1,4 +1,7 @@
-// FreeLLM Hub — Client-Side Application Controller for GitHub Pages
+// FreeLLM Hub — Client-Side Application Controller for GitHub Pages (v2.0)
+// Features: IndexedDB storage, Multi-File Artifacts with live Console and "Fix with AI",
+// Transparent Fallback & Intent Badges, Blind Arena Benchmark, and Backup Import/Export.
+
 class App {
   constructor() {
     window.app = this;
@@ -10,6 +13,9 @@ class App {
     this.deepthinkMode = false;
     this.imageMode = false;
     this.isArenaMode = false;
+    this.isBlindArena = false;
+    this.currentArtifactContent = "";
+    this.lastArtifactError = null;
 
     this.modelSelector = new ModelSelector(this);
     window.modelSelector = this.modelSelector;
@@ -27,10 +33,10 @@ class App {
       .replace(/'/g, "&#039;");
   }
 
-  init() {
+  async init() {
     this.modelSelector.init();
     this.settings.init();
-    this.loadChats();
+    await this.loadChats();
     this.setupEventListeners();
     this.setupArtifactsPanel();
 
@@ -41,23 +47,60 @@ class App {
     }
   }
 
-  loadChats() {
+  async loadChats() {
     try {
-      const data = localStorage.getItem("freellm_chats");
-      this.chats = data ? JSON.parse(data) : [];
+      if (window.hubStorage) {
+        await window.hubStorage.init();
+        this.chats = await window.hubStorage.getAllChats();
+      } else {
+        const data = localStorage.getItem("freellm_chats");
+        this.chats = data ? JSON.parse(data) : [];
+      }
       this.renderSidebarChats();
     } catch (e) {
+      console.warn("Error loading chats from storage:", e);
       this.chats = [];
     }
   }
 
-  saveChats() {
+  async saveChats() {
     try {
-      localStorage.setItem("freellm_chats", JSON.stringify(this.chats));
+      if (this.currentChat && window.hubStorage) {
+        await window.hubStorage.saveChat(this.currentChat);
+      }
       this.renderSidebarChats();
     } catch (e) {
-      console.error("Failed to save chats:", e);
+      console.error("Failed to save chats to storage:", e);
     }
+  }
+
+  async deleteChat(chatId) {
+    if (!confirm("Are you sure you want to delete this chat?")) return;
+    if (window.hubStorage) {
+      await window.hubStorage.deleteChat(chatId);
+    }
+    this.chats = this.chats.filter(c => c.id !== chatId);
+    this.renderSidebarChats();
+    if (this.currentChat && this.currentChat.id === chatId) {
+      this.newChat();
+    }
+  }
+
+  async handleImportBackup(input) {
+    if (!input || !input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    const text = await file.text();
+    if (window.hubStorage) {
+      const result = await window.hubStorage.importBackup(text);
+      if (result.success) {
+        alert(`Successfully imported ${result.count} conversations!`);
+        await this.loadChats();
+        if (this.chats.length > 0) this.selectChat(this.chats[0].id);
+      } else {
+        alert(`Backup import failed: ${result.error}`);
+      }
+    }
+    input.value = "";
   }
 
   setupEventListeners() {
@@ -218,15 +261,6 @@ class App {
     }
   }
 
-  deleteChat(chatId) {
-    if (!confirm("Are you sure you want to delete this chat?")) return;
-    this.chats = this.chats.filter(c => c.id !== chatId);
-    this.saveChats();
-    if (this.currentChat && this.currentChat.id === chatId) {
-      this.newChat();
-    }
-  }
-
   renderSidebarChats() {
     const list = document.getElementById("sidebar-chats-list");
     if (!list) return;
@@ -283,13 +317,22 @@ class App {
           name: msg.model_used || "Free LLM"
         };
 
-        const statsPill = msg.meta ? `
+        const statsPill = msg.meta && (msg.meta.tps || msg.meta.elapsed) ? `
           <div class="flex items-center gap-2 text-[11px] font-mono text-stone-400">
             <span>⚡ ${msg.meta.tps || 0} tok/s</span>
             <span>•</span>
             <span>⏱️ ${msg.meta.elapsed || 0}s</span>
-            <span>•</span>
-            <span>${msg.meta.tokens || 0} tokens</span>
+          </div>
+        ` : '';
+
+        // Transparent Fallback & Intent Routing Badge
+        const routeBadge = (msg.meta && msg.meta.routed_via) ? `
+          <div class="mb-2 flex items-center flex-wrap gap-2 text-xs font-mono">
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-stone-900 border ${msg.meta.is_fallback ? 'border-amber-500/50 text-amber-300' : 'border-stone-800 text-stone-400'}">
+              <span>⚡ Routed via ${msg.meta.routed_via}</span>
+              ${msg.meta.is_fallback ? '<span class="text-amber-400 font-bold">(Failover Active)</span>' : ''}
+            </span>
+            ${msg.meta.intent ? `<span class="text-stone-500">· Intent: ${msg.meta.intent}</span>` : ''}
           </div>
         ` : '';
 
@@ -314,6 +357,7 @@ class App {
               </div>
               ${statsPill}
             </div>
+            ${routeBadge}
             ${thinkingBlock}
             <div class="prose max-w-none text-stone-200" id="msg-content-${index}">
               ${renderedContent}
@@ -342,7 +386,7 @@ class App {
               <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-sm">✦</div>
               <div>
                 <div class="text-xs font-bold text-stone-100">${title}</div>
-                <div class="text-[10px] text-stone-400 font-mono">${type.toUpperCase()} · Click to open Artifact Canvas</div>
+                <div class="text-[10px] text-stone-400 font-mono">${type.toUpperCase()} · Interactive Sandbox Canvas</div>
               </div>
             </div>
             <span class="inline-flex items-center gap-1 text-xs font-semibold text-amber-400 group-hover:translate-x-0.5 transition-transform">
@@ -381,18 +425,23 @@ class App {
         </button>
       `;
 
-      header.querySelector(".code-copy-btn").addEventListener("click", () => {
-        navigator.clipboard.writeText(el.innerText).then(() => {
-          header.querySelector(".code-copy-btn span").textContent = "Copied!";
-          setTimeout(() => {
-            header.querySelector(".code-copy-btn span").textContent = "Copy";
-          }, 2000);
-        });
-      });
-
       pre.parentNode.insertBefore(wrapper, pre);
       wrapper.appendChild(header);
       wrapper.appendChild(pre);
+
+      const copyBtn = header.querySelector(".code-copy-btn");
+      if (copyBtn) {
+        copyBtn.addEventListener("click", () => {
+          navigator.clipboard.writeText(el.textContent);
+          copyBtn.innerHTML = `<span>Copied!</span>`;
+          setTimeout(() => {
+            copyBtn.innerHTML = `
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+              <span>Copy</span>
+            `;
+          }, 2000);
+        });
+      }
     });
 
     if (window.renderMathInElement) {
@@ -468,7 +517,13 @@ class App {
       });
 
       for await (const chunk of stream) {
-        if (chunk.type === "thinking") {
+        if (chunk.type === "meta") {
+          assistantMsg.meta = {
+            ...(assistantMsg.meta || {}),
+            ...chunk
+          };
+          this.renderMessages();
+        } else if (chunk.type === "thinking") {
           thinkingText += chunk.delta;
           assistantMsg.thinking = thinkingText;
           const thEl = document.getElementById(`msg-thinking-${assistantIndex}`);
@@ -490,6 +545,7 @@ class App {
           }
         } else if (chunk.type === "done") {
           assistantMsg.meta = {
+            ...(assistantMsg.meta || {}),
             tps: chunk.tps,
             elapsed: chunk.elapsed,
             tokens: chunk.tokens
@@ -498,14 +554,14 @@ class App {
         }
       }
 
-      // Save to chats list
+      // Save to storage
       const existingIdx = this.chats.findIndex(c => c.id === this.currentChat.id);
       if (existingIdx > -1) {
         this.chats[existingIdx] = this.currentChat;
       } else {
         this.chats.unshift(this.currentChat);
       }
-      this.saveChats();
+      await this.saveChats();
 
     } catch (err) {
       if (err.name !== "AbortError") {
@@ -535,31 +591,86 @@ class App {
     if (stopBtn) stopBtn.classList.toggle("hidden", !streaming);
   }
 
+  // --- Interactive Artifacts Multi-Tab Sandbox with Error Feedback ---
   setupArtifactsPanel() {
     const closeBtn = document.getElementById("close-artifacts-btn");
     if (closeBtn) closeBtn.addEventListener("click", () => this.closeArtifact());
 
     const codeTab = document.getElementById("artifact-tab-code");
     const previewTab = document.getElementById("artifact-tab-preview");
+    const consoleTab = document.getElementById("artifact-tab-console");
 
-    if (codeTab && previewTab) {
-      codeTab.addEventListener("click", () => {
-        codeTab.classList.add("bg-stone-800", "text-stone-100");
-        previewTab.classList.remove("bg-stone-800", "text-stone-100");
-        document.getElementById("artifact-code-view")?.classList.remove("hidden");
-        document.getElementById("artifact-preview-view")?.classList.add("hidden");
+    const tabs = [
+      { btn: previewTab, view: document.getElementById("artifact-preview-view") },
+      { btn: codeTab, view: document.getElementById("artifact-code-view") },
+      { btn: consoleTab, view: document.getElementById("artifact-console-view") }
+    ];
+
+    tabs.forEach(({ btn, view }) => {
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        tabs.forEach(t => {
+          if (t.btn) {
+            t.btn.classList.remove("bg-stone-800", "text-stone-100", "font-medium");
+            t.btn.classList.add("text-stone-400");
+          }
+          if (t.view) t.view.classList.add("hidden");
+        });
+        btn.classList.add("bg-stone-800", "text-stone-100", "font-medium");
+        btn.classList.remove("text-stone-400");
+        if (view) view.classList.remove("hidden");
       });
+    });
 
-      previewTab.addEventListener("click", () => {
-        previewTab.classList.add("bg-stone-800", "text-stone-100");
-        codeTab.classList.remove("bg-stone-800", "text-stone-100");
-        document.getElementById("artifact-preview-view")?.classList.remove("hidden");
-        document.getElementById("artifact-code-view")?.classList.add("hidden");
+    const fixBtn = document.getElementById("artifact-fix-btn");
+    if (fixBtn) {
+      fixBtn.addEventListener("click", () => {
+        if (!this.lastArtifactError) return;
+        this.sendMessage(`Please fix the runtime error in the artifact: "${this.lastArtifactError.error}" (at line ${this.lastArtifactError.line || 1}). Output the complete corrected <antArtifact> code.`);
+        this.closeArtifact();
       });
     }
+
+    // Message bridge for sandbox iframe
+    window.addEventListener("message", (event) => {
+      if (!event.data) return;
+      if (event.data.type === "ARTIFACT_ERROR") {
+        this.lastArtifactError = event.data;
+        const banner = document.getElementById("artifact-error-banner");
+        const msg = document.getElementById("artifact-error-msg");
+        if (banner && msg) {
+          msg.textContent = `${event.data.error} (line ${event.data.line || 1})`;
+          banner.classList.remove("hidden");
+        }
+        this.appendArtifactLog(`[Runtime Error]: ${event.data.error} (line ${event.data.line || 1})`, "text-red-400");
+      } else if (event.data.type === "ARTIFACT_LOG") {
+        this.appendArtifactLog(`[Log]: ${event.data.data}`, "text-stone-300");
+      }
+    });
+  }
+
+  appendArtifactLog(text, colorClass = "text-stone-300") {
+    const consoleView = document.getElementById("artifact-console-view");
+    if (!consoleView) return;
+    const line = document.createElement("div");
+    line.className = `${colorClass} font-mono text-[11px] leading-relaxed`;
+    line.textContent = `> ${text}`;
+    consoleView.appendChild(line);
+    consoleView.scrollTop = consoleView.scrollHeight;
   }
 
   openArtifact(title, type, content) {
+    this.currentArtifactContent = content;
+    this.lastArtifactError = null;
+
+    const banner = document.getElementById("artifact-error-banner");
+    if (banner) banner.classList.add("hidden");
+
+    const consoleView = document.getElementById("artifact-console-view");
+    if (consoleView) {
+      consoleView.innerHTML = '<div class="text-stone-500 italic pb-1 border-b border-stone-800">[Console ready. Runtime errors and console.log will appear here.]</div>';
+    }
+
     const panel = document.getElementById("artifacts-panel");
     const titleEl = document.getElementById("artifact-title");
     const codeView = document.getElementById("artifact-code-content");
@@ -574,8 +685,26 @@ class App {
     }
 
     if (previewFrame) {
-      if (type === "html" || type === "svg" || content.includes("<html") || content.includes("<svg")) {
-        previewFrame.srcdoc = content;
+      if (type === "html" || type === "svg" || content.includes("<html") || content.includes("<svg") || content.includes("<script")) {
+        const injectedScript = `
+<script>
+  window.onerror = function(msg, url, line) {
+    window.parent.postMessage({ type: 'ARTIFACT_ERROR', error: String(msg), line: line }, '*');
+  };
+  const _origLog = console.log;
+  console.log = function(...args) {
+    _origLog.apply(console, args);
+    window.parent.postMessage({ type: 'ARTIFACT_LOG', data: args.join(' ') }, '*');
+  };
+<\/script>
+`;
+        let fullHtml = content;
+        if (fullHtml.includes("<head>")) {
+          fullHtml = fullHtml.replace("<head>", "<head>" + injectedScript);
+        } else {
+          fullHtml = injectedScript + fullHtml;
+        }
+        previewFrame.srcdoc = fullHtml;
         document.getElementById("artifact-tab-preview")?.click();
       } else {
         document.getElementById("artifact-tab-code")?.click();
