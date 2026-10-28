@@ -7,7 +7,7 @@
 window.HUB_CONFIG = {
   defaultOpenrouterKey: typeof atob === "function" ? atob("c2stb3ItdjEtNjhiMjBmYjZiOTMyYzRmNWRjODIzNjlmNGZlZWUxM2RmYWIzMWNjNWFiYzg5ZGI3YzVmODkyNGU4ZTI5Mjk3Mg==") : "",
   defaultGroqKey: typeof atob === "function" ? atob("Z3NrX0VVQThVTjBGcWJPek9waVplOGI3V0dkeWIwRllJdEhLWWVjUGx1dE9HM0p4aWhzYWxQNWQ=") : "",
-  defaultBackendUrl: "https://eva-dylan-society-fixes.trycloudflare.com"
+  defaultBackendUrl: "https://cbs-sri-hollywood-democracy.trycloudflare.com"
 };
 
 class ClientEngine {
