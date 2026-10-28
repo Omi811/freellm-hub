@@ -151,12 +151,17 @@ class ModelSelector {
         if (this.activeCategory === "daily") {
           const dailyIds = [
             "openrouter/free",
+            "deepseek/deepseek-v4-pro",
+            "moonshot/kimi-k3",
+            "meta-llama/llama-4-scout-109b",
             "groq/openai/gpt-oss-120b",
             "openrouter/qwen/qwen-2.5-coder-32b-instruct",
             "openrouter/deepseek/deepseek-r1-0528",
             "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition",
             "gemini/gemini-2.5-flash",
-            "image/pollinations/flux"
+            "image/pollinations/flux-2-dev",
+            "ollama/qwen3.6-35b-a3b",
+            "ollama/ternary-bonsai-2-27b"
           ];
           if (!dailyIds.includes(m.id) && m.provider !== "ollama") return false;
         }
