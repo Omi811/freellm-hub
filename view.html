@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreeLLM Hub — Published Artifact</title>
+  <style>
+    html, body, iframe {
+      margin: 0; padding: 0; width: 100%; height: 100%; border: 0; overflow: hidden;
+      background: #09090b; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #fff;
+    }
+    .loading {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div id="loader" class="loading">
+    <div style="font-size: 24px;">✦</div>
+    <div style="color: #a1a1aa; font-size: 14px;">Loading Published Artifact...</div>
+  </div>
+  <iframe id="artifact-frame" style="display: none;" sandbox="allow-scripts allow-modals allow-forms"></iframe>
+
+  <script>
+    async function loadArtifact() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      const hash = window.location.hash;
+
+      // 1. Check if payload is in hash (offline / instant client-side sharing)
+      if (hash && hash.startsWith("#code=")) {
+        try {
+          const raw = decodeURIComponent(hash.substring(6));
+          renderHtml(raw);
+          return;
+        } catch (e) {}
+      }
+
+      // 2. Fetch from Cloudflare KV endpoint
+      if (id) {
+        try {
+          const res = await fetch(`/api/publish?id=${encodeURIComponent(id)}`);
+          if (res.ok) {
+            const html = await res.text();
+            renderHtml(html);
+            return;
+          }
+        } catch (e) {}
+      }
+
+      document.getElementById("loader").innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+          <h3 style="color: #f59e0b; margin-bottom: 8px;">Artifact Link Expired or Not Found</h3>
+          <p style="color: #71717a; font-size: 13px;">This artifact may have been generated locally or KV sync is unbound.</p>
+          <a href="/" style="color: #38bdf8; text-decoration: none; font-size: 14px;">← Back to FreeLLM Hub</a>
+        </div>
+      `;
+    }
+
+    function renderHtml(html) {
+      document.getElementById("loader").style.display = "none";
+      const frame = document.getElementById("artifact-frame");
+      frame.style.display = "block";
+      frame.srcdoc = html;
+    }
+
+    loadArtifact();
+  </script>
+</body>
+</html>

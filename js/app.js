@@ -19,7 +19,9 @@ class App {
     this.isArenaMode = false;
     this.arenaResults = [];
     this.currentArtifactContent = "";
+    this.currentArtifactTitle = "";
     this.lastArtifactError = null;
+    this.editingMessageIndex = null;
 
     // Local Project Mount (FS API) & Clipboard Attachments
     this.projectDirHandle = null;
@@ -315,11 +317,22 @@ class App {
 
   setupEventListeners() {
     const textarea = document.getElementById("chat-input-textarea");
+    const tokenCounter = document.getElementById("live-token-counter");
+
     if (textarea) {
+      const updateTokenCount = () => {
+        const len = textarea.value.length;
+        const estTokens = len === 0 ? 0 : Math.ceil(len / 3.8);
+        if (tokenCounter) tokenCounter.textContent = `~${estTokens} tokens`;
+      };
+
       textarea.addEventListener("input", () => {
         textarea.style.height = "auto";
         textarea.style.height = Math.min(textarea.scrollHeight, 220) + "px";
+        updateTokenCount();
       });
+
+      textarea.addEventListener("paste", () => setTimeout(updateTokenCount, 50));
 
       textarea.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
@@ -333,6 +346,10 @@ class App {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         this.newChat();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === "/" || e.code === "Slash")) {
+        e.preventDefault();
+        this.openFabricModal();
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "t") {
         e.preventDefault();
@@ -350,8 +367,17 @@ class App {
         this.modelSelector.closeModal();
         this.settings.closeModal();
         this.closeArtifact();
+        this.closeFabricModal();
+        document.getElementById("publish-modal")?.classList.add("hidden");
       }
     });
+
+    const fabricSearch = document.getElementById("fabric-search-input");
+    if (fabricSearch) {
+      fabricSearch.addEventListener("input", (e) => {
+        this.renderFabricPatterns(e.target.value);
+      });
+    }
 
     const arenaToggle = document.getElementById("arena-mode-toggle");
     if (arenaToggle) {
@@ -515,10 +541,46 @@ class App {
 
     container.innerHTML = this.currentChat.messages.map((msg, index) => {
       if (msg.role === "user") {
+        const isEditing = this.editingMessageIndex === index;
+        if (isEditing) {
+          return `
+            <div class="flex justify-end mb-6 w-full">
+              <div class="max-w-[85%] sm:max-w-[75%] w-full rounded-2xl p-3 bg-stone-900 border border-amber-500/50 shadow-xl">
+                <textarea id="edit-msg-textarea-${index}" class="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-stone-100 text-sm focus:outline-none focus:border-amber-500/50 resize-none leading-relaxed" rows="3">${this.escapeHtml(msg.content)}</textarea>
+                <div class="flex items-center justify-end gap-2 mt-2">
+                  <button type="button" onclick="window.app.cancelEditMessage()" class="px-3 py-1.5 rounded-lg text-xs text-stone-400 hover:text-stone-200 hover:bg-stone-800 transition-all cursor-pointer">Cancel</button>
+                  <button type="button" onclick="window.app.saveEditedMessage(${index})" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-stone-950 hover:bg-amber-400 transition-all cursor-pointer">Save & Submit</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        const variants = msg.variants || [{ content: msg.content }];
+        const variantIdx = msg.variantIndex !== undefined ? msg.variantIndex : variants.length - 1;
+        const branchSwitcher = variants.length > 1 ? `
+          <div class="inline-flex items-center gap-1.5 text-[11px] font-mono text-stone-400 bg-stone-900 px-2 py-0.5 rounded border border-stone-800 shadow-sm mr-1">
+            <button type="button" onclick="window.app.switchBranch(${index}, -1)" ${variantIdx === 0 ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:text-amber-400 cursor-pointer"'} title="Previous version">◀</button>
+            <span class="text-stone-300 font-semibold">${variantIdx + 1}/${variants.length}</span>
+            <button type="button" onclick="window.app.switchBranch(${index}, 1)" ${variantIdx === variants.length - 1 ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:text-amber-400 cursor-pointer"'} title="Next version">▶</button>
+          </div>
+        ` : '';
+
         return `
-          <div class="flex justify-end mb-6">
+          <div class="group flex flex-col items-end mb-6">
             <div class="max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 bg-stone-800 border border-stone-700/80 text-stone-100 text-[0.95rem] shadow-sm leading-relaxed whitespace-pre-wrap">
               ${this.escapeHtml(msg.content)}
+            </div>
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 mt-1.5 px-1">
+              ${branchSwitcher}
+              <button type="button" onclick="window.app.startEditMessage(${index})" title="Edit prompt & branch" class="text-stone-500 hover:text-amber-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                <span class="text-[10px] font-mono">Edit</span>
+              </button>
+              <button type="button" onclick="window.app.forkThreadAt(${index})" title="Fork thread from here into a new chat" class="text-stone-500 hover:text-cyan-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                <span class="text-[10px] font-mono">Fork</span>
+              </button>
             </div>
           </div>
         `;
@@ -534,6 +596,13 @@ class App {
             <span>⏱️ ${msg.meta.elapsed || 0}s</span>
           </div>
         ` : '';
+
+        const forkAssistantBtn = `
+          <button type="button" onclick="window.app.forkThreadAt(${index})" title="Fork conversation up to this response" class="text-stone-500 hover:text-cyan-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+            <span class="text-[10px] font-mono">Fork</span>
+          </button>
+        `;
 
         // Transparent Fallback & Intent Routing Badge
         const routeBadge = (msg.meta && msg.meta.routed_via) ? `
@@ -565,7 +634,10 @@ class App {
                 <span class="w-6 h-6 rounded-md bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs font-bold">✦</span>
                 <span class="text-xs font-semibold text-stone-200">${modelMeta.name}</span>
               </div>
-              ${statsPill}
+              <div class="flex items-center gap-2">
+                ${statsPill}
+                ${forkAssistantBtn}
+              </div>
             </div>
             ${routeBadge}
             ${thinkingBlock}
@@ -579,6 +651,94 @@ class App {
 
     this.postRenderCodeBlocks();
     this.scrollToBottom();
+  }
+
+  // --- Branching & Editing Controls ---
+  startEditMessage(index) {
+    this.editingMessageIndex = index;
+    this.renderMessages();
+    setTimeout(() => {
+      const textarea = document.getElementById(`edit-msg-textarea-${index}`);
+      if (textarea) {
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      }
+    }, 50);
+  }
+
+  cancelEditMessage() {
+    this.editingMessageIndex = null;
+    this.renderMessages();
+  }
+
+  async saveEditedMessage(index) {
+    const textarea = document.getElementById(`edit-msg-textarea-${index}`);
+    if (!textarea) return;
+    const newText = textarea.value.trim();
+    if (!newText) {
+      this.cancelEditMessage();
+      return;
+    }
+
+    const msg = this.currentChat.messages[index];
+    if (!msg.variants) {
+      msg.variants = [{
+        content: msg.content,
+        assistantMsg: this.currentChat.messages[index + 1] ? JSON.parse(JSON.stringify(this.currentChat.messages[index + 1])) : null
+      }];
+      msg.variantIndex = 0;
+    }
+
+    if (msg.content !== newText) {
+      msg.variants.push({
+        content: newText,
+        assistantMsg: null
+      });
+      msg.variantIndex = msg.variants.length - 1;
+      msg.content = newText;
+    }
+
+    this.editingMessageIndex = null;
+    // Truncate following messages
+    this.currentChat.messages = this.currentChat.messages.slice(0, index + 1);
+    await this.executeStreamAssistant();
+  }
+
+  switchBranch(index, delta) {
+    const msg = this.currentChat.messages[index];
+    if (!msg || !msg.variants) return;
+    const currentIdx = msg.variantIndex !== undefined ? msg.variantIndex : msg.variants.length - 1;
+    const nextIdx = currentIdx + delta;
+    if (nextIdx < 0 || nextIdx >= msg.variants.length) return;
+
+    msg.variantIndex = nextIdx;
+    const branch = msg.variants[nextIdx];
+    msg.content = branch.content;
+
+    // Truncate following messages
+    this.currentChat.messages = this.currentChat.messages.slice(0, index + 1);
+    if (branch.assistantMsg) {
+      this.currentChat.messages.push(JSON.parse(JSON.stringify(branch.assistantMsg)));
+      this.renderMessages();
+      this.saveChats();
+    } else {
+      this.executeStreamAssistant();
+    }
+  }
+
+  forkThreadAt(index) {
+    if (!this.currentChat || !this.currentChat.messages || this.currentChat.messages.length === 0) return;
+    const branched = JSON.parse(JSON.stringify(this.currentChat.messages.slice(0, index + 1)));
+    const newChat = {
+      id: "chat_" + Date.now(),
+      title: "Fork: " + (this.currentChat.title || "Chat"),
+      model_id: this.currentChat.model_id || this.modelSelector.selectedModelId,
+      messages: branched
+    };
+    this.chats.unshift(newChat);
+    this.selectChat(newChat.id);
+    this.saveChats();
+    this.showCommandToast("🔀 Thread forked into a new conversation!");
   }
 
   formatMarkdown(content) {
@@ -698,6 +858,75 @@ Output the combined, perfected synthesis directly:`;
     this.sendMessage(synthPrompt);
   }
 
+  // --- Context Mentions Resolver (@url, @github) ---
+  async resolveContextMentions(text) {
+    let resolvedText = text;
+    let contextBlobs = [];
+
+    // 1. Resolve @url (e.g. @https://example.com or @http://...) via Jina Reader
+    const urlMatches = text.match(/@(https?:\/\/[^\s]+)/gi);
+    if (urlMatches) {
+      for (const match of urlMatches) {
+        const targetUrl = match.substring(1);
+        try {
+          this.showCommandToast(`🌐 Fetching content from ${targetUrl.substring(0, 32)}...`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 7500);
+          const res = await fetch(`https://r.jina.ai/${targetUrl}`, {
+            headers: { 'Accept': 'text/plain' },
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          if (res.ok) {
+            let markdown = await res.text();
+            if (markdown.length > 8000) {
+              markdown = markdown.substring(0, 8000) + "\n\n[...truncated for context window...]";
+            }
+            contextBlobs.push(`<context url="${targetUrl}">\n${markdown}\n</context>`);
+            resolvedText = resolvedText.replace(match, targetUrl);
+          }
+        } catch (e) {
+          console.warn("Jina Reader context fetch failed for:", targetUrl, e);
+        }
+      }
+    }
+
+    // 2. Resolve @github:owner/repo
+    const ghMatches = text.match(/@github:([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)/gi);
+    if (ghMatches) {
+      for (const match of ghMatches) {
+        const repoPath = match.substring(8); // strip @github:
+        try {
+          this.showCommandToast(`🐙 Fetching repo README for ${repoPath}...`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 7500);
+          const res = await fetch(`https://api.github.com/repos/${repoPath}/readme`, {
+            headers: { 'Accept': 'application/vnd.github.v3+json' },
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.content) {
+              const decoded = atob(data.content.replace(/\s/g, ''));
+              let clean = decoded.length > 8000 ? decoded.substring(0, 8000) + "\n\n[...README truncated...]" : decoded;
+              contextBlobs.push(`<context github="${repoPath}">\n${clean}\n</context>`);
+              resolvedText = resolvedText.replace(match, `github:${repoPath}`);
+            }
+          }
+        } catch (e) {
+          console.warn("GitHub fetch failed for:", repoPath, e);
+        }
+      }
+    }
+
+    if (contextBlobs.length > 0) {
+      resolvedText = `${contextBlobs.join("\n\n")}\n\n${resolvedText}`;
+    }
+
+    return resolvedText;
+  }
+
   async sendMessage(promptOverride = null) {
     if (this.isStreaming) return;
 
@@ -721,20 +950,37 @@ Output the combined, perfected synthesis directly:`;
       this.clearAttachment();
     }
 
+    // Resolve context mentions (@url, @github)
+    prompt = await this.resolveContextMentions(prompt);
+
     if (textarea) {
       textarea.value = "";
       textarea.style.height = "auto";
+      const tokenCounter = document.getElementById("live-token-counter");
+      if (tokenCounter) tokenCounter.textContent = "~0 tokens";
     }
 
-    const selectedModel = this.modelSelector.getSelectedModel();
     if (!this.currentChat) this.newChat();
 
     if (this.currentChat.messages.length === 0) {
       this.currentChat.title = prompt.length > 36 ? prompt.substring(0, 36) + "..." : prompt;
     }
 
-    this.currentChat.messages.push({ role: "user", content: prompt });
+    const userMsg = {
+      role: "user",
+      content: prompt,
+      variants: [{ content: prompt, assistantMsg: null }],
+      variantIndex: 0
+    };
+    this.currentChat.messages.push(userMsg);
 
+    await this.executeStreamAssistant();
+  }
+
+  async executeStreamAssistant() {
+    if (this.isStreaming) return;
+
+    const selectedModel = this.modelSelector.getSelectedModel();
     const assistantMsg = {
       role: "assistant",
       model_used: selectedModel.id,
@@ -804,6 +1050,15 @@ Output the combined, perfected synthesis directly:`;
         }
       }
 
+      // Update active branch cache in the preceding user message if variants exist
+      const userMsgIdx = assistantIndex - 1;
+      if (userMsgIdx >= 0 && this.currentChat.messages[userMsgIdx]) {
+        const uMsg = this.currentChat.messages[userMsgIdx];
+        if (uMsg.variants && uMsg.variantIndex !== undefined && uMsg.variants[uMsg.variantIndex]) {
+          uMsg.variants[uMsg.variantIndex].assistantMsg = JSON.parse(JSON.stringify(assistantMsg));
+        }
+      }
+
       // Store in arena results cache for mixture-of-agents synthesis
       this.arenaResults.push({
         model_name: selectedModel.name,
@@ -831,6 +1086,81 @@ Output the combined, perfected synthesis directly:`;
       const input = document.getElementById("chat-input-textarea");
       if (input) input.focus();
     }
+  }
+
+  // --- Fabric Pattern Palette Controls (Ctrl+/) ---
+  openFabricModal() {
+    const modal = document.getElementById("fabric-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      this.renderFabricPatterns("");
+      const input = document.getElementById("fabric-search-input");
+      if (input) {
+        input.value = "";
+        input.focus();
+      }
+    }
+  }
+
+  closeFabricModal() {
+    const modal = document.getElementById("fabric-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
+  renderFabricPatterns(query = "") {
+    const container = document.getElementById("fabric-patterns-list");
+    if (!container) return;
+    const q = query.toLowerCase().trim();
+    const patterns = window.FABRIC_PATTERNS || [];
+    const filtered = patterns.filter(p =>
+      !q || p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q))
+    );
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="p-6 text-center text-xs text-stone-500 font-mono">
+          No engineering patterns found matching "${this.escapeHtml(query)}".
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filtered.map(p => `
+      <div class="group p-3 rounded-xl bg-stone-950/70 border border-stone-800 hover:border-amber-500/50 hover:bg-stone-900 transition-all cursor-pointer flex items-start gap-3"
+           onclick="window.app.applyFabricPattern('${p.id}')">
+        <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
+          ${p.icon || '⚡'}
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-bold text-stone-200 group-hover:text-amber-400 transition-colors">${this.escapeHtml(p.name)}</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-900 text-stone-400 border border-stone-800">${(p.category || 'fabric').toUpperCase()}</span>
+          </div>
+          <p class="text-xs text-stone-400 leading-relaxed line-clamp-2">${this.escapeHtml(p.description)}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  applyFabricPattern(patternId) {
+    const patterns = window.FABRIC_PATTERNS || [];
+    const p = patterns.find(item => item.id === patternId);
+    if (!p) return;
+
+    const textarea = document.getElementById("chat-input-textarea");
+    if (textarea) {
+      textarea.value = (p.template || "") + (textarea.value ? "\n\n" + textarea.value : "");
+      textarea.style.height = "auto";
+      textarea.style.height = Math.min(textarea.scrollHeight, 220) + "px";
+      textarea.focus();
+      const tokenCounter = document.getElementById("live-token-counter");
+      if (tokenCounter) {
+        tokenCounter.textContent = `~${Math.ceil(textarea.value.length / 3.8)} tokens`;
+      }
+    }
+
+    this.closeFabricModal();
+    this.showCommandToast(`⚡ Inserted pattern: ${p.name}`);
   }
 
   stopStreaming() {
@@ -918,6 +1248,7 @@ Output the combined, perfected synthesis directly:`;
 
   openArtifact(title, type, content) {
     this.currentArtifactContent = content;
+    this.currentArtifactTitle = title;
     this.lastArtifactError = null;
 
     const banner = document.getElementById("artifact-error-banner");
@@ -972,6 +1303,59 @@ Output the combined, perfected synthesis directly:`;
   closeArtifact() {
     const panel = document.getElementById("artifacts-panel");
     if (panel) panel.classList.add("hidden");
+  }
+
+  // --- One-Click Publish Artifact (Host on Cloudflare / Standalone Hash) ---
+  async publishArtifact() {
+    if (!this.currentArtifactContent) {
+      alert("No active artifact to publish. Generate an interactive artifact first!");
+      return;
+    }
+
+    const titleEl = document.getElementById("artifact-title");
+    const artTitle = (titleEl && titleEl.textContent) ? titleEl.textContent.trim() : (this.currentArtifactTitle || "Interactive Artifact");
+
+    const modal = document.getElementById("publish-modal");
+    const urlInput = document.getElementById("publish-url-input");
+    const qrImg = document.getElementById("publish-qr-image");
+
+    let finalUrl = "";
+
+    try {
+      this.showCommandToast("🚀 Publishing artifact...");
+      const res = await fetch("/api/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: artTitle,
+          code: this.currentArtifactContent
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.url) finalUrl = data.url;
+      }
+    } catch (e) {
+      console.warn("API publish failed, falling back to client-side hash:", e);
+    }
+
+    if (!finalUrl) {
+      // Direct client-side hash fallback (100% reliable even if KV is unbound or offline)
+      finalUrl = `${window.location.origin}/view.html#code=${encodeURIComponent(this.currentArtifactContent)}`;
+    }
+
+    if (urlInput) urlInput.value = finalUrl;
+    if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(finalUrl)}`;
+    if (modal) modal.classList.remove("hidden");
+  }
+
+  copyPublishUrl() {
+    const input = document.getElementById("publish-url-input");
+    if (input && input.value) {
+      navigator.clipboard.writeText(input.value);
+      this.showCommandToast("📋 Copied live artifact URL to clipboard!");
+    }
   }
 }
 

@@ -285,11 +285,13 @@
 
               <div class="flex items-center justify-between pt-2 px-1 border-t border-stone-800/60 mt-1">
                 <div class="flex items-center gap-2 text-xs text-stone-500">
-                  <span class="hidden sm:inline">⚡ Turbo: <kbd class="font-mono text-stone-400">Ctrl+T</kbd></span>
+                  <button type="button" onclick="window.app.openFabricModal()" title="Fabric Pattern Library (Ctrl+/)" class="px-2 py-0.5 rounded-lg bg-stone-800 hover:bg-stone-750 text-amber-400 font-mono text-[11px] flex items-center gap-1.5 cursor-pointer border border-stone-700/60 transition-all">
+                    <span>⚡ Patterns</span>
+                    <kbd class="text-[9px] text-stone-400 font-mono">Ctrl+/</kbd>
+                  </button>
+                  <span id="live-token-counter" class="font-mono text-stone-400 text-[11px]">~0 tokens</span>
                   <span class="hidden sm:inline">•</span>
-                  <span class="hidden sm:inline">🧠 DeepThink: <kbd class="font-mono text-stone-400">Ctrl+D</kbd></span>
-                  <span class="hidden sm:inline">•</span>
-                  <span class="hidden sm:inline">📎 Paste Screenshots & Code</span>
+                  <span class="hidden sm:inline">📎 @url, @github, PDFs</span>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -315,19 +317,24 @@
         <div class="h-12 border-b border-stone-800 px-4 flex items-center justify-between bg-stone-950/80">
           <div class="flex items-center gap-2">
             <span class="w-5 h-5 rounded bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold">✦</span>
-            <span id="artifact-title" class="text-xs font-bold text-stone-100 truncate max-w-[160px] sm:max-w-xs">Artifact Canvas</span>
+            <span id="artifact-title" class="text-xs font-bold text-stone-100 truncate max-w-[140px] sm:max-w-xs">Artifact Canvas</span>
           </div>
 
           <div class="flex items-center gap-2">
+            <button onclick="window.app.publishArtifact()"
+                    title="Publish Artifact to permanent live URL with mobile QR code"
+                    class="px-2.5 py-1 rounded-md bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-stone-950 text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow">
+              <span>🚀 Publish Live</span>
+            </button>
             <button onclick="window.app.saveArtifactToFile()"
                     title="Save this code directly to your mounted local project folder (Native FS API)"
                     class="px-2.5 py-1 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 text-xs font-medium flex items-center gap-1 cursor-pointer transition-all">
-              <span>💾 Save to File</span>
+              <span>💾 Save</span>
             </button>
             <div class="flex items-center bg-stone-900 border border-stone-800 rounded-lg p-0.5 text-xs">
-              <button id="artifact-tab-preview" class="px-2.5 py-1 rounded-md bg-stone-800 text-stone-100 font-medium">Preview</button>
-              <button id="artifact-tab-code" class="px-2.5 py-1 rounded-md text-stone-400 hover:text-stone-200">Code</button>
-              <button id="artifact-tab-console" class="px-2.5 py-1 rounded-md text-stone-400 hover:text-stone-200">Console</button>
+              <button id="artifact-tab-preview" class="px-2 py-1 rounded-md bg-stone-800 text-stone-100 font-medium">Preview</button>
+              <button id="artifact-tab-code" class="px-2 py-1 rounded-md text-stone-400 hover:text-stone-200">Code</button>
+              <button id="artifact-tab-console" class="px-2 py-1 rounded-md text-stone-400 hover:text-stone-200">Console</button>
             </div>
             <button id="close-artifacts-btn" class="p-1.5 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -523,8 +530,71 @@
     </div>
   </div>
 
+  <!-- ======================================================== -->
+  <!-- MODAL: Fabric Prompt Library & Pattern Palette (Ctrl+/) -->
+  <!-- ======================================================== -->
+  <div id="fabric-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4">
+    <div class="w-full max-w-xl bg-stone-900 border border-stone-800 rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden">
+      <div class="p-4 border-b border-stone-800 bg-stone-950/60 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xs font-bold">⚡</span>
+          <h3 class="text-sm font-bold text-stone-100">Fabric Engineering Prompt Patterns</h3>
+        </div>
+        <button onclick="window.app.closeFabricModal()" class="text-stone-400 hover:text-white p-1 rounded-lg hover:bg-stone-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="p-3 border-b border-stone-800 bg-stone-900/40">
+        <input
+          id="fabric-search-input"
+          type="text"
+          placeholder="Filter patterns (e.g. security, wisdom, refactor, sql, docker, pr)..."
+          class="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500/50"
+        />
+      </div>
+
+      <div id="fabric-patterns-list" class="flex-1 overflow-y-auto p-4 space-y-2">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: One-Click Published Artifact (Host & Share Link) -->
+  <!-- ======================================================== -->
+  <div id="publish-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4">
+    <div class="w-full max-w-md bg-stone-900 border border-stone-800 rounded-2xl shadow-2xl p-5 flex flex-col text-center">
+      <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">
+        🚀
+      </div>
+      <h3 class="text-base font-bold text-stone-100 mb-1">Artifact Published Successfully!</h3>
+      <p class="text-xs text-stone-400 mb-4 leading-relaxed">
+        Your interactive web tool is live and shareable. Scan the QR code to open it directly on your mobile device.
+      </p>
+
+      <div class="p-3 rounded-xl bg-stone-950 border border-stone-800 mb-4 flex items-center justify-center">
+        <img id="publish-qr-image" src="" alt="Mobile QR Code" class="w-40 h-40 rounded-lg bg-white p-2" />
+      </div>
+
+      <div class="flex items-center gap-2 mb-4">
+        <input id="publish-url-input" type="text" readonly class="flex-1 bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-200 font-mono focus:outline-none" />
+        <button onclick="window.app.copyPublishUrl()" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs cursor-pointer whitespace-nowrap">
+          Copy Link
+        </button>
+      </div>
+
+      <div class="flex justify-end">
+        <button onclick="document.getElementById('publish-modal').classList.add('hidden')" class="w-full py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-medium cursor-pointer">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="./js/storage.js"></script>
+  <script src="./js/fabric_patterns.js"></script>
   <script src="./js/models_data.js"></script>
   <script src="./js/client_engine.js"></script>
   <script src="./js/model_selector.js"></script>
