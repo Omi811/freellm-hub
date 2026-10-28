@@ -65,6 +65,84 @@ class ClientEngine {
     if (!localStorage.getItem("freellm_auth_token")) {
       localStorage.setItem("freellm_auth_token", "antigravity2026");
     }
+
+    // Auto-scan local Ollama models on startup
+    this.scanLocalOllamaModels();
+  }
+
+  // --- Dynamic Localhost Ollama Auto-Scan (Direct Browser to http://localhost:11434) ---
+  async scanLocalOllamaModels() {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 1200);
+      const res = await fetch("http://localhost:11434/api/tags", { signal: controller.signal });
+      clearTimeout(timeout);
+      if (!res.ok) return [];
+
+      const data = await res.json();
+      const localModels = data.models || [];
+      if (localModels.length > 0) {
+        console.log(`Discovered ${localModels.length} local Ollama models:`, localModels.map(m => m.name));
+        localModels.forEach(lm => {
+          const id = `ollama/${lm.name}`;
+          if (!window.MODELS_CATALOG.some(m => m.id === id)) {
+            window.MODELS_CATALOG.unshift({
+              id: id,
+              name: `${lm.name} (Local Ollama)`,
+              provider: "ollama",
+              provider_name: "Localhost Machine",
+              category: "offline",
+              context_window: `${Math.round((lm.size || 0) / 1024 / 1024 / 1024 * 10) / 10} GB VRAM`,
+              speed_rating: "⚡⚡ 100% Offline Local",
+              free_quota: "Unlimited Offline Execution",
+              description: `Installed model detected on your machine (${lm.name}). Direct local streaming via http://localhost:11434 without any tunnel.`,
+              tags: ["Installed Locally", "100% Offline", "Direct Localhost"],
+              litellm_model: id,
+              key_env_var: null,
+              free_key_url: "http://localhost:11434",
+              icon: "cpu",
+              color: "emerald",
+              data_retention: "zero_retention",
+              group: "local_ollama"
+            });
+          }
+        });
+        if (window.modelSelector) {
+          window.modelSelector.models = window.MODELS_CATALOG;
+          window.modelSelector.renderModalContent();
+        }
+      }
+      return localModels;
+    } catch (e) {
+      // Offline or remote device
+      return [];
+    }
+  }
+
+  // --- Cloudflare KV Personal State Sync ---
+  async syncToKV(chats, settings) {
+    try {
+      const res = await fetch("/api/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chats, settings, updated: Date.now() })
+      });
+      return res.ok;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async pullFromKV() {
+    try {
+      const res = await fetch("/api/sync");
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (data && Array.isArray(data.chats)) return data;
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 
   // --- Intent Classifier ---

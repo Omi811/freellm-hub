@@ -72,12 +72,23 @@
 
       <!-- New Chat Button -->
       <button onclick="window.app.newChat()"
-              class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-semibold text-xs shadow-sm transition-all mb-3 cursor-pointer">
+              class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-semibold text-xs shadow-sm transition-all mb-2 cursor-pointer">
         <span class="flex items-center gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
           New Chat
         </span>
         <kbd class="px-1.5 py-0.5 text-[10px] rounded bg-stone-950/20 text-stone-950 font-mono">Ctrl+K</kbd>
+      </button>
+
+      <!-- Mount Local Project Folder (Native File System Access API) -->
+      <button id="mount-project-btn" onclick="window.app.mountLocalProject()"
+              title="Grant browser tab direct read/write access to a local project folder"
+              class="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-stone-800 bg-stone-950 hover:bg-stone-850 text-stone-300 font-medium text-xs transition-all mb-3 cursor-pointer">
+        <span class="flex items-center gap-2 truncate">
+          <span>📁</span>
+          <span class="truncate">Mount Local Project</span>
+        </span>
+        <span class="text-[10px] text-stone-500 font-mono">FS API</span>
       </button>
 
       <!-- Conversations History Header -->
@@ -172,7 +183,11 @@
         <span class="font-semibold text-amber-400">Comparing Models:</span>
         <div id="arena-selected-tags" class="flex items-center gap-2"></div>
       </div>
-      <span class="text-stone-400">Prompts are evaluated head-to-head.</span>
+      <button onclick="window.app.synthesizeArenaBoth()"
+              title="Mixture-of-Agents: Combine the best code and reasoning from both models into one superior answer"
+              class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-bold hover:brightness-110 flex items-center gap-1.5 shadow cursor-pointer transition-all">
+        <span>✨ Synthesize Both (Mixture-of-Agents)</span>
+      </button>
     </div>
 
     <!-- ======================================================== -->
@@ -234,11 +249,37 @@
         <!-- Bottom Fixed Chat Input Box -->
         <div class="p-4 border-t border-stone-800/80 bg-stone-950/80 backdrop-blur">
           <div class="max-w-3xl mx-auto">
+            <!-- Personal Slash Command Shortcuts Bar -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1.5 mb-1.5 text-[11px] font-mono no-scrollbar">
+              <span class="text-stone-500 font-sans text-xs mr-1 hidden sm:inline">⚡ Quick Stack:</span>
+              <button onclick="window.app.applySlashCommand('/code')" title="Qwen 2.5 Coder 32B · Temp: 0.2" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
+                <span class="text-amber-400 font-bold">/code</span><span>Qwen 32B</span>
+              </button>
+              <button onclick="window.app.applySlashCommand('/review')" title="DeepSeek R1 · Security & Bug Audit" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
+                <span class="text-purple-400 font-bold">/review</span><span>Audit</span>
+              </button>
+              <button onclick="window.app.applySlashCommand('/refactor')" title="Refactor for clean architecture" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
+                <span class="text-cyan-400 font-bold">/refactor</span><span>Clean</span>
+              </button>
+              <button onclick="window.app.applySlashCommand('/ui')" title="Interactive HTML/JS Artifacts" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
+                <span class="text-pink-400 font-bold">/ui</span><span>Artifacts</span>
+              </button>
+              <button onclick="window.app.applySlashCommand('/fast')" title="Groq LPU (~280 tok/s)" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
+                <span class="text-orange-400 font-bold">/fast</span><span>Groq 280t/s</span>
+              </button>
+              <button onclick="window.app.applySlashCommand('/uncensored')" title="Dolphin Mistral 24B (Zero Refusal)" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
+                <span class="text-red-400 font-bold">/uncensored</span><span>Dolphin</span>
+              </button>
+            </div>
+
+            <!-- Attachment Preview Container (Clipboard Image / Dropped Files) -->
+            <div id="attachment-preview-container" class="hidden pb-2 flex items-center gap-2"></div>
+
             <div class="relative rounded-2xl bg-stone-900/90 border border-stone-800 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/30 transition-all shadow-lg p-2.5">
               <textarea
                 id="chat-input-textarea"
                 rows="1"
-                placeholder="Ask anything... (Ctrl+T for Turbo, Ctrl+D for DeepThink, Shift+Enter for newline)"
+                placeholder="Ask anything... (Paste image with Ctrl+V, drop code files, or type /code)"
                 class="w-full bg-transparent text-stone-100 placeholder-stone-500 text-sm focus:outline-none resize-none max-h-56 px-2 py-1 leading-relaxed"
               ></textarea>
 
@@ -247,6 +288,8 @@
                   <span class="hidden sm:inline">⚡ Turbo: <kbd class="font-mono text-stone-400">Ctrl+T</kbd></span>
                   <span class="hidden sm:inline">•</span>
                   <span class="hidden sm:inline">🧠 DeepThink: <kbd class="font-mono text-stone-400">Ctrl+D</kbd></span>
+                  <span class="hidden sm:inline">•</span>
+                  <span class="hidden sm:inline">📎 Paste Screenshots & Code</span>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -272,10 +315,15 @@
         <div class="h-12 border-b border-stone-800 px-4 flex items-center justify-between bg-stone-950/80">
           <div class="flex items-center gap-2">
             <span class="w-5 h-5 rounded bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold">✦</span>
-            <span id="artifact-title" class="text-xs font-bold text-stone-100 truncate max-w-xs">Artifact Canvas</span>
+            <span id="artifact-title" class="text-xs font-bold text-stone-100 truncate max-w-[160px] sm:max-w-xs">Artifact Canvas</span>
           </div>
 
           <div class="flex items-center gap-2">
+            <button onclick="window.app.saveArtifactToFile()"
+                    title="Save this code directly to your mounted local project folder (Native FS API)"
+                    class="px-2.5 py-1 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 text-xs font-medium flex items-center gap-1 cursor-pointer transition-all">
+              <span>💾 Save to File</span>
+            </button>
             <div class="flex items-center bg-stone-900 border border-stone-800 rounded-lg p-0.5 text-xs">
               <button id="artifact-tab-preview" class="px-2.5 py-1 rounded-md bg-stone-800 text-stone-100 font-medium">Preview</button>
               <button id="artifact-tab-code" class="px-2.5 py-1 rounded-md text-stone-400 hover:text-stone-200">Code</button>
@@ -351,6 +399,7 @@
 
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
           <button class="category-pill active-pill px-3 py-1 rounded-lg bg-amber-500 text-stone-950 font-medium whitespace-nowrap" data-category="all">All Models</button>
+          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-amber-300 hover:bg-stone-700 whitespace-nowrap" data-category="daily">⭐ Daily Drivers</button>
           <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-amber-400 hover:bg-stone-700 whitespace-nowrap" data-category="keyless">⚡ Keyless</button>
           <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-purple-400 hover:bg-stone-700 whitespace-nowrap" data-category="byok">🔑 BYOK</button>
           <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-cyan-400 hover:bg-stone-700 whitespace-nowrap" data-category="offline">💻 100% Offline</button>

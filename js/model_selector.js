@@ -148,6 +148,18 @@ class ModelSelector {
 
       // Category filters
       if (this.activeCategory !== "all") {
+        if (this.activeCategory === "daily") {
+          const dailyIds = [
+            "openrouter/free",
+            "groq/openai/gpt-oss-120b",
+            "openrouter/qwen/qwen-2.5-coder-32b-instruct",
+            "openrouter/deepseek/deepseek-r1-0528",
+            "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition",
+            "gemini/gemini-2.5-flash",
+            "image/pollinations/flux"
+          ];
+          if (!dailyIds.includes(m.id) && m.provider !== "ollama") return false;
+        }
         if (this.activeCategory === "keyless" && m.group !== "verified_keyless") return false;
         if (this.activeCategory === "byok" && m.group !== "byok") return false;
         if (this.activeCategory === "offline" && m.provider !== "ollama") return false;

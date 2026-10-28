@@ -1,6 +1,10 @@
-// FreeLLM Hub — Client-Side Application Controller for GitHub Pages (v2.0)
-// Features: IndexedDB storage, Multi-File Artifacts with live Console and "Fix with AI",
-// Transparent Fallback & Intent Badges, Blind Arena Benchmark, and Backup Import/Export.
+// FreeLLM Hub — Client-Side Application Controller for GitHub Pages (v2.0 Personal Powerhouse)
+// Features:
+// - Native File System Access API (Local Codex read/write)
+// - Personal Slash-Commands (/code, /review, /refactor, /ui, /fast, /deep, /uncensored)
+// - Mixture-of-Agents Arena Synthesizer
+// - Clipboard Image Paste (Ctrl+V) & Drag-and-Drop File Context
+// - IndexedDB unlimited storage + Cloudflare KV Cross-Device Sync
 
 class App {
   constructor() {
@@ -13,9 +17,14 @@ class App {
     this.deepthinkMode = false;
     this.imageMode = false;
     this.isArenaMode = false;
-    this.isBlindArena = false;
+    this.arenaResults = [];
     this.currentArtifactContent = "";
     this.lastArtifactError = null;
+
+    // Local Project Mount (FS API) & Clipboard Attachments
+    this.projectDirHandle = null;
+    this.mountedProjectName = null;
+    this.attachedImageBase64 = null;
 
     this.modelSelector = new ModelSelector(this);
     window.modelSelector = this.modelSelector;
@@ -39,6 +48,7 @@ class App {
     await this.loadChats();
     this.setupEventListeners();
     this.setupArtifactsPanel();
+    this.setupPasteAndDrop();
 
     if (this.chats.length > 0) {
       this.selectChat(this.chats[0].id);
@@ -101,6 +111,206 @@ class App {
       }
     }
     input.value = "";
+  }
+
+  async triggerKVSync() {
+    if (!window.clientEngine) return;
+    const synced = await window.clientEngine.syncToKV(this.chats, {
+      systemPrompt: localStorage.getItem("freellm_system_prompt") || "",
+      temperature: localStorage.getItem("freellm_temperature") || "0.7"
+    });
+    if (synced) {
+      this.showCommandToast("☁️ Synced state with Cloudflare KV!");
+    } else {
+      this.showCommandToast("ℹ️ KV sync: local-first mode (bind HUB_KV in Cloudflare to enable cross-device)");
+    }
+  }
+
+  // --- Native File System Access API (Local Project Direct Read/Write) ---
+  async mountLocalProject() {
+    if (!window.showDirectoryPicker) {
+      alert("Your browser does not support the File System Access API. Please open in Chrome, Edge, or Brave.");
+      return;
+    }
+    try {
+      this.projectDirHandle = await window.showDirectoryPicker({
+        mode: "readwrite"
+      });
+      this.mountedProjectName = this.projectDirHandle.name;
+      this.updateProjectMountUI();
+      this.showCommandToast(`📁 Mounted: ${this.mountedProjectName}`);
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        console.error("Directory pick failed:", err);
+      }
+    }
+  }
+
+  updateProjectMountUI() {
+    const mountBtn = document.getElementById("mount-project-btn");
+    if (mountBtn && this.mountedProjectName) {
+      mountBtn.innerHTML = `
+        <span class="flex items-center gap-2 truncate">
+          <span>📁</span>
+          <span class="truncate font-semibold text-emerald-400">${this.mountedProjectName}</span>
+        </span>
+        <span class="text-[10px] text-emerald-500 font-mono">Mounted</span>
+      `;
+      mountBtn.classList.add("border-emerald-500/50", "bg-emerald-500/10");
+    }
+  }
+
+  async saveArtifactToFile(fileName = null) {
+    if (!this.currentArtifactContent) {
+      alert("No active artifact to save.");
+      return;
+    }
+    if (!this.projectDirHandle) {
+      await this.mountLocalProject();
+      if (!this.projectDirHandle) return;
+    }
+    try {
+      const targetName = fileName || prompt("Enter filename to save into mounted project folder (e.g. index.html, app.py, style.css):", "index.html");
+      if (!targetName) return;
+
+      const fileHandle = await this.projectDirHandle.getFileHandle(targetName, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(this.currentArtifactContent);
+      await writable.close();
+      this.showCommandToast(`💾 Saved "${targetName}" directly to local folder!`);
+    } catch (err) {
+      alert(`Failed to save file: ${err.message}`);
+    }
+  }
+
+  // --- Clipboard Image Paste (Ctrl+V) & Drag-and-Drop Context ---
+  setupPasteAndDrop() {
+    const textarea = document.getElementById("chat-input-textarea");
+    const dropZone = document.getElementById("chat-scroll-area") || document.body;
+
+    // Clipboard paste (Ctrl+V screenshot)
+    if (textarea) {
+      textarea.addEventListener("paste", (e) => {
+        const items = e.clipboardData?.items || [];
+        for (const item of items) {
+          if (item.type.startsWith("image/")) {
+            const file = item.getAsFile();
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+              this.attachedImageBase64 = evt.target.result;
+              this.renderAttachmentPill(file.name || "screenshot.png");
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      });
+    }
+
+    // Drag-and-drop code files
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    });
+
+    dropZone.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      const files = e.dataTransfer?.files || [];
+      if (files.length === 0) return;
+
+      let combinedContext = "";
+      for (const file of files) {
+        if (file.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            this.attachedImageBase64 = evt.target.result;
+            this.renderAttachmentPill(file.name);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          try {
+            const text = await file.text();
+            combinedContext += `\n<file path="${file.name}">\n${text}\n</file>\n`;
+          } catch (err) {}
+        }
+      }
+
+      if (combinedContext && textarea) {
+        textarea.value = (textarea.value ? textarea.value + "\n\n" : "") + combinedContext;
+        textarea.style.height = Math.min(textarea.scrollHeight, 220) + "px";
+        textarea.focus();
+        this.showCommandToast(`📎 Injected ${files.length} file context(s)`);
+      }
+    });
+  }
+
+  renderAttachmentPill(name) {
+    const container = document.getElementById("attachment-preview-container");
+    if (!container) return;
+    container.innerHTML = `
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono">
+        <span>🖼️ Attached: ${name}</span>
+        <button onclick="window.app.clearAttachment()" class="hover:text-amber-200 font-bold ml-1">&times;</button>
+      </div>
+    `;
+    container.classList.remove("hidden");
+  }
+
+  clearAttachment() {
+    this.attachedImageBase64 = null;
+    const container = document.getElementById("attachment-preview-container");
+    if (container) container.classList.add("hidden");
+  }
+
+  // --- Personal Slash Command Parser ---
+  applySlashCommand(cmd) {
+    const cleanCmd = cmd.toLowerCase().trim();
+    const textarea = document.getElementById("chat-input-textarea");
+
+    if (cleanCmd === "/code") {
+      this.modelSelector.selectModel("openrouter/qwen/qwen-2.5-coder-32b-instruct");
+      if (this.settings) this.settings.temperature = 0.2;
+      localStorage.setItem("freellm_system_prompt", "You are an elite principal software engineer. Write clean, modular, production-ready code with complete implementations, zero placeholders, and exact syntax.");
+      this.showCommandToast("💻 Qwen 2.5 Coder 32B · Temp: 0.2");
+    } else if (cleanCmd === "/review") {
+      this.modelSelector.selectModel("openrouter/deepseek/deepseek-r1-0528");
+      if (this.settings) this.settings.temperature = 0.3;
+      localStorage.setItem("freellm_system_prompt", "You are a rigorous code reviewer and security auditor. Analyze the provided code for edge cases, performance bottlenecks, race conditions, memory leaks, and vulnerabilities. Deliver concrete fixes.");
+      this.showCommandToast("🛡️ DeepSeek R1 · Security & Bug Audit");
+    } else if (cleanCmd === "/refactor") {
+      if (this.settings) this.settings.temperature = 0.2;
+      localStorage.setItem("freellm_system_prompt", "Refactor the provided code for maximum clarity, clean architecture, and testability while preserving 100% backward compatibility.");
+      this.showCommandToast("⚡ Clean Architecture Refactoring");
+    } else if (cleanCmd === "/ui") {
+      this.modelSelector.selectModel("openrouter/free");
+      if (this.settings) this.settings.temperature = 0.7;
+      localStorage.setItem("freellm_system_prompt", "You are a creative UI/UX designer and frontend engineer. Build modern, interactive web applications using HTML, Tailwind CSS, and vanilla JavaScript. Always wrap the complete standalone code in an <antArtifact identifier=\"...\" type=\"html\" title=\"...\"> container.");
+      this.showCommandToast("🎨 Interactive HTML/JS Artifact Studio");
+    } else if (cleanCmd === "/fast") {
+      this.modelSelector.selectModel("groq/openai/gpt-oss-120b");
+      if (this.settings) this.settings.temperature = 0.7;
+      this.showCommandToast("⚡ Groq LPU (~280 tok/s)");
+    } else if (cleanCmd === "/deep") {
+      this.toggleDeepThinkMode();
+      this.showCommandToast("🧠 DeepThink REA Evidence-Driven Reasoning");
+    } else if (cleanCmd === "/uncensored") {
+      this.modelSelector.selectModel("openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition");
+      this.showCommandToast("🔓 Dolphin Mistral 24B (Zero Refusal)");
+    }
+
+    if (textarea) {
+      textarea.value = textarea.value.replace(new RegExp(`^${cmd}\\s*`, 'i'), '').trim();
+      textarea.focus();
+    }
+  }
+
+  showCommandToast(text) {
+    const existing = document.getElementById("hub-toast-notification");
+    if (existing) existing.remove();
+    const toast = document.createElement("div");
+    toast.id = "hub-toast-notification";
+    toast.className = "fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-amber-500 text-stone-950 font-bold text-xs shadow-2xl z-50 animate-bounce";
+    toast.textContent = text;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
   }
 
   setupEventListeners() {
@@ -330,7 +540,7 @@ class App {
           <div class="mb-2 flex items-center flex-wrap gap-2 text-xs font-mono">
             <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-stone-900 border ${msg.meta.is_fallback ? 'border-amber-500/50 text-amber-300' : 'border-stone-800 text-stone-400'}">
               <span>⚡ Routed via ${msg.meta.routed_via}</span>
-              ${msg.meta.is_fallback ? '<span class="text-amber-400 font-bold">(Failover Active)</span>' : ''}
+              ${msg.meta.is_fallback ? '<span class="text-amber-400 font-bold ml-1">(Failover Active)</span>' : ''}
             </span>
             ${msg.meta.intent ? `<span class="text-stone-500">· Intent: ${msg.meta.intent}</span>` : ''}
           </div>
@@ -436,7 +646,7 @@ class App {
           copyBtn.innerHTML = `<span>Copied!</span>`;
           setTimeout(() => {
             copyBtn.innerHTML = `
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
               <span>Copy</span>
             `;
           }, 2000);
@@ -464,12 +674,52 @@ class App {
     if (main) main.scrollTop = main.scrollHeight;
   }
 
+  // --- Mixture-of-Agents Arena Synthesizer ---
+  async synthesizeArenaBoth() {
+    if (!this.arenaResults || this.arenaResults.length < 2) {
+      alert("Please run an Arena comparison first so both models generate answers.");
+      return;
+    }
+
+    const [resA, resB] = this.arenaResults;
+    const synthPrompt = `Synthesize the following two AI responses to the user prompt into one unified, superior answer.
+Merge the most accurate technical code and best reasoning from both:
+
+--- MODEL A (${resA.model_name}) ---
+${resA.content}
+
+--- MODEL B (${resB.model_name}) ---
+${resB.content}
+
+Output the combined, perfected synthesis directly:`;
+
+    this.isArenaMode = false;
+    this.updateArenaUI();
+    this.sendMessage(synthPrompt);
+  }
+
   async sendMessage(promptOverride = null) {
     if (this.isStreaming) return;
 
     const textarea = document.getElementById("chat-input-textarea");
-    const prompt = (promptOverride || (textarea ? textarea.value : "")).trim();
+    let prompt = (promptOverride || (textarea ? textarea.value : "")).trim();
     if (!prompt) return;
+
+    // Check for Slash Command prefix
+    for (const cmd of ["/code", "/review", "/refactor", "/ui", "/fast", "/deep", "/uncensored"]) {
+      if (prompt.toLowerCase().startsWith(cmd)) {
+        this.applySlashCommand(cmd);
+        prompt = prompt.substring(cmd.length).trim();
+        break;
+      }
+    }
+    if (!prompt) return;
+
+    // Attach clipboard image if present
+    if (this.attachedImageBase64) {
+      prompt = `![Attachment](${this.attachedImageBase64})\n\n${prompt}`;
+      this.clearAttachment();
+    }
 
     if (textarea) {
       textarea.value = "";
@@ -553,6 +803,13 @@ class App {
           this.renderMessages();
         }
       }
+
+      // Store in arena results cache for mixture-of-agents synthesis
+      this.arenaResults.push({
+        model_name: selectedModel.name,
+        content: fullText
+      });
+      if (this.arenaResults.length > 2) this.arenaResults.shift();
 
       // Save to storage
       const existingIdx = this.chats.findIndex(c => c.id === this.currentChat.id);
