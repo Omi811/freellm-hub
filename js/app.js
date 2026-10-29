@@ -16,6 +16,7 @@ class App {
     this.turboMode = false;
     this.deepthinkMode = false;
     this.imageMode = false;
+    this.webMode = false;
     this.isArenaMode = false;
     this.arenaResults = [];
     this.currentArtifactContent = "";
@@ -296,6 +297,10 @@ class App {
     } else if (cleanCmd === "/uncensored") {
       this.modelSelector.selectModel("openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition");
       this.showCommandToast("🔓 Dolphin Mistral 24B (Zero Refusal)");
+    } else if (cleanCmd === "/web" || cleanCmd === "@web" || cleanCmd === "/search" || cleanCmd === "@search") {
+      this.webMode = true;
+      this.updateModeUI();
+      this.showCommandToast("🌐 Live Web & Date Search: Enabled");
     }
 
     if (textarea) {
@@ -363,6 +368,10 @@ class App {
         e.preventDefault();
         this.toggleImageMode();
       }
+      if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "w") || (e.altKey && e.key.toLowerCase() === "w")) {
+        e.preventDefault();
+        this.toggleWebMode();
+      }
       if (e.key === "Escape") {
         this.modelSelector.closeModal();
         this.settings.closeModal();
@@ -417,9 +426,20 @@ class App {
     this.updateModeUI();
   }
 
+  toggleWebMode() {
+    this.webMode = !this.webMode;
+    this.updateModeUI();
+    if (this.webMode) {
+      this.showCommandToast("🌐 Live Web & Date Search: Enabled");
+    } else {
+      this.showCommandToast("🌐 Live Web Search: Disabled");
+    }
+  }
+
   updateModeUI() {
     const turboBtn = document.getElementById("mode-turbo-btn");
     const deepthinkBtn = document.getElementById("mode-deepthink-btn");
+    const webBtn = document.getElementById("mode-web-btn");
     const imageBtn = document.getElementById("mode-image-btn");
 
     if (turboBtn) {
@@ -439,6 +459,16 @@ class App {
       } else {
         deepthinkBtn.classList.remove("bg-purple-500/20", "text-purple-400", "border-purple-500/40");
         deepthinkBtn.classList.add("text-stone-400");
+      }
+    }
+
+    if (webBtn) {
+      if (this.webMode) {
+        webBtn.classList.add("bg-sky-500/20", "text-sky-400", "border-sky-500/40");
+        webBtn.classList.remove("text-stone-400");
+      } else {
+        webBtn.classList.remove("bg-sky-500/20", "text-sky-400", "border-sky-500/40");
+        webBtn.classList.add("text-stone-400");
       }
     }
 
@@ -1053,6 +1083,7 @@ Output the combined, perfected synthesis directly:`;
         turbo_mode: this.turboMode,
         deepthink_mode: this.deepthinkMode,
         image_mode: this.imageMode,
+        web_mode: this.webMode,
         abortSignal: this.abortController.signal
       });
 

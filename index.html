@@ -162,6 +162,15 @@
           <span>DeepThink</span>
         </button>
 
+        <!-- Live Web & Date Search Toggle -->
+        <button id="mode-web-btn"
+                onclick="window.app.toggleWebMode()"
+                title="Live Web Mode (Ctrl+W): Real-time live internet search and current date grounding"
+                class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-stone-900 hover:bg-stone-800 text-stone-400 border border-stone-800 transition-all cursor-pointer">
+          <span class="text-sky-400">🌐</span>
+          <span>Web</span>
+        </button>
+
         <!-- Image Generation Toggle -->
         <button id="mode-image-btn"
                 onclick="window.app.toggleImageMode()"
@@ -262,6 +271,9 @@
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1.5 mb-1.5 text-[11px] font-mono no-scrollbar">
               <button onclick="window.modelSelector.selectAutoModel()" title="Enable Auto Model Selector (Intent Smart Router)" class="px-2 py-0.5 rounded-md bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 cursor-pointer flex items-center gap-1 transition-all shadow-sm">
                 <span class="text-amber-400">✨</span><span class="font-bold">Auto</span>
+              </button>
+              <button onclick="window.app.applySlashCommand('@web')" title="Search the live internet for recent news and data" class="px-2 py-0.5 rounded-md bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 cursor-pointer flex items-center gap-1 transition-all shadow-sm">
+                <span class="text-sky-400">🌐</span><span class="font-bold">@web</span>
               </button>
               <span class="text-stone-500 font-sans text-xs mr-1 hidden sm:inline">⚡ Quick Stack:</span>
               <button onclick="window.app.applySlashCommand('/code')" title="Qwen 2.5 Coder 32B · Temp: 0.2" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">

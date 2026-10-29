@@ -257,6 +257,71 @@ class ClientEngine {
     return Boolean(this.openrouterKey || this.groqKey || cfg.defaultOpenrouterKey || cfg.defaultGroqKey);
   }
 
+  // --- Universal Real-Time Temporal Grounding ---
+  getTemporalGrounding() {
+    const now = new Date();
+    const options = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: true,
+      timeZoneName: 'short'
+    };
+    const localStr = now.toLocaleString(undefined, options);
+    const isoUtc = now.toISOString();
+    const year = now.getFullYear();
+    const month = now.toLocaleDateString(undefined, { month: 'long' });
+    const dayOfWeek = now.toLocaleDateString(undefined, { weekday: 'long' });
+
+    return `[REAL-TIME TEMPORAL GROUNDING]\n` +
+           `Current Real-World Date & Time: ${localStr}\n` +
+           `UTC Timestamp: ${isoUtc}\n` +
+           `Current Year: ${year}\n` +
+           `Current Month: ${month}\n` +
+           `Current Day of Week: ${dayOfWeek}\n` +
+           `[CRITICAL INSTRUCTION: You have accurate real-time knowledge of today's date and time. When the user asks "what is the date", "what time is it", "what day is today", or asks questions about recent/current events relative to "now" or "today", you MUST answer with the current date/time specified above. Never claim you lack real-time access or that your knowledge is cut off.]`;
+  }
+
+  // --- Live Web & News Search Proxy ---
+  async performLiveSearch(query) {
+    let cleanQ = query.trim().replace(/^@web\s*/i, "").replace(/^\/search\s*/i, "").replace(/^@search\s*/i, "");
+    if (!cleanQ) return null;
+
+    // 1. Try backend /api/search if backendUrl is set
+    if (this.backendUrl) {
+      try {
+        const controller = new AbortController();
+        const tId = setTimeout(() => controller.abort(), 4500);
+        const res = await fetch(`${this.backendUrl}/api/search?q=${encodeURIComponent(cleanQ)}`, {
+          signal: controller.signal
+        });
+        clearTimeout(tId);
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch (e) {}
+    }
+
+    // 2. Try Cloudflare Pages serverless /api/search
+    try {
+      const controller = new AbortController();
+      const tId = setTimeout(() => controller.abort(), 4500);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(cleanQ)}`, {
+        signal: controller.signal
+      });
+      clearTimeout(tId);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {}
+
+    return null;
+  }
+
   // --- Direct Localhost Ollama Streaming (Zero Tunnel Required) ---
   async *streamOllamaDirect(modelId, messages, systemPrompt, abortSignal) {
     const modelTag = modelId.replace(/^ollama\//, "");
@@ -321,16 +386,42 @@ class ClientEngine {
     turbo_mode = false,
     deepthink_mode = false,
     image_mode = false,
+    web_mode = false,
     abortSignal = null
   }) {
     const startTime = Date.now();
     let tokenCount = 0;
     let fullContent = "";
 
+    // Universal Temporal Grounding across ALL models (Real-time date, time, year)
+    const temporalHeader = this.getTemporalGrounding();
+    let activeSystemPrompt = `${temporalHeader}\n\n${system_prompt || ""}`.trim();
+
     // 1. Intent Classification & Smart Routing
     const lastUserPrompt = [...messages].reverse().find(m => m.role === "user")?.content || "";
     let activeModel = model_id;
     let intentInfo = null;
+
+    // Check for Live Web Search Intent or @web prefix or web_mode toggle
+    const lowerPrompt = lastUserPrompt.toLowerCase().trim();
+    const isSearchTrigger = web_mode || [
+      "@web", "/search", "@search", "search:", "latest news", "news today", "today's news",
+      "what happened today", "recent news", "breaking news", "current price",
+      "stock price", "weather today", "recent internet", "search web", "what happened in",
+      "latest update", "recent developments"
+    ].some(term => lowerPrompt.includes(term));
+
+    if (isSearchTrigger) {
+      yield { type: "chunk", delta: "🌐 *Connecting to live internet for real-time data & recent articles...*\n\n" };
+      try {
+        const searchData = await this.performLiveSearch(lastUserPrompt);
+        if (searchData && searchData.context) {
+          activeSystemPrompt += `\n\n[REAL-TIME LIVE INTERNET DATA]\n${searchData.context}\n\n[INSTRUCTION: Answer using the factual live search data above. Always cite references using markdown links.]`;
+        }
+      } catch (err) {
+        console.warn("Live web search failed:", err);
+      }
+    }
 
     if (!activeModel || activeModel === "openrouter/free" || activeModel === "freellm/auto") {
       intentInfo = this.classifyPromptIntent(lastUserPrompt);
@@ -352,7 +443,7 @@ class ClientEngine {
 
     // 2. Direct Ollama Handling
     if (activeModel.startsWith("ollama/")) {
-      const ollamaSuccess = yield* this.streamOllamaDirect(activeModel, messages, system_prompt, abortSignal);
+      const ollamaSuccess = yield* this.streamOllamaDirect(activeModel, messages, activeSystemPrompt, abortSignal);
       if (ollamaSuccess) {
         this.recordHealth(activeModel, true);
         return;
@@ -410,12 +501,13 @@ class ClientEngine {
           body: JSON.stringify({
             model_id: activeModel,
             messages,
-            system_prompt,
+            system_prompt: activeSystemPrompt,
             temperature,
             max_tokens,
             turbo_mode,
             deepthink_mode,
-            image_mode
+            image_mode,
+            web_search: isSearchTrigger
           })
         });
         clearTimeout(timeoutTimer);
@@ -460,7 +552,7 @@ class ClientEngine {
         body: JSON.stringify({
           model_id: activeModel,
           messages,
-          system_prompt,
+          system_prompt: activeSystemPrompt,
           temperature,
           max_tokens
         })
@@ -549,7 +641,7 @@ class ClientEngine {
         let normalized = this.normalizeModelId(currentCandidate);
 
         const formatted = [];
-        if (system_prompt) formatted.push({ role: "system", content: system_prompt });
+        if (activeSystemPrompt) formatted.push({ role: "system", content: activeSystemPrompt });
         for (const m of messages) formatted.push({ role: m.role || "user", content: m.content || "" });
 
         const resp = await fetch(endpoint, {
