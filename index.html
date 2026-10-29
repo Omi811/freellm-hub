@@ -131,6 +131,15 @@
                 class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-850 border border-stone-800 text-left transition-all cursor-pointer">
           <!-- Populated by ModelSelector -->
         </button>
+
+        <!-- Dedicated Auto Model Selector Button -->
+        <button id="auto-model-btn"
+                onclick="window.modelSelector.selectAutoModel()"
+                title="Auto Model Selector: Automatically analyzes prompt intent (code, reasoning, fast, creative) and routes to optimal free model"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-800 bg-stone-900 hover:bg-stone-850 text-stone-300 font-semibold text-xs transition-all cursor-pointer shadow-sm">
+          <span class="text-amber-400">✨</span>
+          <span id="auto-model-btn-label">Auto Select</span>
+        </button>
       </div>
 
       <!-- Right Header Actions -->
@@ -251,6 +260,9 @@
           <div class="max-w-3xl mx-auto">
             <!-- Personal Slash Command Shortcuts Bar -->
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1.5 mb-1.5 text-[11px] font-mono no-scrollbar">
+              <button onclick="window.modelSelector.selectAutoModel()" title="Enable Auto Model Selector (Intent Smart Router)" class="px-2 py-0.5 rounded-md bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 cursor-pointer flex items-center gap-1 transition-all shadow-sm">
+                <span class="text-amber-400">✨</span><span class="font-bold">Auto</span>
+              </button>
               <span class="text-stone-500 font-sans text-xs mr-1 hidden sm:inline">⚡ Quick Stack:</span>
               <button onclick="window.app.applySlashCommand('/code')" title="Qwen 2.5 Coder 32B · Temp: 0.2" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
                 <span class="text-amber-400 font-bold">/code</span><span>Qwen 32B</span>

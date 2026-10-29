@@ -47,6 +47,13 @@ class ModelSelector {
     };
   }
 
+  selectAutoModel() {
+    this.selectModel("openrouter/free");
+    if (this.app) {
+      this.app.showCommandToast("✨ Auto Model Selector Enabled: Intelligently routing prompts");
+    }
+  }
+
   selectModel(modelId) {
     this.selectedModelId = modelId;
     localStorage.setItem("freellm_selected_model", modelId);
@@ -98,6 +105,20 @@ class ModelSelector {
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
       </svg>
     `;
+
+    const autoBtn = document.getElementById("auto-model-btn");
+    const autoLabel = document.getElementById("auto-model-btn-label");
+    const isAuto = this.selectedModelId === "openrouter/free" || this.selectedModelId === "auto" || this.selectedModelId === "freellm/auto";
+
+    if (autoBtn && autoLabel) {
+      if (isAuto) {
+        autoBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/50 bg-amber-500/20 text-amber-300 font-bold text-xs transition-all cursor-pointer shadow-sm shadow-amber-500/10";
+        autoLabel.textContent = "Auto Active";
+      } else {
+        autoBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-800 bg-stone-900 hover:bg-stone-850 text-stone-400 hover:text-stone-200 font-medium text-xs transition-all cursor-pointer";
+        autoLabel.textContent = "Auto Select";
+      }
+    }
   }
 
   renderArenaPills() {

@@ -568,16 +568,20 @@ class App {
 
         return `
           <div class="group flex flex-col items-end mb-6">
-            <div class="max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 bg-stone-800 border border-stone-700/80 text-stone-100 text-[0.95rem] shadow-sm leading-relaxed whitespace-pre-wrap">
+            <div class="max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 bg-stone-800 border border-stone-700/80 text-stone-100 text-[0.95rem] shadow-sm leading-relaxed whitespace-pre-wrap selection:bg-amber-500/30">
               ${this.escapeHtml(msg.content)}
             </div>
-            <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 mt-1.5 px-1">
+            <div class="opacity-80 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 mt-1.5 px-1">
               ${branchSwitcher}
-              <button type="button" onclick="window.app.startEditMessage(${index})" title="Edit prompt & branch" class="text-stone-500 hover:text-amber-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
+              <button type="button" onclick="window.app.copyMessageContent(${index})" title="Copy prompt to clipboard" class="text-stone-400 hover:text-amber-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <span class="text-[10px] font-mono">Copy</span>
+              </button>
+              <button type="button" onclick="window.app.startEditMessage(${index})" title="Edit prompt & branch" class="text-stone-400 hover:text-amber-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 <span class="text-[10px] font-mono">Edit</span>
               </button>
-              <button type="button" onclick="window.app.forkThreadAt(${index})" title="Fork thread from here into a new chat" class="text-stone-500 hover:text-cyan-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
+              <button type="button" onclick="window.app.forkThreadAt(${index})" title="Fork thread from here into a new chat" class="text-stone-400 hover:text-cyan-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
                 <span class="text-[10px] font-mono">Fork</span>
               </button>
@@ -597,8 +601,15 @@ class App {
           </div>
         ` : '';
 
+        const copyAssistantBtn = `
+          <button type="button" onclick="window.app.copyMessageContent(${index})" title="Copy response to clipboard" class="text-stone-400 hover:text-amber-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span class="text-[10px] font-mono">Copy</span>
+          </button>
+        `;
+
         const forkAssistantBtn = `
-          <button type="button" onclick="window.app.forkThreadAt(${index})" title="Fork conversation up to this response" class="text-stone-500 hover:text-cyan-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
+          <button type="button" onclick="window.app.forkThreadAt(${index})" title="Fork conversation up to this response" class="text-stone-400 hover:text-cyan-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
             <span class="text-[10px] font-mono">Fork</span>
           </button>
@@ -636,6 +647,7 @@ class App {
               </div>
               <div class="flex items-center gap-2">
                 ${statsPill}
+                ${copyAssistantBtn}
                 ${forkAssistantBtn}
               </div>
             </div>
@@ -651,6 +663,38 @@ class App {
 
     this.postRenderCodeBlocks();
     this.scrollToBottom();
+  }
+
+  // --- Message Copy & Branching Controls ---
+  copyMessageContent(index) {
+    if (!this.currentChat || !this.currentChat.messages[index]) return;
+    const msg = this.currentChat.messages[index];
+    const textToCopy = msg.content || "";
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        this.showCommandToast("📋 Copied to clipboard!");
+      }).catch(() => {
+        this.fallbackCopyText(textToCopy);
+      });
+    } else {
+      this.fallbackCopyText(textToCopy);
+    }
+  }
+
+  fallbackCopyText(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      this.showCommandToast("📋 Copied to clipboard!");
+    } catch (e) {
+      alert("Unable to copy to clipboard.");
+    }
+    document.body.removeChild(ta);
   }
 
   // --- Branching & Editing Controls ---

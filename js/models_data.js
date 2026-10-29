@@ -1,12 +1,37 @@
 window.MODELS_CATALOG = [
   {
+    "id": "openrouter/free",
+    "name": "Auto Free Smart Router (Zero Setup)",
+    "provider": "openrouter",
+    "provider_name": "OpenRouter Free",
+    "category": "fast",
+    "context_window": "128k context · Auto-fallback",
+    "speed_rating": "⚡ High Speed (~85 tok/s)",
+    "free_quota": "100% Free / Unlimited",
+    "description": "Intelligent automated routing across frontier open weights LLMs. Zero rate-limit failover, optimal response quality, and immediate streaming without credit constraints.",
+    "tags": [
+      "Auto Router",
+      "Zero Cost",
+      "High Availability",
+      "Open Weights",
+      "Instant"
+    ],
+    "litellm_model": "openrouter/free",
+    "key_env_var": "OPENROUTER_API_KEY",
+    "free_key_url": "https://openrouter.ai/keys",
+    "icon": "zap",
+    "color": "amber",
+    "group": "verified_keyless",
+    "data_retention": "standard_logging"
+  },
+  {
     "id": "deepseek/deepseek-v4-pro",
     "name": "DeepSeek V4 Pro (80.6% SWE-bench)",
     "provider": "orcarouter",
     "provider_name": "OrcaRouter / OpenCode Zen",
     "category": "code",
     "context_window": "1,048,576 tokens (1M)",
-    "speed_rating": "\u26a1\u26a1 SOTA Frontier Coding",
+    "speed_rating": "⚡⚡ SOTA Frontier Coding",
     "free_quota": "Free Tier via OrcaRouter ($0/token)",
     "description": "DeepSeek's flagship V4 Pro frontier model scoring 80.6% on SWE-bench. Unrivaled repository-level refactoring and architectural code generation.",
     "tags": [
@@ -31,7 +56,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OrcaRouter",
     "category": "fast",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1\u26a1\u26a1 Blazing (~220 tok/s)",
+    "speed_rating": "⚡⚡⚡ Blazing (~220 tok/s)",
     "free_quota": "Free Gateway via OrcaRouter",
     "description": "High-efficiency Causal Encoder-Decoder architecture delivering instantaneous responses with full mathematical reasoning capabilities.",
     "tags": [
@@ -55,7 +80,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Moonshot / OpenCode Zen",
     "category": "code",
     "context_window": "2,000,000 tokens (2M)",
-    "speed_rating": "\ud83e\udde0 2.8T MoE Frontier",
+    "speed_rating": "🧠 2.8T MoE Frontier",
     "free_quota": "Free Community Tier via Kilo / OpenCode",
     "description": "Moonshot AI's massive 2.8 Trillion parameter Mixture-of-Experts. Ranked #1 on the Frontend Code Arena for HTML/Tailwind/React generation.",
     "tags": [
@@ -74,12 +99,12 @@ window.MODELS_CATALOG = [
   },
   {
     "id": "meta-llama/llama-4-scout-109b",
-    "name": "Llama 4 Scout (109B MoE \u00b7 10M Context)",
+    "name": "Llama 4 Scout (109B MoE · 10M Context)",
     "provider": "groq",
     "provider_name": "Meta / Groq LPU",
     "category": "multimodal",
     "context_window": "10,000,000 tokens (10M)",
-    "speed_rating": "\u26a1\u26a1 Groq Accelerated (~350 tok/s)",
+    "speed_rating": "⚡⚡ Groq Accelerated (~350 tok/s)",
     "free_quota": "GroqCloud Free Tier",
     "description": "Meta's breakthrough Llama 4 Scout featuring a 10M token context window and native multimodal comprehension running on Groq hardware.",
     "tags": [
@@ -103,7 +128,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Meta / NVIDIA NIM",
     "category": "reasoning",
     "context_window": "1,048,576 tokens (1M)",
-    "speed_rating": "\ud83e\udde0 Massive 402B Intelligence",
+    "speed_rating": "🧠 Massive 402B Intelligence",
     "free_quota": "1,000 free requests/month via NVIDIA NIM",
     "description": "Meta's flagship 402B parameter Mixture-of-Experts frontier model. Top-tier reasoning rivaling private commercial frontier models.",
     "tags": [
@@ -122,12 +147,12 @@ window.MODELS_CATALOG = [
   },
   {
     "id": "zhipu/glm-5.3-flashx",
-    "name": "GLM-5.3-FlashX (200 tok/s \u00b7 1M Context)",
+    "name": "GLM-5.3-FlashX (200 tok/s · 1M Context)",
     "provider": "zai",
     "provider_name": "Zhipu AI / Z.ai",
     "category": "fast",
     "context_window": "1,048,576 tokens (1M)",
-    "speed_rating": "\u26a1\u26a1 200 tok/s Lightning",
+    "speed_rating": "⚡⚡ 200 tok/s Lightning",
     "free_quota": "Permanent Free Tier via Z.ai",
     "description": "Zhipu AI's 5th-generation high-speed long-context engine with native tool-use and code execution capabilities.",
     "tags": [
@@ -151,7 +176,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Mistral AI",
     "category": "reasoning",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1 High Precision (~110 tok/s)",
+    "speed_rating": "⚡ High Precision (~110 tok/s)",
     "free_quota": "500k tokens/min Free on La Plateforme",
     "description": "Mistral AI's premier European flagship reasoning model. Unmatched multilingual fluency, mathematical proofing, and strict JSON outputs.",
     "tags": [
@@ -174,7 +199,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Xiaomi / OpenCode Zen",
     "category": "reasoning",
     "context_window": "512,000 tokens",
-    "speed_rating": "\ud83e\udde0 1.02T MoE Agentic",
+    "speed_rating": "🧠 1.02T MoE Agentic",
     "free_quota": "Free Community Route via OpenCode",
     "description": "Xiaomi's massive 1.02 Trillion parameter Mixture-of-Experts architecture tuned specifically for multi-step agentic workflows and tool execution.",
     "tags": [
@@ -198,7 +223,7 @@ window.MODELS_CATALOG = [
     "provider_name": "StepFun / OVHcloud AI",
     "category": "fast",
     "context_window": "256,000 tokens",
-    "speed_rating": "\u26a1\u26a1 Blazing (~180 tok/s)",
+    "speed_rating": "⚡⚡ Blazing (~180 tok/s)",
     "free_quota": "14 Free Anonymous Endpoints via OVHcloud",
     "description": "StepFun's nimble multi-modal MoE model hosted across OVHcloud European sovereign compute nodes. Fast, private, and keyless.",
     "tags": [
@@ -222,7 +247,7 @@ window.MODELS_CATALOG = [
     "provider_name": "MiniMax / OrcaRouter",
     "category": "reasoning",
     "context_window": "1,048,576 tokens (1M)",
-    "speed_rating": "\ud83d\udda5\ufe0f Computer Use & Vision",
+    "speed_rating": "🖥️ Computer Use & Vision",
     "free_quota": "Free Tier via OrcaRouter",
     "description": "MiniMax's agentic model with built-in GUI grounding and computer-use automation capabilities over 1,000,000 tokens.",
     "tags": [
@@ -246,7 +271,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Black Forest Labs / Pollinations",
     "category": "image",
     "context_window": "Up to 2048x2048 px",
-    "speed_rating": "\ud83c\udfa8 32B SOTA Photorealism",
+    "speed_rating": "🎨 32B SOTA Photorealism",
     "free_quota": "100% Free & Unlimited Keyless Generation",
     "description": "Black Forest Labs' 32-billion parameter flow-matching diffusion transformer. Flawless human anatomy, micro-textures, and crystal-clear typography.",
     "tags": [
@@ -270,7 +295,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Pollinations AI",
     "category": "image",
     "context_window": "1024x1024 px",
-    "speed_rating": "\u26a1 Sub-second (~0.8s)",
+    "speed_rating": "⚡ Sub-second (~0.8s)",
     "free_quota": "Instant Keyless API",
     "description": "Ultra-fast distilled 4-step diffusion model rendering beautiful visuals and concept art in less than one second.",
     "tags": [
@@ -289,12 +314,12 @@ window.MODELS_CATALOG = [
   },
   {
     "id": "ollama/qwen3.6-35b-a3b",
-    "name": "Qwen 3.6-35B-A3B (Sparse MoE \u00b7 OCI Ampere)",
+    "name": "Qwen 3.6-35B-A3B (Sparse MoE · OCI Ampere)",
     "provider": "ollama",
     "provider_name": "Localhost / OCI Ampere A1",
     "category": "offline",
     "context_window": "65,536 tokens",
-    "speed_rating": "\u26a1\u26a1 4x Faster on ARM CPU (~19 tok/s)",
+    "speed_rating": "⚡⚡ 4x Faster on ARM CPU (~19 tok/s)",
     "free_quota": "100% Offline (ollama run qwen3.6-35b-a3b)",
     "description": "Sparse MoE with 35B total parameters but only 3B ACTIVE parameters per token. Runs 3-4x faster than dense 8B models on Oracle Cloud Ampere A1 ARM CPUs.",
     "tags": [
@@ -313,12 +338,12 @@ window.MODELS_CATALOG = [
   },
   {
     "id": "ollama/ternary-bonsai-2-27b",
-    "name": "Ternary Bonsai 2 27B (~8.5GB RAM \u00b7 OCI)",
+    "name": "Ternary Bonsai 2 27B (~8.5GB RAM · OCI)",
     "provider": "ollama",
     "provider_name": "Localhost / OCI Ampere A1",
     "category": "offline",
     "context_window": "32,768 tokens",
-    "speed_rating": "\ud83e\udde0 Ternary 1.58-bit Weights",
+    "speed_rating": "🧠 Ternary 1.58-bit Weights",
     "free_quota": "100% Offline (ollama run ternary-bonsai-2-27b)",
     "description": "Groundbreaking 1.58-bit ternary quantization compressing a full 27B model into just 8.5 GB of system RAM on OCI Ampere A1 VMs without accuracy loss.",
     "tags": [
@@ -337,12 +362,12 @@ window.MODELS_CATALOG = [
   },
   {
     "id": "ollama/gemma-4-e4b",
-    "name": "Gemma 4 E4B (ARM64 Optimized \u00b7 OCI)",
+    "name": "Gemma 4 E4B (ARM64 Optimized · OCI)",
     "provider": "ollama",
     "provider_name": "Localhost / OCI Ampere A1",
     "category": "offline",
     "context_window": "32,768 tokens",
-    "speed_rating": "\u26a1 High Speed ARM Neon",
+    "speed_rating": "⚡ High Speed ARM Neon",
     "free_quota": "100% Offline (ollama run gemma-4-e4b)",
     "description": "Google's ARM Neoverse N1 optimized instruction weights fine-tuned specifically for Oracle Cloud A1 Always Free instances.",
     "tags": [
@@ -366,7 +391,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Cognitive Computations / Ollama",
     "category": "uncensored",
     "context_window": "128k tokens",
-    "speed_rating": "\u26a1\u26a1 High Speed Local",
+    "speed_rating": "⚡⚡ High Speed Local",
     "free_quota": "100% Free and Offline (ollama run dolphin3:8b)",
     "description": "Eric Hartford's premier uncensored model fine-tuned on Llama 3.1. Zero alignment guardrails, zero preachy refusals, full creative and technical freedom.",
     "tags": [
@@ -391,7 +416,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Cognitive Computations / Ollama",
     "category": "uncensored",
     "context_window": "32k tokens",
-    "speed_rating": "\ud83e\udde0 MoE Architecture",
+    "speed_rating": "🧠 MoE Architecture",
     "free_quota": "100% Free and Offline (ollama run dolphin-mixtral:8x7b)",
     "description": "Massive Mixture-of-Experts uncensored powerhouse. Exceptional reasoning, coding, and creative generation without corporate censorship.",
     "tags": [
@@ -415,7 +440,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Cognitive Computations / Venice",
     "category": "uncensored",
     "context_window": "128k tokens",
-    "speed_rating": "\u26a1 Fast Cloud",
+    "speed_rating": "⚡ Fast Cloud",
     "free_quota": "Cloud Micro-Tier via OpenRouter",
     "description": "Official Venice Edition 24B Mistral NeMo uncensored model. Built for unrestricted creative writing, technical queries, and open roleplay.",
     "tags": [
@@ -439,7 +464,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Nous Research",
     "category": "uncensored",
     "context_window": "131k tokens",
-    "speed_rating": "\ud83e\udde0 Frontier 70B",
+    "speed_rating": "🧠 Frontier 70B",
     "free_quota": "Cloud Micro-Tier via OpenRouter",
     "description": "Nous Research's flagship steerable frontier model. Designed without corporate moralizing, with high compliance, complex reasoning, and full persona steering.",
     "tags": [
@@ -457,38 +482,13 @@ window.MODELS_CATALOG = [
     "data_retention": "standard_logging"
   },
   {
-    "id": "openrouter/free",
-    "name": "Auto Free Smart Router (Zero Setup)",
-    "provider": "openrouter",
-    "provider_name": "OpenRouter Free",
-    "category": "fast",
-    "context_window": "128k context \u00b7 Auto-fallback",
-    "speed_rating": "\u26a1 High Speed (~85 tok/s)",
-    "free_quota": "100% Free / Unlimited",
-    "description": "Intelligent automated routing across frontier open weights LLMs. Zero rate-limit failover, optimal response quality, and immediate streaming without credit constraints.",
-    "tags": [
-      "Auto Router",
-      "Zero Cost",
-      "High Availability",
-      "Open Weights",
-      "Instant"
-    ],
-    "litellm_model": "openrouter/free",
-    "key_env_var": "OPENROUTER_API_KEY",
-    "free_key_url": "https://openrouter.ai/keys",
-    "icon": "zap",
-    "color": "amber",
-    "group": "verified_keyless",
-    "data_retention": "standard_logging"
-  },
-  {
     "id": "image/black-forest-labs/flux-1-schnell",
     "name": "FLUX.1 [schnell] (12B Flow Transformer)",
     "provider": "huggingface",
     "provider_name": "Black Forest Labs / HF",
     "category": "image",
-    "context_window": "1024x1024 px \u00b7 4 steps",
-    "speed_rating": "\u26a1\u26a1 Sub-Second Diffusion (~3.6s)",
+    "context_window": "1024x1024 px · 4 steps",
+    "speed_rating": "⚡⚡ Sub-Second Diffusion (~3.6s)",
     "free_quota": "100% Free via HF Token",
     "description": "World-leading 12B Rectified Flow Transformer. Unrivaled text rendering inside images, photorealistic human anatomy, and rapid 4-step generation.",
     "tags": [
@@ -512,8 +512,8 @@ window.MODELS_CATALOG = [
     "provider": "huggingface",
     "provider_name": "Stability AI / HF",
     "category": "image",
-    "context_window": "1024x1024 px \u00b7 28 steps",
-    "speed_rating": "\ud83c\udfa8 Studio Grade (~6.5s)",
+    "context_window": "1024x1024 px · 28 steps",
+    "speed_rating": "🎨 Studio Grade (~6.5s)",
     "free_quota": "Permissive Community License",
     "description": "Stability AI's flagship 8B Multimodal Diffusion Transformer. Outstanding prompt adherence, artistic visual styles, and rich typography.",
     "tags": [
@@ -536,8 +536,8 @@ window.MODELS_CATALOG = [
     "provider": "huggingface",
     "provider_name": "ByteDance / HF",
     "category": "image",
-    "context_window": "1024x1024 px \u00b7 2-4 steps",
-    "speed_rating": "\u26a1 Ultra-Fast (~2.2s)",
+    "context_window": "1024x1024 px · 2-4 steps",
+    "speed_rating": "⚡ Ultra-Fast (~2.2s)",
     "free_quota": "Open Weights / Unlimited",
     "description": "Progressive adversarial distilled SDXL producing crisp 1024x1024 imagery in 2 to 4 steps with unmatched community LoRA compatibility.",
     "tags": [
@@ -560,8 +560,8 @@ window.MODELS_CATALOG = [
     "provider": "google",
     "provider_name": "Google AI Studio",
     "category": "image",
-    "context_window": "1024x1024 px \u00b7 Ultra HDR",
-    "speed_rating": "\ud83c\udf10 Google Cloud TPU",
+    "context_window": "1024x1024 px · Ultra HDR",
+    "speed_rating": "🌐 Google Cloud TPU",
     "free_quota": "Google AI Studio Free Tier",
     "description": "Google's benchmark-setting image foundation model. Unprecedented photorealism, specular reflections, and fine-grained natural lighting.",
     "tags": [
@@ -585,7 +585,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Black Forest Labs / Pollinations",
     "category": "image",
     "context_window": "Up to 2048x2048 px",
-    "speed_rating": "\ud83c\udfac Cinematic Rendering",
+    "speed_rating": "🎬 Cinematic Rendering",
     "free_quota": "100% Free & Unlimited Keyless Generation",
     "description": "State-of-the-art open diffusion weights by Black Forest Labs. Fast photorealistic generation with zero API key required.",
     "tags": [
@@ -609,7 +609,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenAI / OpenRouter",
     "category": "image",
     "context_window": "1024x1024 / 1792x1024",
-    "speed_rating": "\ud83e\udd16 GPT-4 Vision Guided",
+    "speed_rating": "🤖 GPT-4 Vision Guided",
     "free_quota": "OpenRouter Active Key",
     "description": "Deeply conditioned on GPT-4 prompt expanders. Capable of following extremely nuanced, multi-turn paragraphs of visual direction.",
     "tags": [
@@ -633,7 +633,7 @@ window.MODELS_CATALOG = [
     "provider_name": "FreeLLM Smart Router",
     "category": "auto",
     "context_window": "1,048,576 tokens",
-    "speed_rating": "\u26a1\u26a1 Dynamic (Auto-Fastest)",
+    "speed_rating": "⚡⚡ Dynamic (Auto-Fastest)",
     "free_quota": "Unlimited / Keyless Fallback",
     "description": "Automatically routes your prompt to the fastest active free provider and instantly fails over if one hits rate limits.",
     "tags": [
@@ -657,7 +657,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OVHcloud / Public Edge",
     "category": "reasoning",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1 Fast (~120 t/s)",
+    "speed_rating": "⚡ Fast (~120 t/s)",
     "free_quota": "100% Free (No Key Required)",
     "description": "Meta's flagship 70B open reasoning model served via public anonymous edge endpoints with zero signup.",
     "tags": [
@@ -680,7 +680,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / DeepSeek",
     "category": "reasoning",
     "context_window": "128,000 tokens",
-    "speed_rating": "\ud83e\udde0 Deep Chain-of-Thought",
+    "speed_rating": "🧠 Deep Chain-of-Thought",
     "free_quota": "OpenRouter Active Key",
     "description": "World-renowned 671B reasoning model matching OpenAI o1. Explores hypotheses and self-corrects inside a collapsible <think> block.",
     "tags": [
@@ -704,7 +704,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Alibaba",
     "category": "reasoning",
     "context_window": "32,768 tokens",
-    "speed_rating": "\ud83e\udde0 Deep Mathematical Logic",
+    "speed_rating": "🧠 Deep Mathematical Logic",
     "free_quota": "OpenRouter Active Key",
     "description": "Alibaba's specialized reasoning engine tuned for competition coding, mathematical proofs, and multi-step deduction.",
     "tags": [
@@ -728,7 +728,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Meta",
     "category": "fast",
     "context_window": "131,072 tokens",
-    "speed_rating": "\u26a1\u26a1 Very Fast (~140 t/s)",
+    "speed_rating": "⚡⚡ Very Fast (~140 t/s)",
     "free_quota": "OpenRouter Active Key",
     "description": "Meta's flagship 70B powerhouse matching original Llama 3.1 405B capabilities with 5x the speed and efficiency. Top-tier daily driver.",
     "tags": [
@@ -752,7 +752,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / DeepSeek",
     "category": "fast",
     "context_window": "163,840 tokens",
-    "speed_rating": "\u26a1\u26a1\u26a1 Blazing (~160 t/s)",
+    "speed_rating": "⚡⚡⚡ Blazing (~160 t/s)",
     "free_quota": "OpenRouter Active Key",
     "description": "DeepSeek's raw multi-turn conversational flagship with 685B parameters (MoE). Multi-head latent attention for supreme speed and reasoning.",
     "tags": [
@@ -776,7 +776,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Alibaba",
     "category": "reasoning",
     "context_window": "32,768 tokens",
-    "speed_rating": "\u26a1 Fast (~110 t/s)",
+    "speed_rating": "⚡ Fast (~110 t/s)",
     "free_quota": "OpenRouter Active Key",
     "description": "Alibaba's flagship 72B dense general-purpose intelligence model; ranks top 3 in global LMSYS Arena benchmarks.",
     "tags": [
@@ -800,7 +800,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Google",
     "category": "reasoning",
     "context_window": "8,192 tokens",
-    "speed_rating": "\u26a1\u26a1 Very Fast (~130 t/s)",
+    "speed_rating": "⚡⚡ Very Fast (~130 t/s)",
     "free_quota": "OpenRouter Active Key",
     "description": "Google DeepMind's distilled architectural masterpiece; punches above 70B models in zero-shot reasoning and factual accuracy.",
     "tags": [
@@ -824,7 +824,7 @@ window.MODELS_CATALOG = [
     "provider_name": "RecursiveSI / Ollama",
     "category": "offline",
     "context_window": "65,536 tokens",
-    "speed_rating": "\ud83d\udcbb Local CPU/GPU Speed",
+    "speed_rating": "💻 Local CPU/GPU Speed",
     "free_quota": "100% Offline (ollama run flint)",
     "description": "Trending Hugging Face reasoning model for synthetic hypothesis exploration and logic deduction running 100% privately on your PC.",
     "tags": [
@@ -848,7 +848,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / RecursiveSI",
     "category": "reasoning",
     "context_window": "65,536 tokens",
-    "speed_rating": "\u26a1 Fast CoT (~110 t/s)",
+    "speed_rating": "⚡ Fast CoT (~110 t/s)",
     "free_quota": "Permanent :free tier",
     "description": "Viral Hugging Face dynamic MoE reasoning model for deep hypothesis exploration and synthetic reasoning running on OpenRouter's 100% free tier.",
     "tags": [
@@ -873,7 +873,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Meta",
     "category": "reasoning",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1 405B Giant (~70 t/s)",
+    "speed_rating": "⚡ 405B Giant (~70 t/s)",
     "free_quota": "OpenRouter Active Key",
     "description": "The largest open-weights model in human history (405 Billion parameters). Supreme synthetic logic and comprehensive factual reasoning.",
     "tags": [
@@ -896,7 +896,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / NVIDIA",
     "category": "reasoning",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1\u26a1 Fast CoT (~120 t/s)",
+    "speed_rating": "⚡⚡ Fast CoT (~120 t/s)",
     "free_quota": "Permanent :free tier",
     "description": "NVIDIA's dedicated reasoning model with native chain-of-thought logic running on OpenRouter's 100% free tier.",
     "tags": [
@@ -919,7 +919,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Alibaba",
     "category": "code",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1 Very Fast (~130 t/s)",
+    "speed_rating": "⚡ Very Fast (~130 t/s)",
     "free_quota": "Free Access via OpenRouter Key",
     "description": "Ranked the #1 open coding model in the world; writes complete full-stack apps, system architectures, and rigorous unit tests.",
     "tags": [
@@ -943,7 +943,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Mistral",
     "category": "code",
     "context_window": "256,000 tokens",
-    "speed_rating": "\u26a1\u26a1 Blazing Code (~180 t/s)",
+    "speed_rating": "⚡⚡ Blazing Code (~180 t/s)",
     "free_quota": "Free Access via OpenRouter Key",
     "description": "Mistral's dedicated code engine with a massive 256k token context window for whole-repository analysis, refactoring, and multi-file debugging.",
     "tags": [
@@ -967,7 +967,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Microsoft",
     "category": "code",
     "context_window": "16,384 tokens",
-    "speed_rating": "\u26a1 Very Fast (~150 t/s)",
+    "speed_rating": "⚡ Very Fast (~150 t/s)",
     "free_quota": "Free via OpenRouter Key / GitHub Free",
     "description": "14B parameter powerhouse trained heavily on synthetic textbook and coding data; punches far above 70B models in coding benchmarks.",
     "tags": [
@@ -991,7 +991,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Cohere",
     "category": "code",
     "context_window": "256,000 tokens",
-    "speed_rating": "\u26a1\u26a1 Very Fast (~160 t/s)",
+    "speed_rating": "⚡⚡ Very Fast (~160 t/s)",
     "free_quota": "Permanent :free tier",
     "description": "Fast code completion, syntax fixing, algorithm generation, and API documentation lookup running on OpenRouter's 100% free tier.",
     "tags": [
@@ -1015,7 +1015,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Liquid AI",
     "category": "fast",
     "context_window": "65,536 tokens",
-    "speed_rating": "\u26a1\u26a1\u26a1 Blazing (~180 t/s)",
+    "speed_rating": "⚡⚡⚡ Blazing (~180 t/s)",
     "free_quota": "Permanent :free tier",
     "description": "Next-gen Liquid Neural Network architecture; efficient memory retention, real-time agility, and adaptive computation.",
     "tags": [
@@ -1039,7 +1039,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Mistral & NVIDIA",
     "category": "fast",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1 Very Fast (~140 t/s)",
+    "speed_rating": "⚡ Very Fast (~140 t/s)",
     "free_quota": "Free Access via OpenRouter Key",
     "description": "Jointly trained by Mistral AI and NVIDIA with 128k context; exceptional European multilingual proficiency and swift reasoning.",
     "tags": [
@@ -1063,7 +1063,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Ollama Local Engine",
     "category": "offline",
     "context_window": "128,000 tokens",
-    "speed_rating": "\ud83d\udcbb Local CPU/GPU Speed",
+    "speed_rating": "💻 Local CPU/GPU Speed",
     "free_quota": "100% Offline (No Internet)",
     "description": "Meta's ultra-lightweight Llama 3.2 running 100% privately on your local CPU or GPU. Zero data leaves your machine.",
     "tags": [
@@ -1087,7 +1087,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Ollama Local Engine",
     "category": "offline",
     "context_window": "64,000 tokens",
-    "speed_rating": "\ud83d\udcbb Local CPU/GPU Speed",
+    "speed_rating": "💻 Local CPU/GPU Speed",
     "free_quota": "100% Offline (No Internet)",
     "description": "DeepSeek's distilled chain-of-thought reasoning model running completely offline on your PC.",
     "tags": [
@@ -1111,7 +1111,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Ollama Local Engine",
     "category": "offline",
     "context_window": "32,768 tokens",
-    "speed_rating": "\ud83d\udcbb Local CPU/GPU Speed",
+    "speed_rating": "💻 Local CPU/GPU Speed",
     "free_quota": "100% Offline (No Internet)",
     "description": "Alibaba's specialized code assistant running offline. Great for programming without an internet connection.",
     "tags": [
@@ -1134,8 +1134,8 @@ window.MODELS_CATALOG = [
     "provider_name": "GroqCloud LPU",
     "category": "fast",
     "context_window": "131,072 tokens",
-    "speed_rating": "\u26a1\u26a1\u26a1 Blazing (~280 t/s)",
-    "free_quota": "14,400 req/day \u00b7 30 RPM",
+    "speed_rating": "⚡⚡⚡ Blazing (~280 t/s)",
+    "free_quota": "14,400 req/day · 30 RPM",
     "description": "Massive 120B open weights model built for deep logic, complex reasoning, and structured task decomposition on Groq LPUs.",
     "tags": [
       "Massive 120B",
@@ -1158,8 +1158,8 @@ window.MODELS_CATALOG = [
     "provider_name": "GroqCloud LPU",
     "category": "fast",
     "context_window": "131,072 tokens",
-    "speed_rating": "\u26a1\u26a1\u26a1 Hyper (~450 t/s)",
-    "free_quota": "14,400 req/day \u00b7 30 RPM",
+    "speed_rating": "⚡⚡⚡ Hyper (~450 t/s)",
+    "free_quota": "14,400 req/day · 30 RPM",
     "description": "High-speed 20B model running at ~450+ tokens/sec. Ideal for instant chat, classification, and real-time generation.",
     "tags": [
       "Ultra Fast",
@@ -1182,8 +1182,8 @@ window.MODELS_CATALOG = [
     "provider_name": "GroqCloud LPU",
     "category": "reasoning",
     "context_window": "131,072 tokens",
-    "speed_rating": "\u26a1\u26a1\u26a1 Blazing (~320 t/s)",
-    "free_quota": "14,400 req/day \u00b7 30 RPM",
+    "speed_rating": "⚡⚡⚡ Blazing (~320 t/s)",
+    "free_quota": "14,400 req/day · 30 RPM",
     "description": "Alibaba's advanced 27B model running on Groq hardware. Superior bilingual, multilingual, and mathematical logic.",
     "tags": [
       "Qwen 3.8",
@@ -1205,7 +1205,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / NVIDIA",
     "category": "reasoning",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1 Fast (~90 t/s)",
+    "speed_rating": "⚡ Fast (~90 t/s)",
     "free_quota": "Permanent :free tier",
     "description": "An absolute giant 550B parameter open-weights model hosted by NVIDIA on OpenRouter for maximum reasoning fidelity.",
     "tags": [
@@ -1229,7 +1229,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / NVIDIA",
     "category": "fast",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1\u26a1 Very Fast (~180 t/s)",
+    "speed_rating": "⚡⚡ Very Fast (~180 t/s)",
     "free_quota": "Permanent :free tier",
     "description": "Engineered for low-latency text completion and agile conversation with NVIDIA TensorRT tuning.",
     "tags": [
@@ -1252,7 +1252,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / NVIDIA",
     "category": "multimodal",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1 Fast (~110 t/s)",
+    "speed_rating": "⚡ Fast (~110 t/s)",
     "free_quota": "Permanent :free tier",
     "description": "NVIDIA-tuned vision model for reading technical schematics, screenshots, charts, and complex documents.",
     "tags": [
@@ -1276,7 +1276,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Alibaba",
     "category": "multimodal",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1 Fast Vision (~95 t/s)",
+    "speed_rating": "⚡ Fast Vision (~95 t/s)",
     "free_quota": "Free Access via OpenRouter Key",
     "description": "Top-tier 72B open vision model. Excels at optical character recognition (OCR), table extraction, diagram parsing, and complex document layout analysis.",
     "tags": [
@@ -1300,7 +1300,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / NVIDIA",
     "category": "reasoning",
     "context_window": "262,144 tokens",
-    "speed_rating": "\u26a1\u26a1 Very Fast (~140 t/s)",
+    "speed_rating": "⚡⚡ Very Fast (~140 t/s)",
     "free_quota": "Permanent :free tier",
     "description": "Massive 120B MoE model hosted free by NVIDIA on OpenRouter with huge 262k token window.",
     "tags": [
@@ -1324,7 +1324,7 @@ window.MODELS_CATALOG = [
     "provider_name": "OpenRouter / Google",
     "category": "reasoning",
     "context_window": "32,768 tokens",
-    "speed_rating": "\u26a1 Fast (~120 t/s)",
+    "speed_rating": "⚡ Fast (~120 t/s)",
     "free_quota": "Permanent :free tier",
     "description": "Google's latest Gemma 4 generation instruction-tuned model. Highly articulate and factual.",
     "tags": [
@@ -1347,8 +1347,8 @@ window.MODELS_CATALOG = [
     "provider_name": "Google AI Studio",
     "category": "fast",
     "context_window": "1,048,576 tokens",
-    "speed_rating": "\u26a1\u26a1\u26a1 Blazing (~260 t/s)",
-    "free_quota": "1,500 req/day \u00b7 30 RPM",
+    "speed_rating": "⚡⚡⚡ Blazing (~260 t/s)",
+    "free_quota": "1,500 req/day · 30 RPM",
     "description": "Google's ultra-responsive Flash-Lite model with 1,000,000+ token context window. Built for speed and instant conversation.",
     "tags": [
       "1M Context",
@@ -1371,8 +1371,8 @@ window.MODELS_CATALOG = [
     "provider_name": "Google AI Studio",
     "category": "multimodal",
     "context_window": "1,048,576 tokens",
-    "speed_rating": "\u26a1\u26a1 Very Fast (~190 t/s)",
-    "free_quota": "1,500 req/day \u00b7 15 RPM",
+    "speed_rating": "⚡⚡ Very Fast (~190 t/s)",
+    "free_quota": "1,500 req/day · 15 RPM",
     "description": "Google's flagship multimodal model with advanced reasoning, coding, and comprehension capabilities.",
     "tags": [
       "1M Context",
@@ -1395,8 +1395,8 @@ window.MODELS_CATALOG = [
     "provider_name": "Google AI Studio",
     "category": "reasoning",
     "context_window": "32,768 tokens",
-    "speed_rating": "\u26a1\u26a1 Fast (~140 t/s)",
-    "free_quota": "1,500 req/day \u00b7 15 RPM",
+    "speed_rating": "⚡⚡ Fast (~140 t/s)",
+    "free_quota": "1,500 req/day · 15 RPM",
     "description": "Google's premier open weights model delivered directly from AI Studio. Exceptional instruction following.",
     "tags": [
       "Gemma 4",
@@ -1418,7 +1418,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Cohere Cloud",
     "category": "reasoning",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1 Fast (~75 t/s)",
+    "speed_rating": "⚡ Fast (~75 t/s)",
     "free_quota": "1,000 requests/month",
     "description": "Cohere's enterprise-grade model built specifically for RAG, grounded citations, and multi-step tool use.",
     "tags": [
@@ -1442,7 +1442,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Cohere Cloud",
     "category": "fast",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1\u26a1 Very Fast (~140 t/s)",
+    "speed_rating": "⚡⚡ Very Fast (~140 t/s)",
     "free_quota": "1,000 requests/month",
     "description": "Lightweight companion model optimized for low latency, summarization, and interactive conversational workflows.",
     "tags": [
@@ -1465,7 +1465,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Zhipu AI / THUDM",
     "category": "fast",
     "context_window": "1,048,576 tokens",
-    "speed_rating": "\u26a1\u26a1 Very Fast (~160 t/s)",
+    "speed_rating": "⚡⚡ Very Fast (~160 t/s)",
     "free_quota": "OpenRouter Active Key",
     "description": "Zhipu AI's flagship 1M context model with native CoT reasoning. Top-tier bilingual English/Chinese comprehension and code synthesis.",
     "tags": [
@@ -1490,7 +1490,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Zhipu AI / THUDM",
     "category": "reasoning",
     "context_window": "1,000,000 tokens",
-    "speed_rating": "\ud83e\udde0 Frontier Logic (~90 t/s)",
+    "speed_rating": "🧠 Frontier Logic (~90 t/s)",
     "free_quota": "OpenRouter Active Key",
     "description": "Tsinghua & Zhipu's supreme frontier intelligence model. Excels at high-complexity multi-step reasoning, mathematical deduction, and agentic workflows.",
     "tags": [
@@ -1514,7 +1514,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Z.ai / Zhipu Direct",
     "category": "fast",
     "context_window": "128,000 tokens",
-    "speed_rating": "\u26a1\u26a1 Very Fast (~170 t/s)",
+    "speed_rating": "⚡⚡ Very Fast (~170 t/s)",
     "free_quota": "Permanent Free Tier",
     "description": "Outstanding multilingual foundation model tuned for rapid Asian and European language comprehension and reasoning.",
     "tags": [
@@ -1537,7 +1537,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Moonshot AI (Kimi)",
     "category": "reasoning",
     "context_window": "262,144 tokens",
-    "speed_rating": "\u26a1 Fast (~120 t/s)",
+    "speed_rating": "⚡ Fast (~120 t/s)",
     "free_quota": "OpenRouter Active Key",
     "description": "Moonshot AI's famous Kimi model renowned for needle-in-a-haystack document search, extensive conversational memory, and precise synthesis.",
     "tags": [
@@ -1561,7 +1561,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Moonshot AI (Kimi)",
     "category": "reasoning",
     "context_window": "262,144 tokens",
-    "speed_rating": "\ud83e\udde0 Deep Chain-of-Thought",
+    "speed_rating": "🧠 Deep Chain-of-Thought",
     "free_quota": "OpenRouter Active Key",
     "description": "Kimi's specialized reasoning version with autonomous reasoning traces before answering. Perfect for complex logic, debate, and code audits.",
     "tags": [
@@ -1585,7 +1585,7 @@ window.MODELS_CATALOG = [
     "provider_name": "Moonshot AI (Kimi)",
     "category": "code",
     "context_window": "262,144 tokens",
-    "speed_rating": "\u26a1 Very Fast (~140 t/s)",
+    "speed_rating": "⚡ Very Fast (~140 t/s)",
     "free_quota": "OpenRouter Active Key",
     "description": "Moonshot's specialized coding architecture for repository-level debugging, script generation, and system administration.",
     "tags": [
@@ -1609,7 +1609,7 @@ window.MODELS_CATALOG = [
     "provider_name": "IBM Research",
     "category": "reasoning",
     "context_window": "131,072 tokens",
-    "speed_rating": "\u26a1 Fast CoT (~130 t/s)",
+    "speed_rating": "⚡ Fast CoT (~130 t/s)",
     "free_quota": "OpenRouter Active Key",
     "description": "IBM's open enterprise Apache 2.0 foundation model with native CoT reasoning. Engineered for business workflows, finance, logic, and code safety.",
     "tags": [
@@ -1633,7 +1633,7 @@ window.MODELS_CATALOG = [
     "provider_name": "IBM Research / Ollama",
     "category": "offline",
     "context_window": "131,072 tokens",
-    "speed_rating": "\ud83d\udcbb Local CPU/GPU Speed",
+    "speed_rating": "💻 Local CPU/GPU Speed",
     "free_quota": "100% Offline (ollama run granite3.1-dense:8b)",
     "description": "Run IBM's flagship Granite 3.1 8B dense model 100% privately on your local PC with Ollama. Zero data leaves your device.",
     "tags": [
@@ -1657,7 +1657,7 @@ window.MODELS_CATALOG = [
     "provider_name": "IBM Research / Ollama",
     "category": "offline",
     "context_window": "65,536 tokens",
-    "speed_rating": "\ud83d\udcbb Local CPU/GPU Speed",
+    "speed_rating": "💻 Local CPU/GPU Speed",
     "free_quota": "100% Offline (ollama run granite-code:8b)",
     "description": "IBM's specialized code synthesis model for 116 programming languages running 100% locally on your machine.",
     "tags": [
