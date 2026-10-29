@@ -17,6 +17,7 @@ class App {
     this.deepthinkMode = false;
     this.imageMode = false;
     this.webMode = false;
+    this.osintMode = false;
     this.isArenaMode = false;
     this.arenaResults = [];
     this.currentArtifactContent = "";
@@ -301,6 +302,21 @@ class App {
       this.webMode = true;
       this.updateModeUI();
       this.showCommandToast("🌐 Live Web & Date Search: Enabled");
+    } else if (cleanCmd === "/osint") {
+      const osintModel = "deepseek/deepseek-v4-pro";
+      if (this.modelSelector.models.some(m => m.id === osintModel)) {
+        this.modelSelector.selectModel(osintModel);
+      } else if (this.modelSelector.models.some(m => m.id === "meta-llama/llama-4-scout-109b")) {
+        this.modelSelector.selectModel("meta-llama/llama-4-scout-109b");
+      } else {
+        this.modelSelector.selectModel("openrouter/free");
+      }
+      if (this.settings) this.settings.temperature = 0.2;
+      this.osintMode = true;
+      const osintPrompt = "You are an elite OSINT & Attack-Surface Intelligence Analyst. Analyze the live reconnaissance telemetry injected in <osint_telemetry> tags alongside the user's query. Organize your report into: (1) Executive Risk & Exposure Summary, (2) Infrastructure, Open Ports & CVEs (citing exact Shodan InternetDB & DNS data), (3) Subdomain & Certificate Attack Surface (highlighting dev/staging/admin/api hosts from crt.sh), (4) Identity / WHOIS / GitHub Footprint, and (5) Concrete Remediation or Next Recon Commands. Never fabricate ports, subdomains, or CVEs not present in the telemetry.";
+      localStorage.setItem("freellm_system_prompt", osintPrompt);
+      if (this.settings) this.settings.systemPrompt = osintPrompt;
+      this.showCommandToast("🔍 OSINT Recon · DeepSeek V4 Pro · Temp: 0.2");
     }
 
     if (textarea) {
@@ -440,6 +456,7 @@ class App {
     const turboBtn = document.getElementById("mode-turbo-btn");
     const deepthinkBtn = document.getElementById("mode-deepthink-btn");
     const webBtn = document.getElementById("mode-web-btn");
+    const promptWebBtn = document.getElementById("prompt-bar-web-btn");
     const imageBtn = document.getElementById("mode-image-btn");
 
     if (turboBtn) {
@@ -469,6 +486,16 @@ class App {
       } else {
         webBtn.classList.remove("bg-sky-500/20", "text-sky-400", "border-sky-500/40");
         webBtn.classList.add("text-stone-400");
+      }
+    }
+
+    if (promptWebBtn) {
+      if (this.webMode) {
+        promptWebBtn.classList.add("bg-sky-500/20", "text-sky-400", "border-sky-500/40");
+        promptWebBtn.classList.remove("text-stone-400");
+      } else {
+        promptWebBtn.classList.remove("bg-sky-500/20", "text-sky-400", "border-sky-500/40");
+        promptWebBtn.classList.add("text-stone-400");
       }
     }
 
@@ -607,13 +634,13 @@ class App {
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                 <span class="text-[10px] font-mono">Copy</span>
               </button>
-              <button type="button" onclick="window.app.startEditMessage(${index})" title="Edit prompt & branch" class="text-stone-400 hover:text-amber-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                <span class="text-[10px] font-mono">Edit</span>
+              <button type="button" onclick="window.app.startEditMessage(${index})" title="Edit prompt & branch into a new variation" class="text-stone-400 hover:text-amber-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
+                <span>✏️</span>
+                <span class="text-[10px] font-mono font-medium">Edit & Branch</span>
               </button>
               <button type="button" onclick="window.app.forkThreadAt(${index})" title="Fork thread from here into a new chat" class="text-stone-400 hover:text-cyan-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
-                <span class="text-[10px] font-mono">Fork</span>
+                <span>🔀</span>
+                <span class="text-[10px] font-mono font-medium">Fork Thread</span>
               </button>
             </div>
           </div>
@@ -682,6 +709,7 @@ class App {
               </div>
             </div>
             ${routeBadge}
+            ${msg.osintCardHtml || ''}
             ${thinkingBlock}
             <div class="prose max-w-none text-stone-200" id="msg-content-${index}">
               ${renderedContent}
@@ -805,7 +833,7 @@ class App {
     const branched = JSON.parse(JSON.stringify(this.currentChat.messages.slice(0, index + 1)));
     const newChat = {
       id: "chat_" + Date.now(),
-      title: "Fork: " + (this.currentChat.title || "Chat"),
+      title: "[Fork] " + (this.currentChat.title || "Chat"),
       model_id: this.currentChat.model_id || this.modelSelector.selectedModelId,
       messages: branched
     };
@@ -1074,10 +1102,36 @@ Output the combined, perfected synthesis directly:`;
     let thinkingText = "";
 
     try {
+      // Check for OSINT Recon Trigger
+      const lastUserMsg = this.currentChat.messages[this.currentChat.messages.length - 2];
+      const userPromptText = (lastUserMsg && lastUserMsg.content) ? lastUserMsg.content : "";
+      const isOsintTrigger = this.osintMode || userPromptText.toLowerCase().includes("/osint") || (window.osintEngine && (userPromptText.toLowerCase().includes("shodan") || userPromptText.toLowerCase().includes("crt.sh") || userPromptText.toLowerCase().includes("attack surface")));
+
+      let activeSystemPrompt = (this.settings && this.settings.systemPrompt) || (window.settings && window.settings.systemPrompt) || "";
+
+      if (isOsintTrigger && window.osintEngine) {
+        assistantMsg.content = "🛰️ *Scanning Shodan InternetDB, crt.sh Certificate Logs, DoH DNS & RDAP...*\n\n";
+        this.renderMessages();
+        try {
+          const telemetry = await window.osintEngine.runOsintEnrichment(userPromptText, (statusText) => {
+            assistantMsg.content = `${statusText}\n\n`;
+            this.renderMessages();
+          });
+          if (telemetry) {
+            assistantMsg.osintCardHtml = window.osintEngine.renderTelemetryCardHtml(telemetry, `osint-card-${assistantIndex}`);
+            const osintJson = JSON.stringify(telemetry, null, 2);
+            activeSystemPrompt = `${activeSystemPrompt}\n\n<osint_telemetry>\n${osintJson}\n</osint_telemetry>\n\n[CRITICAL INSTRUCTION: Analyze the exact real reconnaissance data inside <osint_telemetry> tags. Cite actual open ports, subdomains, and CVEs. Never fabricate infrastructure.]`.trim();
+          }
+        } catch (osintErr) {
+          console.warn("OSINT enrichment failed:", osintErr);
+        }
+        assistantMsg.content = "";
+      }
+
       const stream = window.clientEngine.streamChat({
         model_id: selectedModel.id,
         messages: this.currentChat.messages.slice(0, -1),
-        system_prompt: (this.settings && this.settings.systemPrompt) || (window.settings && window.settings.systemPrompt) || "",
+        system_prompt: activeSystemPrompt,
         temperature: (this.settings && this.settings.temperature) ?? (window.settings && window.settings.temperature) ?? 0.7,
         max_tokens: (this.settings && this.settings.maxTokens) ?? (window.settings && window.settings.maxTokens) ?? 4096,
         turbo_mode: this.turboMode,
@@ -1286,29 +1340,55 @@ Output the combined, perfected synthesis directly:`;
 
     const fixBtn = document.getElementById("artifact-fix-btn");
     if (fixBtn) {
-      fixBtn.addEventListener("click", () => {
-        if (!this.lastArtifactError) return;
-        this.sendMessage(`Please fix the runtime error in the artifact: "${this.lastArtifactError.error}" (at line ${this.lastArtifactError.line || 1}). Output the complete corrected <antArtifact> code.`);
-        this.closeArtifact();
-      });
+      fixBtn.addEventListener("click", () => this.autoFixArtifactError());
     }
 
     // Message bridge for sandbox iframe
     window.addEventListener("message", (event) => {
       if (!event.data) return;
-      if (event.data.type === "ARTIFACT_ERROR") {
+      if (event.data.type === "ARTIFACT_RUNTIME_ERROR" || event.data.type === "ARTIFACT_ERROR") {
         this.lastArtifactError = event.data;
         const banner = document.getElementById("artifact-error-banner");
         const msg = document.getElementById("artifact-error-msg");
+        const errMsg = event.data.message || event.data.error || "Runtime Error";
+        const lineMsg = event.data.line ? ` (line ${event.data.line})` : "";
         if (banner && msg) {
-          msg.textContent = `${event.data.error} (line ${event.data.line || 1})`;
+          msg.textContent = `${errMsg}${lineMsg}`;
           banner.classList.remove("hidden");
         }
-        this.appendArtifactLog(`[Runtime Error]: ${event.data.error} (line ${event.data.line || 1})`, "text-red-400");
+        this.appendArtifactLog(`[Runtime Error]: ${errMsg}${lineMsg}`, "text-red-400");
+        if (event.data.stack) {
+          this.appendArtifactLog(event.data.stack, "text-red-500/80");
+        }
       } else if (event.data.type === "ARTIFACT_LOG") {
         this.appendArtifactLog(`[Log]: ${event.data.data}`, "text-stone-300");
       }
     });
+  }
+
+  autoFixArtifactError() {
+    if (!this.lastArtifactError || !this.currentArtifactContent) return;
+    const err = this.lastArtifactError;
+    const errMsg = err.message || err.error || "Unknown runtime exception";
+    const stackTrace = err.stack ? `\nStack trace:\n${err.stack}` : "";
+    const lineInfo = err.line ? `Line: ${err.line}` : "";
+
+    const fixPrompt = `I encountered a JavaScript runtime error in this Artifact:
+Error: "${errMsg}" ${lineInfo}${stackTrace}
+
+Current Artifact Code:
+\`\`\`html
+${this.currentArtifactContent}
+\`\`\`
+
+Please diagnose the root cause, fix the bug, and provide the complete, corrected implementation wrapped in an <antArtifact identifier="${this.currentArtifactTitle ? this.currentArtifactTitle.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'fixed-artifact'}" type="html" title="${this.currentArtifactTitle || 'Corrected Artifact'}">...</antArtifact> container. Ensure all functions and event listeners execute cleanly without crashing.`;
+
+    if (this.modelSelector && this.modelSelector.selectedModelId === "openrouter/free") {
+      this.modelSelector.selectModel("openrouter/qwen/qwen-2.5-coder-32b-instruct");
+    }
+    this.closeArtifact();
+    this.showCommandToast("🔧 Sending runtime error & stack trace to AI to auto-fix...");
+    this.sendMessage(fixPrompt);
   }
 
   appendArtifactLog(text, colorClass = "text-stone-300") {
@@ -1351,9 +1431,25 @@ Output the combined, perfected synthesis directly:`;
       if (type === "html" || type === "svg" || content.includes("<html") || content.includes("<svg") || content.includes("<script")) {
         const injectedScript = `
 <script>
-  window.onerror = function(msg, url, line) {
-    window.parent.postMessage({ type: 'ARTIFACT_ERROR', error: String(msg), line: line }, '*');
-  };
+  window.addEventListener('error', function(e) {
+    window.parent.postMessage({
+      type: 'ARTIFACT_RUNTIME_ERROR',
+      message: e.message || 'Script error',
+      line: e.lineno || 1,
+      col: e.colno || 1,
+      filename: e.filename || '',
+      stack: e.error ? (e.error.stack || '') : ''
+    }, '*');
+  });
+  window.addEventListener('unhandledrejection', function(e) {
+    window.parent.postMessage({
+      type: 'ARTIFACT_RUNTIME_ERROR',
+      message: e.reason ? (e.reason.message || String(e.reason)) : 'Unhandled Promise Rejection',
+      line: 1,
+      col: 1,
+      stack: e.reason ? (e.reason.stack || '') : ''
+    }, '*');
+  });
   const _origLog = console.log;
   console.log = function(...args) {
     _origLog.apply(console, args);

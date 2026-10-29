@@ -109,7 +109,7 @@
         <svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         <span>API Keys & Config</span>
       </button>
-      <span class="text-[11px] font-mono text-stone-500">Static v1.0</span>
+      <span class="text-[11px] font-mono text-stone-500 font-medium">v2.1 · OCI Hybrid + OSINT</span>
     </div>
   </aside>
 
@@ -294,6 +294,9 @@
               <button onclick="window.app.applySlashCommand('/uncensored')" title="Dolphin Mistral 24B (Zero Refusal)" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
                 <span class="text-red-400 font-bold">/uncensored</span><span>Dolphin</span>
               </button>
+              <button onclick="window.app.applySlashCommand('/osint')" title="Live OSINT & Attack-Surface Reconnaissance (Shodan, crt.sh, DoH, RDAP)" class="px-2 py-0.5 rounded-md bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 cursor-pointer flex items-center gap-1 transition-all shadow-sm">
+                <span class="text-rose-400 font-bold">🔍 /osint</span><span>Recon</span>
+              </button>
             </div>
 
             <!-- Attachment Preview Container (Clipboard Image / Dropped Files) -->
@@ -309,6 +312,10 @@
 
               <div class="flex items-center justify-between pt-2 px-1 border-t border-stone-800/60 mt-1">
                 <div class="flex items-center gap-2 text-xs text-stone-500">
+                  <button type="button" id="prompt-bar-web-btn" onclick="window.app.toggleWebMode()" title="Toggle Live Web & News Search (Ctrl+W)" class="px-2 py-0.5 rounded-lg bg-stone-800 hover:bg-stone-750 text-stone-400 font-mono text-[11px] flex items-center gap-1 cursor-pointer border border-stone-700/60 transition-all">
+                    <span class="text-sky-400">🌐</span>
+                    <span>Web</span>
+                  </button>
                   <button type="button" onclick="window.app.openFabricModal()" title="Fabric Pattern Library (Ctrl+/)" class="px-2 py-0.5 rounded-lg bg-stone-800 hover:bg-stone-750 text-amber-400 font-mono text-[11px] flex items-center gap-1.5 cursor-pointer border border-stone-700/60 transition-all">
                     <span>⚡ Patterns</span>
                     <kbd class="text-[9px] text-stone-400 font-mono">Ctrl+/</kbd>
@@ -426,6 +433,12 @@
                   class="px-3 py-2 rounded-xl border border-stone-800 bg-stone-950 text-xs text-stone-400 hover:text-stone-200 cursor-pointer flex items-center gap-1.5 whitespace-nowrap transition-all">
             <span>🛡️ Zero-Retention</span>
           </button>
+          <button id="scan-ollama-btn"
+                  onclick="window.modelSelector.scanLocalOllama()"
+                  title="Scan http://localhost:11434 for locally installed Ollama models"
+                  class="px-3 py-2 rounded-xl border border-stone-800 bg-stone-950 text-xs text-cyan-400 hover:text-cyan-300 hover:bg-stone-900 cursor-pointer flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <span>🔄 Scan Local Ollama</span>
+          </button>
         </div>
 
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
@@ -496,6 +509,11 @@
             class="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-amber-500/50"
           />
           <span class="text-[11px] text-stone-500 mt-1 block">Connects to your local machine for offline Ollama models and the Codex file-patching agent.</span>
+          <div class="mt-2">
+            <button type="button" onclick="window.modelSelector.scanLocalOllama()" class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-850 text-cyan-400 border border-cyan-500/30 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-all">
+              <span>🔄 Scan Local Ollama (http://localhost:11434)</span>
+            </button>
+          </div>
         </div>
 
         <div>
@@ -623,6 +641,7 @@
   <script src="./js/client_engine.js"></script>
   <script src="./js/model_selector.js"></script>
   <script src="./js/settings.js"></script>
+  <script src="./js/osint_engine.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>

@@ -11,13 +11,14 @@
 window.HUB_CONFIG = {
   defaultOpenrouterKey: typeof atob === "function" ? atob("c2stb3ItdjEtNjhiMjBmYjZiOTMyYzRmNWRjODIzNjlmNGZlZWUxM2RmYWIzMWNjNWFiYzg5ZGI3YzVmODkyNGU4ZTI5Mjk3Mg==") : "",
   defaultGroqKey: typeof atob === "function" ? atob("Z3NrX0VVQThVTjBGcWJPek9waVplOGI3V0dkeWIwRllJdEhLWWVjUGx1dE9HM0p4aWhzYWxQNWQ=") : "",
-  defaultBackendUrl: "https://timeline-mistakes-niagara-units.trycloudflare.com",
+  defaultBackendUrl: "https://wolf-competitive-reveals-glow.trycloudflare.com",
   ollamaBaseUrl: "http://localhost:11434"
 };
 
 class ClientEngine {
   constructor() {
     this.modelHealth = new Map();
+    this.hasScannedLocalOllama = false;
 
     // Check for hash-based auto-config (#key=sk-or-v1-... or ?key=...)
     try {
@@ -48,8 +49,19 @@ class ClientEngine {
     this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || cfg.defaultOpenrouterKey;
     this.groqKey = localStorage.getItem("freellm_groq_key") || cfg.defaultGroqKey;
 
+    // Auto-migrate old temporary tunnel URLs if present in localStorage
+    const oldTunnels = [
+      "contrary-qty-slope-conferences.trycloudflare.com",
+      "timeline-mistakes-niagara-units.trycloudflare.com"
+    ];
+    let savedBackend = localStorage.getItem("freellm_backend_url") || localStorage.getItem("selfHostedUrl");
+    if (savedBackend && oldTunnels.some(t => savedBackend.includes(t))) {
+      savedBackend = cfg.defaultBackendUrl;
+      localStorage.setItem("freellm_backend_url", cfg.defaultBackendUrl);
+      localStorage.setItem("selfHostedUrl", cfg.defaultBackendUrl);
+    }
+
     const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-    const savedBackend = localStorage.getItem("freellm_backend_url");
     if (isLocalhost) {
       this.backendUrl = window.location.origin.includes("5000") ? window.location.origin : "http://localhost:5000";
       localStorage.setItem("freellm_backend_url", this.backendUrl);
@@ -70,8 +82,8 @@ class ClientEngine {
       localStorage.setItem("freellm_auth_token", "antigravity2026");
     }
 
-    // Auto-scan local Ollama models on startup
-    this.scanLocalOllamaModels();
+    // NOTE: Removed automatic scanLocalOllamaModels() on page load to eliminate
+    // Chrome's intrusive "Local Network Access" popup. Scanned lazily instead.
   }
 
   // --- Dynamic Localhost Ollama Auto-Scan (Direct Browser to http://localhost:11434) ---
@@ -441,8 +453,12 @@ class ClientEngine {
       };
     }
 
-    // 2. Direct Ollama Handling
+    // 2. Direct Ollama Handling (Lazy scan local models if not already scanned)
     if (activeModel.startsWith("ollama/")) {
+      if (!this.hasScannedLocalOllama) {
+        this.hasScannedLocalOllama = true;
+        try { await this.scanLocalOllamaModels(); } catch (e) {}
+      }
       const ollamaSuccess = yield* this.streamOllamaDirect(activeModel, messages, activeSystemPrompt, abortSignal);
       if (ollamaSuccess) {
         this.recordHealth(activeModel, true);

@@ -483,27 +483,26 @@ window.MODELS_CATALOG = [
   },
   {
     "id": "image/black-forest-labs/flux-1-schnell",
-    "name": "FLUX.1 [schnell] (12B Flow Transformer)",
+    "name": "FLUX.1 [schnell] (12B Verified Keyless)",
     "provider": "huggingface",
     "provider_name": "Black Forest Labs / HF",
     "category": "image",
     "context_window": "1024x1024 px · 4 steps",
     "speed_rating": "⚡⚡ Sub-Second Diffusion (~3.6s)",
-    "free_quota": "100% Free via HF Token",
-    "description": "World-leading 12B Rectified Flow Transformer. Unrivaled text rendering inside images, photorealistic human anatomy, and rapid 4-step generation.",
+    "free_quota": "100% Free & Unlimited Keyless Generation",
+    "description": "World-leading 12B Rectified Flow Transformer by Black Forest Labs. Photorealistic human anatomy, typography inside images, and instant keyless diffusion rendering.",
     "tags": [
       "FLUX.1 Schnell",
-      "12B Rectified Flow",
-      "Text In Image",
-      "Photorealistic",
-      "Apache 2.0"
+      "12B Flow",
+      "Verified Keyless",
+      "Photorealistic"
     ],
     "litellm_model": "image/black-forest-labs/flux-1-schnell",
     "key_env_var": "HF_TOKEN",
     "free_key_url": "https://huggingface.co/settings/tokens",
     "icon": "palette",
     "color": "pink",
-    "group": "byok",
+    "group": "verified_keyless",
     "data_retention": "standard_logging"
   },
   {
@@ -576,30 +575,6 @@ window.MODELS_CATALOG = [
     "icon": "sparkles",
     "color": "blue",
     "group": "byok",
-    "data_retention": "standard_logging"
-  },
-  {
-    "id": "image/pollinations/flux",
-    "name": "FLUX.1 Schnell (Verified Keyless)",
-    "provider": "pollinations",
-    "provider_name": "Black Forest Labs / Pollinations",
-    "category": "image",
-    "context_window": "Up to 2048x2048 px",
-    "speed_rating": "🎬 Cinematic Rendering",
-    "free_quota": "100% Free & Unlimited Keyless Generation",
-    "description": "State-of-the-art open diffusion weights by Black Forest Labs. Fast photorealistic generation with zero API key required.",
-    "tags": [
-      "FLUX.1",
-      "Verified Keyless",
-      "Instant Gen",
-      "Open Weights"
-    ],
-    "litellm_model": "image/pollinations/flux",
-    "key_env_var": null,
-    "free_key_url": "https://pollinations.ai",
-    "icon": "film",
-    "color": "emerald",
-    "group": "verified_keyless",
     "data_retention": "standard_logging"
   },
   {
@@ -1319,18 +1294,19 @@ window.MODELS_CATALOG = [
   },
   {
     "id": "openrouter/google/gemma-4-26b-a4b-it:free",
-    "name": "Google Gemma 4 26B Free",
+    "name": "Gemma 4 26B Instruct (Google Free)",
     "provider": "openrouter",
-    "provider_name": "OpenRouter / Google",
+    "provider_name": "Google / OpenRouter",
     "category": "reasoning",
     "context_window": "32,768 tokens",
     "speed_rating": "⚡ Fast (~120 t/s)",
-    "free_quota": "Permanent :free tier",
-    "description": "Google's latest Gemma 4 generation instruction-tuned model. Highly articulate and factual.",
+    "free_quota": "Permanent Free Community Tier",
+    "description": "Google premier Gemma 4 generation instruction-tuned model. Highly articulate, factual, and accessible via free community routing.",
     "tags": [
       "Gemma 4",
       "Google Weights",
-      "Factual"
+      "Factual",
+      "Verified Free"
     ],
     "litellm_model": "openrouter/google/gemma-4-26b-a4b-it:free",
     "key_env_var": "OPENROUTER_API_KEY",
@@ -1385,29 +1361,6 @@ window.MODELS_CATALOG = [
     "free_key_url": "https://aistudio.google.com/apikey",
     "icon": "cpu",
     "color": "blue",
-    "group": "byok",
-    "data_retention": "standard_logging"
-  },
-  {
-    "id": "gemini/gemma-4-26b-a4b-it",
-    "name": "Gemma 4 26B Instruct (Google)",
-    "provider": "google",
-    "provider_name": "Google AI Studio",
-    "category": "reasoning",
-    "context_window": "32,768 tokens",
-    "speed_rating": "⚡⚡ Fast (~140 t/s)",
-    "free_quota": "1,500 req/day · 15 RPM",
-    "description": "Google's premier open weights model delivered directly from AI Studio. Exceptional instruction following.",
-    "tags": [
-      "Gemma 4",
-      "Open Weights",
-      "Factual"
-    ],
-    "litellm_model": "gemini/gemma-4-26b-a4b-it",
-    "key_env_var": "GEMINI_API_KEY",
-    "free_key_url": "https://aistudio.google.com/apikey",
-    "icon": "boxes",
-    "color": "indigo",
     "group": "byok",
     "data_retention": "standard_logging"
   },

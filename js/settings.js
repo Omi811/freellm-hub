@@ -5,13 +5,24 @@ class SettingsManager {
     const cfg = window.HUB_CONFIG || {};
     this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || cfg.defaultOpenrouterKey || "";
     this.groqKey = localStorage.getItem("freellm_groq_key") || cfg.defaultGroqKey || "";
+
+    const oldTunnels = [
+      "contrary-qty-slope-conferences.trycloudflare.com",
+      "timeline-mistakes-niagara-units.trycloudflare.com"
+    ];
+    let savedBackend = localStorage.getItem("freellm_backend_url") || localStorage.getItem("selfHostedUrl");
+    if (savedBackend && oldTunnels.some(t => savedBackend.includes(t))) {
+      savedBackend = cfg.defaultBackendUrl || "https://wolf-competitive-reveals-glow.trycloudflare.com";
+      localStorage.setItem("freellm_backend_url", savedBackend);
+      localStorage.setItem("selfHostedUrl", savedBackend);
+    }
+
     const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-    const savedBackend = localStorage.getItem("freellm_backend_url");
     if (isLocalhost) {
       this.backendUrl = window.location.origin.includes("5000") ? window.location.origin : "http://localhost:5000";
       localStorage.setItem("freellm_backend_url", this.backendUrl);
     } else if (!savedBackend || savedBackend.includes("trycloudflare.com")) {
-      this.backendUrl = cfg.defaultBackendUrl || "https://timeline-mistakes-niagara-units.trycloudflare.com";
+      this.backendUrl = cfg.defaultBackendUrl || "https://wolf-competitive-reveals-glow.trycloudflare.com";
       if (this.backendUrl) {
         localStorage.setItem("freellm_backend_url", this.backendUrl);
       }

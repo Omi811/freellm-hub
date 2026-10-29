@@ -93,13 +93,24 @@ class ModelSelector {
     const health = window.clientEngine ? window.clientEngine.getModelHealth(current.id) : "healthy";
     const healthDot = health === "healthy" ? "🟢" : (health === "degraded" ? "🟡" : "🔴");
 
+    // Compute route type indicator (Local Ollama, BYOK, OCI Tunnel Online, Cloud Keyless)
+    let routeType = "Cloud Keyless";
+    if (current.provider === "ollama" || current.group === "local_ollama" || (current.id && current.id.startsWith("ollama/"))) {
+      routeType = "Local Ollama";
+    } else if (current.group === "byok") {
+      routeType = "BYOK";
+    } else if (window.clientEngine && window.clientEngine.backendUrl && (window.clientEngine.backendUrl.includes("trycloudflare.com") || window.clientEngine.backendUrl.includes(":5000"))) {
+      routeType = "OCI Tunnel Online";
+    }
+
     trigger.innerHTML = `
       <div class="flex items-center gap-2 max-w-[280px] sm:max-w-[340px]">
         <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium border ${badgeClass}">
           ${current.provider_name ? current.provider_name.split(' ')[0] : 'LLM'}
         </span>
         <span class="font-medium text-sm text-stone-200 truncate">${current.name}</span>
-        <span class="text-xs" title="Endpoint Status: ${health}">${healthDot}</span>
+        <span class="text-xs cursor-help" title="Active Route: ${routeType} · Status: ${health}">${healthDot}</span>
+        <span class="hidden md:inline-block text-[10px] px-1.5 py-0.5 rounded font-mono bg-stone-900 border border-stone-800 text-stone-400" title="Active Routing Architecture">${routeType}</span>
       </div>
       <svg class="w-4 h-4 text-stone-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -117,6 +128,22 @@ class ModelSelector {
       } else {
         autoBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-800 bg-stone-900 hover:bg-stone-850 text-stone-400 hover:text-stone-200 font-medium text-xs transition-all cursor-pointer";
         autoLabel.textContent = "Auto Select";
+      }
+    }
+  }
+
+  async scanLocalOllama() {
+    if (window.clientEngine && window.clientEngine.scanLocalOllamaModels) {
+      if (this.app) this.app.showCommandToast("🔄 Scanning http://localhost:11434 for local models...");
+      const models = await window.clientEngine.scanLocalOllamaModels();
+      this.models = window.MODELS_CATALOG;
+      this.renderModalContent();
+      if (this.app) {
+        if (models && models.length > 0) {
+          this.app.showCommandToast(`✅ Discovered ${models.length} local Ollama models!`);
+        } else {
+          this.app.showCommandToast("⚠️ No running Ollama instance detected at localhost:11434");
+        }
       }
     }
   }
@@ -299,7 +326,12 @@ class ModelSelector {
         document.querySelectorAll(".category-pill").forEach(b => b.classList.remove("active-pill", "bg-amber-500", "text-stone-950"));
         btn.classList.add("active-pill", "bg-amber-500", "text-stone-950");
         this.activeCategory = btn.dataset.category || "all";
-        this.renderModalContent();
+        if (this.activeCategory === "offline" && window.clientEngine && !window.clientEngine.hasScannedLocalOllama) {
+          window.clientEngine.hasScannedLocalOllama = true;
+          this.scanLocalOllama();
+        } else {
+          this.renderModalContent();
+        }
       });
     });
   }
