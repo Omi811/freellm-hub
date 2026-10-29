@@ -11,7 +11,7 @@
 window.HUB_CONFIG = {
   defaultOpenrouterKey: typeof atob === "function" ? atob("c2stb3ItdjEtNjhiMjBmYjZiOTMyYzRmNWRjODIzNjlmNGZlZWUxM2RmYWIzMWNjNWFiYzg5ZGI3YzVmODkyNGU4ZTI5Mjk3Mg==") : "",
   defaultGroqKey: typeof atob === "function" ? atob("Z3NrX0VVQThVTjBGcWJPek9waVplOGI3V0dkeWIwRllJdEhLWWVjUGx1dE9HM0p4aWhzYWxQNWQ=") : "",
-  defaultBackendUrl: "https://contrary-qty-slope-conferences.trycloudflare.com",
+  defaultBackendUrl: "https://timeline-mistakes-niagara-units.trycloudflare.com",
   ollamaBaseUrl: "http://localhost:11434"
 };
 
@@ -48,8 +48,12 @@ class ClientEngine {
     this.openrouterKey = localStorage.getItem("freellm_openrouter_key") || cfg.defaultOpenrouterKey;
     this.groqKey = localStorage.getItem("freellm_groq_key") || cfg.defaultGroqKey;
 
+    const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
     const savedBackend = localStorage.getItem("freellm_backend_url");
-    if (!savedBackend || savedBackend.includes("trycloudflare.com")) {
+    if (isLocalhost) {
+      this.backendUrl = window.location.origin.includes("5000") ? window.location.origin : "http://localhost:5000";
+      localStorage.setItem("freellm_backend_url", this.backendUrl);
+    } else if (!savedBackend || savedBackend.includes("trycloudflare.com")) {
       this.backendUrl = cfg.defaultBackendUrl;
       localStorage.setItem("freellm_backend_url", cfg.defaultBackendUrl);
     } else {
@@ -425,14 +429,17 @@ class ClientEngine {
             const { value, done } = await reader.read();
             if (done) break;
             buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n\n");
+            const lines = buffer.split("\n");
             buffer = lines.pop();
 
             for (const line of lines) {
               const trimmed = line.trim();
+              if (!trimmed || trimmed === "data: [DONE]") continue;
               if (trimmed.startsWith("data: ")) {
-                const data = JSON.parse(trimmed.slice(6));
-                yield data;
+                try {
+                  const data = JSON.parse(trimmed.slice(6));
+                  yield data;
+                } catch (e) {}
               }
             }
           }
@@ -468,17 +475,45 @@ class ClientEngine {
           const { value, done } = await reader.read();
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n\n");
+          const lines = buffer.split("\n");
           buffer = lines.pop();
 
           for (const line of lines) {
             const trimmed = line.trim();
+            if (!trimmed || trimmed === "data: [DONE]") continue;
             if (trimmed.startsWith("data: ")) {
-              const data = JSON.parse(trimmed.slice(6));
-              yield data;
+              try {
+                const parsed = JSON.parse(trimmed.slice(6));
+                // If Hub format with type
+                if (parsed.type) {
+                  yield parsed;
+                  continue;
+                }
+                // If OpenAI SSE delta format
+                const delta = parsed.choices?.[0]?.delta;
+                if (delta) {
+                  if (delta.reasoning_content || delta.reasoning) {
+                    yield { type: "thinking", delta: delta.reasoning_content || delta.reasoning };
+                  }
+                  if (delta.content) {
+                    fullContent += delta.content;
+                    tokenCount++;
+                    yield { type: "chunk", delta: delta.content };
+                  }
+                }
+              } catch (e) {}
             }
           }
         }
+
+        const elapsed = (Date.now() - startTime) / 1000;
+        yield {
+          type: "done",
+          tokens: tokenCount,
+          elapsed: elapsed,
+          tps: Math.round(tokenCount / Math.max(elapsed, 0.05)),
+          content: fullContent
+        };
         this.recordHealth(activeModel, true);
         return;
       }
