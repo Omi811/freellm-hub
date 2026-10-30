@@ -125,7 +125,7 @@ class App {
     if (!window.clientEngine) return;
     const synced = await window.clientEngine.syncToKV(this.chats, {
       systemPrompt: localStorage.getItem("freellm_system_prompt") || "",
-      temperature: localStorage.getItem("freellm_temperature") || "0.7"
+      temperature: localStorage.getItem("freellm_temperature") || "0.3"
     });
     if (synced) {
       this.showCommandToast("☁️ Synced state with Cloudflare KV!");
@@ -1381,7 +1381,7 @@ Output the combined, perfected synthesis directly:`;
         model_id: selectedModel.id,
         messages: this.currentChat.messages.slice(0, -1),
         system_prompt: activeSystemPrompt,
-        temperature: (this.settings && this.settings.temperature) ?? (window.settings && window.settings.temperature) ?? 0.7,
+        temperature: (this.settings && this.settings.temperature) ?? (window.settings && window.settings.temperature) ?? 0.3,
         max_tokens: (this.settings && this.settings.maxTokens) ?? (window.settings && window.settings.maxTokens) ?? 4096,
         turbo_mode: this.turboMode,
         deepthink_mode: this.deepthinkMode,

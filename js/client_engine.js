@@ -277,7 +277,12 @@ Current Universal Time: ${dayName}, ${monthName} ${dateNum}, ${year} ${utcTime} 
 ISO 8601 Timestamp: ${isoString}
 Epoch Milliseconds: ${now.getTime()}
 Operating Year: ${year}
-INSTRUCTION: You possess complete temporal grounding. Always provide factual, up-to-date answers accurate to ${year}.`;
+
+[CRITICAL ANTI-HALLUCINATION & FACTUAL ACCURACY DIRECTIVE]
+1. ZERO HALLUCINATION & NO BLUFFING: Under NO circumstances should you fabricate facts, guess unverifiable numbers, make up software libraries, invent URLs, or bluff answers.
+2. ADMIT UNCERTAINTY: If you do not possess confirmed factual information or verified context to answer with 100% certainty, explicitly state: "I do not have verified real-time data on this." Do NOT guess or generate plausible-sounding falsehoods.
+3. TEMPORAL ACCURACY: The current operating year is strictly ${year}. Any events, releases, or facts after your pre-training cutoff must be acknowledged with appropriate temporal awareness.
+4. EVIDENCE GROUNDING: Ground your reasoning strictly in verified evidence and provided search context. Cite sources with markdown links.`;
   }
 
   // --- Always-Working Keyless Web Search Engine ---
@@ -443,19 +448,19 @@ INSTRUCTION: You possess complete temporal grounding. Always provide factual, up
   }
 
   // --- Build Multi-Provider Candidate Waterfall with First-Token Hedging ---
-  buildCandidateWaterfall(requestedModel, activeSystemPrompt, messages, temperature = 0.7, max_tokens = 4096) {
+  buildCandidateWaterfall(requestedModel, activeSystemPrompt, messages, temperature = 0.3, max_tokens = 4096, deepthink_mode = false) {
     const candidates = [];
     const now = Date.now();
-    const omnirouteBase = window.getOmniRouteBaseUrl ? window.getOmniRouteBaseUrl() : "http://localhost:20128";
+    const omnirouteBase = window.getOmniRouteBaseUrl ? window.getOmniRouteBaseUrl() : "http://localhost:5000";
 
     const formattedMessages = [];
     if (activeSystemPrompt) formattedMessages.push({ role: "system", content: activeSystemPrompt });
     for (const m of messages) formattedMessages.push({ role: m.role || "user", content: m.content || "" });
 
-    // 1. OmniRoute Gateway (:20128) if model is an auto combo or local tunnel is online
-    if (requestedModel === "auto" || requestedModel.startsWith("auto/") || requestedModel.startsWith("omniroute/")) {
+    // 1. Primary: Self-Hosted Backend / OmniRoute Tunnel (ALWAYS prioritized for ALL models)
+    if (omnirouteBase && Date.now() > this.tunnelBlockedUntil) {
       candidates.push({
-        provider: "OmniRoute Gateway",
+        provider: "Self-Hosted Backend / OmniRoute",
         endpoint: `${omnirouteBase.replace(/\/+$/, "")}/v1/chat/completions`,
         model: requestedModel,
         headers: {
@@ -466,12 +471,12 @@ INSTRUCTION: You possess complete temporal grounding. Always provide factual, up
         body: {
           model: requestedModel,
           messages: formattedMessages,
-          temperature,
+          temperature: deepthink_mode ? 0.1 : temperature,
           max_tokens,
           stream: true
         },
         isOmniRoute: true,
-        timeoutMs: 3500
+        timeoutMs: 4000
       });
     }
 
@@ -479,10 +484,10 @@ INSTRUCTION: You possess complete temporal grounding. Always provide factual, up
     const groqKey = this.groqKey || window.HUB_CONFIG.defaultGroqKey;
     if (groqKey) {
       let groqModel = "llama-3.3-70b-versatile";
-      if (requestedModel.includes("coder") || requestedModel.includes("code")) {
-        groqModel = "qwen-2.5-coder-32b";
-      } else if (requestedModel.includes("r1") || requestedModel.includes("reason")) {
+      if (deepthink_mode || requestedModel.includes("r1") || requestedModel.includes("reason")) {
         groqModel = "deepseek-r1-distill-llama-70b";
+      } else if (requestedModel.includes("coder") || requestedModel.includes("code")) {
+        groqModel = "qwen-2.5-coder-32b";
       } else if (requestedModel.startsWith("groq/")) {
         groqModel = requestedModel.replace(/^groq\//, "");
       }
@@ -497,7 +502,7 @@ INSTRUCTION: You possess complete temporal grounding. Always provide factual, up
         body: {
           model: groqModel,
           messages: formattedMessages,
-          temperature,
+          temperature: deepthink_mode ? 0.1 : temperature,
           max_tokens,
           stream: true
         },
@@ -594,19 +599,17 @@ INSTRUCTION: You possess complete temporal grounding. Always provide factual, up
     }
 
     // 7. 100% Keyless Instant Fallback Tier (Pollinations OpenAI Gateway)
-    // Supports openai, deepseek, deepseek-reasoning, qwen-coder, llama, mistral with zero keys!
-    let pollinationsModel = "openai";
+    // Uses verifiable reasoning and coding models to minimize hallucinations
+    let pollinationsModel = "deepseek-reasoning";
     const lowerReq = requestedModel.toLowerCase();
     if (lowerReq.includes("code") || lowerReq.includes("qwen")) {
       pollinationsModel = "qwen-coder";
     } else if (lowerReq.includes("r1") || lowerReq.includes("reason")) {
       pollinationsModel = "deepseek-reasoning";
-    } else if (lowerReq.includes("deepseek")) {
-      pollinationsModel = "deepseek";
-    } else if (lowerReq.includes("llama")) {
-      pollinationsModel = "llama";
     } else if (lowerReq.includes("mistral")) {
       pollinationsModel = "mistral";
+    } else if (lowerReq.includes("llama")) {
+      pollinationsModel = "llama";
     }
 
     candidates.push({
@@ -633,7 +636,7 @@ INSTRUCTION: You possess complete temporal grounding. Always provide factual, up
     model_id,
     messages,
     system_prompt = null,
-    temperature = 0.7,
+    temperature = 0.3,
     max_tokens = 4096,
     turbo_mode = false,
     deepthink_mode = false,
@@ -649,6 +652,20 @@ INSTRUCTION: You possess complete temporal grounding. Always provide factual, up
     const temporalHeader = this.getTemporalGrounding();
     let activeSystemPrompt = `${temporalHeader}\n\n${system_prompt || ""}`.trim();
 
+    // Incorporate REA DeepThink Cognitive Protocol if deepthink_mode is active
+    if (deepthink_mode) {
+      temperature = 0.1;
+      const reaPrompt = `[REA DEEPTHINK COGNITIVE PROTOCOL ACTIVE]
+You are operating in REA DeepThink Mode. Your absolute priority is Evidence-Driven Reasoning with zero hallucination.
+Structure your internal thinking trace inside <think>...</think> tags:
+1. [OBSERVED]: Identify explicit facts, constraints, and known parameters from the user's prompt.
+2. [HYPOTHESES & VERIFICATION]: Formulate candidate solutions and compare them. Challenge edge cases.
+3. [FALSIFICATION]: Actively test potential points of failure and reject invalid assumptions.
+4. [EVIDENCE TAGS]: Clearly distinguish what is [CONFIRMED], [INFERRED], or [UNKNOWN / LIMITATION].
+5. [SYNTHESIS]: Deliver the final, mathematically and factually verified answer.`;
+      activeSystemPrompt = `${activeSystemPrompt}\n\n${reaPrompt}`.trim();
+    }
+
     // 1. Check for Web Search Intent or mode
     const lastUserPrompt = [...messages].reverse().find(m => m.role === "user")?.content || "";
     const lowerPrompt = lastUserPrompt.toLowerCase().trim();
@@ -656,7 +673,9 @@ INSTRUCTION: You possess complete temporal grounding. Always provide factual, up
       "@web", "/search", "@search", "search:", "latest news", "news today", "today's news",
       "what happened today", "recent news", "breaking news", "current price",
       "stock price", "weather today", "recent internet", "search web", "what happened in",
-      "latest update", "recent developments"
+      "latest update", "recent developments", "what is the date", "what date", "today's date",
+      "what day is it", "current date", "current time", "who is current", "who is currently",
+      "who won", "latest", "price of"
     ].some(term => lowerPrompt.includes(term));
 
     let searchData = null;
@@ -713,7 +732,7 @@ INSTRUCTION: You possess complete temporal grounding. Always provide factual, up
     }
 
     // 4. Multi-Provider Hedged Waterfall Execution (First-Token TTFT Race)
-    const candidates = this.buildCandidateWaterfall(model_id, activeSystemPrompt, messages, temperature, max_tokens);
+    const candidates = this.buildCandidateWaterfall(model_id, activeSystemPrompt, messages, temperature, max_tokens, deepthink_mode);
 
     let streamSucceeded = false;
     let lastError = null;

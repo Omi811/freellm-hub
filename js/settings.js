@@ -42,7 +42,7 @@ class SettingsManager {
     localStorage.setItem("omniroute_url", this.omnirouteUrl);
 
     this.systemPrompt = localStorage.getItem("freellm_system_prompt") || "";
-    this.temperature = parseFloat(localStorage.getItem("freellm_temperature") || "0.7");
+    this.temperature = parseFloat(localStorage.getItem("freellm_temperature") || "0.3");
     this.maxTokens = parseInt(localStorage.getItem("freellm_max_tokens") || "4096");
     this.activeTab = "keys";
     this.isOpen = false;
