@@ -1,5 +1,5 @@
-// Antigravity-Style Model Selector Component for GitHub Pages (v2.0)
-// Audited model registry, health status dots, data retention indicators, and verified groups.
+// Antigravity-Style Model Selector Component for GitHub Pages (v3.5)
+// Audited model registry, custom model manager, health latency pings, pinning & hiding.
 
 class ModelSelector {
   constructor(app) {
@@ -14,11 +14,11 @@ class ModelSelector {
     this.searchQuery = "";
     this.zeroRetentionOnly = localStorage.getItem("freellm_zero_retention") === "true";
     this.isOpen = false;
+    this.latencyMap = new Map(); // { [modelId]: { ms, status } }
   }
 
   init() {
-    this.models = window.MODELS_CATALOG || [];
-    this.providers = window.PROVIDERS_CONFIG || {};
+    this.refreshCatalog();
 
     const saved = localStorage.getItem("freellm_selected_model");
     if (saved && saved !== "freellm/auto" && saved !== "freellm/keyless-llama" && this.models.some(m => m.id === saved)) {
@@ -29,7 +29,6 @@ class ModelSelector {
       localStorage.setItem("freellm_selected_model", this.selectedModelId);
     }
 
-    // Call dynamic OpenRouter check if available
     if (window.loadDynamicOpenRouterModels) {
       window.loadDynamicOpenRouterModels().catch(() => {});
     }
@@ -39,7 +38,21 @@ class ModelSelector {
     this.setupModalEvents();
   }
 
+  refreshCatalog() {
+    const baseCatalog = [...(window.MODELS_CATALOG || [])];
+    const customModels = window.customStore ? window.customStore.getCustomModels() : [];
+    
+    // Merge custom models without duplicating
+    for (const cm of customModels) {
+      if (!baseCatalog.some(m => m.id === cm.id)) {
+        baseCatalog.unshift(cm);
+      }
+    }
+    this.models = baseCatalog;
+  }
+
   getSelectedModel() {
+    this.refreshCatalog();
     return this.models.find(m => m.id === this.selectedModelId) || this.models[0] || {
       id: "auto",
       name: "OmniRoute Auto (15-Factor Smart Score)",
@@ -95,14 +108,13 @@ class ModelSelector {
     const health = window.clientEngine ? window.clientEngine.getModelHealth(current.id) : "healthy";
     const healthDot = health === "healthy" ? "🟢" : (health === "degraded" ? "🟡" : "🔴");
 
-    // Compute route type indicator (OmniRoute Gateway, Local Ollama, BYOK, OCI Tunnel Online, Cloud Keyless)
     let routeType = "Cloud Keyless";
     if (current.provider === "omniroute" || (current.group && current.group.startsWith("omniroute"))) {
       routeType = "OmniRoute Gateway";
     } else if (current.provider === "ollama" || current.group === "local_ollama" || (current.id && current.id.startsWith("ollama/"))) {
       routeType = "Local Ollama";
-    } else if (current.group === "byok") {
-      routeType = "BYOK";
+    } else if (current.group === "byok" || current.group === "custom") {
+      routeType = "BYOK / Custom";
     } else if (window.clientEngine && window.clientEngine.backendUrl && (window.clientEngine.backendUrl.includes("trycloudflare.com") || window.clientEngine.backendUrl.includes(":5000"))) {
       routeType = "OCI Tunnel Online";
     }
@@ -140,7 +152,7 @@ class ModelSelector {
     if (window.clientEngine && window.clientEngine.scanLocalOllamaModels) {
       if (this.app) this.app.showCommandToast("🔄 Scanning http://localhost:11434 for local models...");
       const models = await window.clientEngine.scanLocalOllamaModels();
-      this.models = window.MODELS_CATALOG;
+      this.refreshCatalog();
       this.renderModalContent();
       if (this.app) {
         if (models && models.length > 0) {
@@ -162,7 +174,7 @@ class ModelSelector {
       
       const res = await window.loadDynamicOmniRouteModels(omnirouteBaseUrl);
       if (res && res.success) {
-        this.models = window.MODELS_CATALOG;
+        this.refreshCatalog();
         this.renderModalContent();
         this.renderTriggerPill();
         if (this.app) {
@@ -173,13 +185,47 @@ class ModelSelector {
         if (this.app) {
           this.app.showCommandToast(`⚠️ OmniRoute Offline at ${omnirouteBaseUrl}`);
         }
-        alert(`Cannot connect to OmniRoute Gateway at:\n${omnirouteBaseUrl}\n\nError: ${errorMsg}\n\nTip: Verify OmniRoute is running on port 20128 or update the Base URL in API Keys & Settings.`);
+        alert(`Cannot connect to OmniRoute Gateway at:\n${omnirouteBaseUrl}\n\nError: ${errorMsg}`);
       }
     } catch (e) {
       alert(`OmniRoute Sync Error: ${e.message}`);
     } finally {
       if (btn) btn.innerHTML = originalText;
     }
+  }
+
+  // --- One-Click Test All Models Health ---
+  async testAllModelsHealth() {
+    if (this.app) this.app.showCommandToast("⚡ Pinging model endpoints for live latency...");
+    const testPromises = this.models.slice(0, 30).map(async (m) => {
+      const start = Date.now();
+      try {
+        const candidate = window.clientEngine.buildCandidateWaterfall(m.id, "", [{ role: "user", content: "ping" }], 0.1, 5)[0];
+        if (candidate) {
+          const controller = new AbortController();
+          const tid = setTimeout(() => controller.abort(), 2500);
+          const r = await fetch(candidate.endpoint, {
+            method: "POST",
+            headers: candidate.headers,
+            body: JSON.stringify(candidate.body),
+            signal: controller.signal
+          });
+          clearTimeout(tid);
+          const latency = Date.now() - start;
+          if (r.ok) {
+            this.latencyMap.set(m.id, { ms: latency, status: "healthy", label: `${latency}ms` });
+          } else {
+            this.latencyMap.set(m.id, { ms: latency, status: "degraded", label: `HTTP ${r.status}` });
+          }
+        }
+      } catch (e) {
+        this.latencyMap.set(m.id, { ms: 9999, status: "offline", label: "Timed out" });
+      }
+    });
+
+    await Promise.allSettled(testPromises);
+    this.renderModalContent();
+    if (this.app) this.app.showCommandToast("✅ Model health test complete!");
   }
 
   renderArenaPills() {
@@ -191,7 +237,7 @@ class ModelSelector {
       return `
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30">
           <span>${m.name}</span>
-          <button onclick="window.modelSelector.toggleArenaModel('${mid}')" class="hover:text-amber-200">&times;</button>
+          <button onclick="window.modelSelector.toggleArenaModel('${mid}')" class="hover:text-amber-200 cursor-pointer">&times;</button>
         </span>
       `;
     }).join('');
@@ -200,6 +246,7 @@ class ModelSelector {
   openModal() {
     const modal = document.getElementById("model-selector-modal");
     if (modal) {
+      this.refreshCatalog();
       modal.classList.remove("hidden");
       this.renderModalContent();
       const input = document.getElementById("model-search-input");
@@ -223,6 +270,11 @@ class ModelSelector {
   filterModels() {
     const q = this.searchQuery.toLowerCase().trim();
     return this.models.filter(m => {
+      const override = window.customStore ? window.customStore.getModelOverride(m.id) : {};
+      
+      // Hidden filter (unless user explicitly searches for it)
+      if (override.hidden && !q) return false;
+
       // Privacy filter
       if (this.zeroRetentionOnly && m.data_retention !== "zero_retention" && m.provider !== "ollama" && m.provider !== "omniroute") {
         return false;
@@ -230,31 +282,15 @@ class ModelSelector {
 
       // Category filters
       if (this.activeCategory !== "all") {
-        if (this.activeCategory === "omniroute") {
+        if (this.activeCategory === "daily") {
+          const defaultDaily = ["auto", "auto/coding", "auto/fast", "openrouter/free", "deepseek/deepseek-v4-pro", "moonshot/kimi-k3", "groq/openai/gpt-oss-120b"];
+          if (!defaultDaily.includes(m.id) && !override.pinned && m.provider !== "ollama") return false;
+        } else if (this.activeCategory === "omniroute") {
           if (m.provider !== "omniroute" && m.group !== "omniroute_combos" && m.group !== "omniroute_live") return false;
-        } else if (this.activeCategory === "daily") {
-          const dailyIds = [
-            "auto",
-            "auto/coding",
-            "auto/fast",
-            "openrouter/free",
-            "deepseek/deepseek-v4-pro",
-            "moonshot/kimi-k3",
-            "meta-llama/llama-4-scout-109b",
-            "groq/openai/gpt-oss-120b",
-            "openrouter/qwen/qwen-2.5-coder-32b-instruct",
-            "openrouter/deepseek/deepseek-r1-0528",
-            "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition",
-            "gemini/gemini-2.5-flash",
-            "image/pollinations/flux-2-dev",
-            "ollama/qwen3.6-35b-a3b",
-            "ollama/ternary-bonsai-2-27b"
-          ];
-          if (!dailyIds.includes(m.id) && m.provider !== "ollama") return false;
         } else if (this.activeCategory === "keyless") {
           if (m.group !== "verified_keyless" && m.group !== "omniroute_combos") return false;
         } else if (this.activeCategory === "byok") {
-          if (m.group !== "byok") return false;
+          if (m.group !== "byok" && m.group !== "custom") return false;
         } else if (this.activeCategory === "offline") {
           if (m.provider !== "ollama" && m.id !== "auto/offline") return false;
         } else if (this.activeCategory === "uncensored") {
@@ -282,6 +318,36 @@ class ModelSelector {
     });
   }
 
+  editModelSlug(modelId) {
+    const current = this.models.find(m => m.id === modelId);
+    if (!current) return;
+    const currentSlug = (window.customStore && window.customStore.getModelOverride(modelId).slug) || current.litellm_model || modelId;
+    const newSlug = prompt(`Edit target upstream model slug for "${current.name}":`, currentSlug);
+    if (newSlug && newSlug.trim()) {
+      if (window.customStore) {
+        window.customStore.setModelOverride(modelId, { slug: newSlug.trim() });
+      }
+      current.litellm_model = newSlug.trim();
+      this.renderModalContent();
+      if (this.app) this.app.showCommandToast(`✏️ Updated slug for ${current.name} -> ${newSlug.trim()}`);
+    }
+  }
+
+  togglePin(modelId) {
+    if (window.customStore) {
+      window.customStore.togglePinModel(modelId);
+      this.renderModalContent();
+    }
+  }
+
+  toggleHide(modelId) {
+    if (window.customStore) {
+      window.customStore.toggleHideModel(modelId);
+      this.renderModalContent();
+      if (this.app) this.app.showCommandToast("Card visibility updated");
+    }
+  }
+
   renderModalContent() {
     const listContainer = document.getElementById("model-cards-list");
     if (!listContainer) return;
@@ -300,6 +366,16 @@ class ModelSelector {
     listContainer.innerHTML = filtered.map(m => {
       const isSelected = m.id === this.selectedModelId;
       const isArena = this.arenaSelectedModelIds.includes(m.id);
+      const override = window.customStore ? window.customStore.getModelOverride(m.id) : {};
+      const isPinned = !!override.pinned;
+
+      // Latency badge if tested
+      const latencyRecord = this.latencyMap.get(m.id);
+      let latencyPill = "";
+      if (latencyRecord) {
+        const dot = latencyRecord.status === "healthy" ? "🟢" : (latencyRecord.status === "degraded" ? "🟡" : "🔴");
+        latencyPill = `<span class="px-1.5 py-0.5 rounded text-[10px] bg-stone-900 border border-stone-800 font-mono text-stone-300">${dot} ${latencyRecord.label}</span>`;
+      }
 
       const health = window.clientEngine ? window.clientEngine.getModelHealth(m.id) : "healthy";
       const healthDot = health === "healthy" ? '<span class="text-emerald-400" title="Endpoint Status: Healthy">🟢</span>' : 
@@ -318,18 +394,24 @@ class ModelSelector {
         groupBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">⚡ Keyless</span>';
       } else if (m.group === "local_ollama" || m.provider === "ollama") {
         groupBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono">💻 100% Offline</span>';
+      } else if (m.group === "custom") {
+        groupBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">🎨 Custom</span>';
       }
 
       return `
-        <div class="p-3.5 rounded-xl border ${isSelected ? 'border-amber-500/80 bg-amber-500/5' : 'border-stone-800 bg-stone-900/60'} hover:border-stone-700 transition-all flex flex-col justify-between">
+        <div class="p-3.5 rounded-xl border ${isSelected ? 'border-amber-500/80 bg-amber-500/5' : 'border-stone-800 bg-stone-900/60'} hover:border-stone-700 transition-all flex flex-col justify-between group">
           <div>
             <div class="flex items-start justify-between gap-2 mb-1.5">
               <div class="flex items-center gap-2">
                 ${healthDot}
                 <span class="text-sm font-semibold text-stone-100">${m.name}</span>
+                ${isPinned ? '<span title="Pinned to Daily Drivers">⭐</span>' : ''}
                 ${isSelected ? '<span class="px-1.5 py-0.5 rounded text-[10px] bg-amber-500 text-stone-950 font-bold">ACTIVE</span>' : ''}
               </div>
-              <span class="text-[11px] font-mono text-stone-400">${m.speed_rating || ''}</span>
+              <div class="flex items-center gap-1.5">
+                ${latencyPill}
+                <span class="text-[11px] font-mono text-stone-400">${m.speed_rating || ''}</span>
+              </div>
             </div>
             <p class="text-xs text-stone-400 line-clamp-2 mb-2 leading-relaxed">${m.description || ''}</p>
             <div class="flex flex-wrap items-center gap-1.5 mb-3">
@@ -339,7 +421,18 @@ class ModelSelector {
             </div>
           </div>
           <div class="flex items-center justify-between pt-2 border-t border-stone-800/80 text-xs">
-            <span class="text-stone-500 font-mono text-[11px]">${m.context_window || ''}</span>
+            <div class="flex items-center gap-1 text-stone-500 font-mono text-[11px]">
+              <button onclick="window.modelSelector.togglePin('${m.id}')" title="Pin / Unpin to Daily Drivers" class="p-1 hover:text-amber-400 cursor-pointer">
+                ${isPinned ? '⭐' : '☆'}
+              </button>
+              <button onclick="window.modelSelector.editModelSlug('${m.id}')" title="Edit Upstream Model Slug" class="p-1 hover:text-amber-400 cursor-pointer">
+                ✏️
+              </button>
+              <button onclick="window.modelSelector.toggleHide('${m.id}')" title="Hide Card" class="p-1 hover:text-red-400 cursor-pointer">
+                👁️
+              </button>
+              <span class="truncate max-w-[100px] sm:max-w-[130px]">${override.slug || m.litellm_model || m.id}</span>
+            </div>
             <div class="flex items-center gap-2">
               <button onclick="window.modelSelector.toggleArenaModel('${m.id}')"
                       class="px-2 py-1 rounded text-[11px] ${isArena ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' : 'bg-stone-800 text-stone-400 hover:text-stone-200'} transition-all cursor-pointer">

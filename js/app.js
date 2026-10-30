@@ -49,6 +49,10 @@ class App {
   async init() {
     this.modelSelector.init();
     this.settings.init();
+    if (window.customStore) {
+      this.setMode(window.customStore.getActiveMode() || "gemini");
+    }
+    this.renderDynamicSlashBar();
     await this.loadChats();
     this.setupEventListeners();
     this.setupArtifactsPanel();
@@ -318,10 +322,93 @@ class App {
     if (container) container.classList.add("hidden");
   }
 
+  // --- Dynamic Quick-Stack Slash Command Bar ---
+  renderDynamicSlashBar() {
+    const bar = document.getElementById("quick-stack-bar");
+    if (!bar) return;
+    const commands = window.customStore ? window.customStore.getSlashCommands() : [];
+    bar.innerHTML = commands.map(c => `
+      <button type="button" onclick="window.app.applySlashCommand('${c.trigger}')" title="${c.label} · Target: ${c.modelId}${c.webSearch ? ' · 🌐 Web' : ''}" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-850 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all whitespace-nowrap shadow-sm hover:border-amber-500/40">
+        <span class="text-amber-400 font-bold">${c.trigger}</span>
+        <span class="text-stone-300">${c.label}</span>
+      </button>
+    `).join('');
+  }
+
+  // --- Segmented Mode Switcher (Google Search / Gemini / OSINT / Arena) ---
+  setMode(mode) {
+    if (window.customStore) {
+      window.customStore.setActiveMode(mode);
+    }
+
+    // Update Omni-Bar Mode Pills
+    document.querySelectorAll(".omni-mode-pill").forEach(p => {
+      p.classList.remove("active-omni-pill", "bg-amber-500/20", "text-amber-300", "border-amber-500/40", "font-semibold");
+      p.classList.add("text-stone-400");
+    });
+
+    const activeBtn = document.getElementById(`omni-mode-${mode}-btn`);
+    if (activeBtn) {
+      activeBtn.classList.add("active-omni-pill", "bg-amber-500/20", "text-amber-300", "border-amber-500/40", "font-semibold");
+      activeBtn.classList.remove("text-stone-400");
+    }
+
+    if (mode === "search") {
+      this.webMode = true;
+      this.osintMode = false;
+      this.isArenaMode = false;
+      this.showCommandToast("🔍 Google AI Search Active: Live internet sources and citations");
+    } else if (mode === "gemini") {
+      this.webMode = false;
+      this.osintMode = false;
+      this.isArenaMode = false;
+      this.showCommandToast("✦ Gemini Chat Active: Direct conversational reasoning");
+    } else if (mode === "osint") {
+      this.osintMode = true;
+      this.webMode = false;
+      this.isArenaMode = false;
+      this.showCommandToast("🛰️ OSINT Recon Active: Shodan, crt.sh, and attack surface scan");
+    } else if (mode === "arena") {
+      this.isArenaMode = true;
+      this.webMode = false;
+      this.osintMode = false;
+      this.showCommandToast("⚔️ Arena Mode Active: Multi-model comparison");
+    }
+
+    this.updateModeUI();
+    this.updateArenaUI();
+  }
+
   // --- Personal Slash Command Parser ---
   applySlashCommand(cmd) {
     const cleanCmd = cmd.toLowerCase().trim();
     const textarea = document.getElementById("chat-input-textarea");
+
+    // 1. Check custom slash commands defined in CustomizationStore
+    if (window.customStore) {
+      const customCmd = window.customStore.getSlashCommands().find(c => c.trigger.toLowerCase() === cleanCmd);
+      if (customCmd) {
+        if (customCmd.modelId) {
+          this.modelSelector.selectModel(customCmd.modelId);
+        }
+        if (customCmd.temperature !== undefined && this.settings) {
+          this.settings.temperature = customCmd.temperature;
+        }
+        if (customCmd.systemPrompt) {
+          localStorage.setItem("freellm_system_prompt", customCmd.systemPrompt);
+          if (this.settings) this.settings.systemPrompt = customCmd.systemPrompt;
+        }
+        this.webMode = !!customCmd.webSearch;
+        this.osintMode = !!customCmd.osint;
+        this.updateModeUI();
+        this.showCommandToast(`${customCmd.icon || '⚡'} ${customCmd.label} (${customCmd.trigger}) active`);
+        if (textarea) {
+          textarea.value = textarea.value.replace(new RegExp(`^${cmd}\\s*`, 'i'), '').trim();
+          textarea.focus();
+        }
+        return;
+      }
+    }
 
     if (cleanCmd === "/code") {
       const targetModel = this.modelSelector.models.some(m => m.id === "auto/coding") ? "auto/coding" : "openrouter/qwen/qwen-2.5-coder-32b-instruct";
@@ -777,6 +864,53 @@ class App {
           </div>
         ` : '';
 
+        let searchSourcesBlock = '';
+        if (msg.search_sources && msg.search_sources.length > 0) {
+          searchSourcesBlock = `
+            <div class="mb-3 p-3 rounded-xl bg-stone-900/80 border border-sky-500/30">
+              <div class="flex items-center gap-1.5 text-xs font-semibold text-sky-400 mb-2">
+                <span>🌐</span>
+                <span>Google AI Overview · Live Sources</span>
+              </div>
+              <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
+                ${msg.search_sources.map(s => `
+                  <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="flex-shrink-0 max-w-[220px] p-2 rounded-lg bg-stone-950 border border-stone-800 hover:border-sky-500/60 flex flex-col transition-all group cursor-pointer">
+                    <div class="flex items-center gap-1.5 text-[10px] text-stone-400 mb-0.5 truncate font-mono">
+                      <span>🔗</span>
+                      <span class="truncate">${s.provider || 'Web'}</span>
+                    </div>
+                    <span class="text-xs font-medium text-stone-200 truncate group-hover:text-sky-300">${s.title}</span>
+                    <span class="text-[10px] text-stone-500 line-clamp-1">${s.snippet || s.url}</span>
+                  </a>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        let paaBlock = '';
+        if (msg.paa && msg.paa.length > 0) {
+          paaBlock = `
+            <div class="mt-3 pt-2.5 border-t border-stone-800/80">
+              <div class="flex items-center gap-1.5 text-[11px] font-semibold text-stone-400 mb-1.5">
+                <span>✦</span>
+                <span>People Also Ask:</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5">
+                ${msg.paa.map(q => {
+                  const safeQ = q.replace(/'/g, "\\'");
+                  return `
+                    <button type="button" onclick="window.app.sendMessage('${safeQ}')" class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-850 border border-stone-800 text-[11px] text-stone-300 hover:text-sky-300 hover:border-sky-500/30 cursor-pointer transition-all flex items-center gap-1">
+                      <span class="text-sky-400">🔍</span>
+                      <span>${q}</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }
+
         const renderedContent = this.formatMarkdown(msg.content);
 
         return `
@@ -794,11 +928,13 @@ class App {
               </div>
             </div>
             ${routeBadge}
+            ${searchSourcesBlock}
             ${msg.osintCardHtml || ''}
             ${thinkingBlock}
             <div class="prose max-w-none text-stone-200" id="msg-content-${index}">
               ${renderedContent}
             </div>
+            ${paaBlock}
           </div>
         `;
       }
@@ -1251,6 +1387,10 @@ Output the combined, perfected synthesis directly:`;
             ...(assistantMsg.meta || {}),
             ...chunk
           };
+          this.renderMessages();
+        } else if (chunk.type === "search_sources") {
+          assistantMsg.search_sources = chunk.sources || [];
+          assistantMsg.paa = chunk.paa || [];
           this.renderMessages();
         } else if (chunk.type === "thinking") {
           thinkingText += chunk.delta;

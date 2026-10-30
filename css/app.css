@@ -2,6 +2,56 @@
 :root {
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Fira Code", "Cascadia Code", Consolas, Monaco, monospace;
+  --bg-canvas: #131314;
+  --bg-surface: #1e1f20;
+  --bg-card: #282a2c;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --text-main: #e3e3e3;
+  --text-muted: #9aa0a6;
+  --accent-primary: #8ab4f8;
+  --accent-gradient: linear-gradient(135deg, #4285f4 0%, #9b72cb 50%, #d96570 100%);
+  --chat-max-width: 1040px;
+  --chat-font-size: 14px;
+}
+
+/* Dynamic theme background & text adaptations */
+body {
+  background-color: var(--bg-canvas) !important;
+  color: var(--text-main) !important;
+}
+
+aside#sidebar {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+main {
+  background-color: var(--bg-canvas) !important;
+}
+
+.custom-chat-width {
+  max-width: var(--chat-max-width) !important;
+  font-size: var(--chat-font-size) !important;
+}
+
+/* Google Gemini Sparkle animation */
+@keyframes sparklePulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 6px rgba(138, 180, 248, 0.6));
+  }
+  50% {
+    transform: scale(1.18) rotate(8deg);
+    filter: drop-shadow(0 0 16px rgba(155, 114, 203, 0.85));
+  }
+}
+
+.gemini-sparkle-icon {
+  display: inline-block;
+  animation: sparklePulse 3s ease-in-out infinite;
+  background: var(--accent-gradient, linear-gradient(135deg, #4285f4 0%, #9b72cb 50%, #d96570 100%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Custom Scrollbars */

@@ -233,37 +233,77 @@
         <div id="chat-scroll-area" class="flex-1 overflow-y-auto px-4 py-6">
           <div class="max-w-3xl mx-auto">
 
-            <!-- Welcome Hero -->
-            <div id="chat-welcome-hero" class="py-12 text-center">
-              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">
-                ✦
+            <!-- Welcome Hero (Google Search + Gemini Hybrid Omni-Bar) -->
+            <div id="chat-welcome-hero" class="py-10 text-center">
+              <div class="inline-flex items-center justify-center w-14 h-14 rounded-3xl bg-amber-500/10 border border-amber-500/20 shadow-xl mb-4 text-3xl font-bold">
+                <span class="gemini-sparkle-icon">✦</span>
               </div>
-              <h2 class="text-2xl font-bold tracking-tight text-stone-100 mb-2">
-                Where would you like to begin?
+              <h2 class="text-3xl font-extrabold tracking-tight text-stone-100 mb-2">
+                Where would you like to explore?
               </h2>
-              <p class="text-sm text-stone-400 max-w-md mx-auto mb-8 leading-relaxed">
-                Query across 42+ frontier models (DeepSeek R1, Kimi, GLM 5.3, IBM Granite, Qwen 2.5 Coder, Llama 405B) with live Claude-style Artifacts.
+              <p class="text-sm text-stone-400 max-w-lg mx-auto mb-6 leading-relaxed">
+                Single unified workspace for Google AI Search, Gemini Chat, OSINT Reconnaissance, and Arena synthesis across 42+ frontier models with zero subscription.
               </p>
 
+              <!-- Segmented Omni-Bar Mode Pills -->
+              <div class="inline-flex items-center p-1 rounded-2xl bg-stone-900 border border-stone-800 shadow-lg mb-8 max-w-full overflow-x-auto no-scrollbar gap-1 text-xs font-medium">
+                <button type="button" id="omni-mode-search-btn" onclick="window.app.setMode('search')" class="omni-mode-pill px-3.5 py-1.5 rounded-xl text-stone-400 hover:text-stone-200 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                  <span>🔍</span>
+                  <span>Google AI Search</span>
+                </button>
+                <button type="button" id="omni-mode-gemini-btn" onclick="window.app.setMode('gemini')" class="omni-mode-pill active-omni-pill px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap font-semibold">
+                  <span class="text-amber-400">✦</span>
+                  <span>Gemini Chat</span>
+                </button>
+                <button type="button" id="omni-mode-osint-btn" onclick="window.app.setMode('osint')" class="omni-mode-pill px-3.5 py-1.5 rounded-xl text-stone-400 hover:text-stone-200 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                  <span>🛰️</span>
+                  <span>OSINT Recon</span>
+                </button>
+                <button type="button" id="omni-mode-arena-btn" onclick="window.app.setMode('arena')" class="omni-mode-pill px-3.5 py-1.5 rounded-xl text-stone-400 hover:text-stone-200 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                  <span>⚔️</span>
+                  <span>Arena Mode</span>
+                </button>
+              </div>
+
               <!-- Starter Prompt Cards -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left max-w-xl mx-auto">
-                <div onclick="window.app.sendMessage('Write an interactive HTML/JS retro arcade game in a single artifact file.')"
-                     class="p-3.5 rounded-xl border border-stone-800 bg-stone-900/60 hover:bg-stone-800/60 cursor-pointer transition-all hover:border-amber-500/40">
+              <div id="starter-prompt-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left max-w-xl mx-auto">
+                <div onclick="window.app.sendMessage('Search the web for the latest artificial intelligence model releases this week with key citations and technical overviews.')"
+                     class="p-3.5 rounded-xl border border-stone-800 bg-stone-900/60 hover:bg-stone-800/60 cursor-pointer transition-all hover:border-sky-500/40 group">
                   <div class="flex items-center gap-2 mb-1">
-                    <span class="text-xs font-semibold text-amber-400">🎨 Interactive Artifact</span>
+                    <span class="text-xs font-semibold text-sky-400">🔍 Google AI Overview</span>
                   </div>
                   <p class="text-xs text-stone-300 leading-snug">
-                    Generate an interactive playable game rendered live in the Artifacts canvas.
+                    Synthesize live web, GitHub repositories, and tech news with citations.
                   </p>
                 </div>
 
-                <div onclick="window.app.sendMessage('Explain quantum entanglement and its role in quantum computing with KaTeX mathematical formulas.')"
-                     class="p-3.5 rounded-xl border border-stone-800 bg-stone-900/60 hover:bg-stone-800/60 cursor-pointer transition-all hover:border-amber-500/40">
+                <div onclick="window.app.sendMessage('Write an interactive HTML/JS retro arcade game in a single artifact file.')"
+                     class="p-3.5 rounded-xl border border-stone-800 bg-stone-900/60 hover:bg-stone-800/60 cursor-pointer transition-all hover:border-amber-500/40 group">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs font-semibold text-amber-400">🎨 Interactive Artifact Canvas</span>
+                  </div>
+                  <p class="text-xs text-stone-300 leading-snug">
+                    Generate an interactive playable app rendered live in the split-screen Canvas.
+                  </p>
+                </div>
+
+                <div onclick="window.app.sendMessage('Analyze attack surface and open ports for example.com with Shodan InternetDB, crt.sh certificate logs, and DoH DNS records.')"
+                     class="p-3.5 rounded-xl border border-stone-800 bg-stone-900/60 hover:bg-stone-800/60 cursor-pointer transition-all hover:border-rose-500/40 group">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs font-semibold text-rose-400">🛰️ OSINT Reconnaissance</span>
+                  </div>
+                  <p class="text-xs text-stone-300 leading-snug">
+                    Scan Shodan InternetDB, crt.sh subdomains, and DNS with real telemetry.
+                  </p>
+                </div>
+
+                <div onclick="window.app.sendMessage('Compare how DeepSeek R1 and Qwen 2.5 Coder solve a distributed consensus algorithm with step-by-step reasoning.')"
+                     class="p-3.5 rounded-xl border border-stone-800 bg-stone-900/60 hover:bg-stone-800/60 cursor-pointer transition-all hover:border-purple-500/40 group">
                   <div class="flex items-center gap-2 mb-1">
                     <span class="text-xs font-semibold text-purple-400">🧠 DeepThink Reasoning</span>
                   </div>
                   <p class="text-xs text-stone-300 leading-snug">
-                    Step-by-step rigorous deduction with visible &lt;think&gt; reasoning traces.
+                    Evidence-driven REA protocol with visible step-by-step reasoning traces.
                   </p>
                 </div>
               </div>
@@ -280,35 +320,13 @@
         <!-- Bottom Fixed Chat Input Box -->
         <div class="p-4 border-t border-stone-800/80 bg-stone-950/80 backdrop-blur">
           <div class="max-w-3xl mx-auto">
-            <!-- Personal Slash Command Shortcuts Bar -->
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1.5 mb-1.5 text-[11px] font-mono no-scrollbar">
-              <button onclick="window.modelSelector.selectAutoModel()" title="Enable Auto Model Selector (Intent Smart Router)" class="px-2 py-0.5 rounded-md bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 cursor-pointer flex items-center gap-1 transition-all shadow-sm">
-                <span class="text-amber-400">✨</span><span class="font-bold">Auto</span>
-              </button>
-              <button onclick="window.app.applySlashCommand('@web')" title="Search the live internet for recent news and data" class="px-2 py-0.5 rounded-md bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 cursor-pointer flex items-center gap-1 transition-all shadow-sm">
-                <span class="text-sky-400">🌐</span><span class="font-bold">@web</span>
-              </button>
-              <span class="text-stone-500 font-sans text-xs mr-1 hidden sm:inline">⚡ Quick Stack:</span>
-              <button onclick="window.app.applySlashCommand('/code')" title="Qwen 2.5 Coder 32B · Temp: 0.2" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
-                <span class="text-amber-400 font-bold">/code</span><span>Qwen 32B</span>
-              </button>
-              <button onclick="window.app.applySlashCommand('/review')" title="DeepSeek R1 · Security & Bug Audit" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
-                <span class="text-purple-400 font-bold">/review</span><span>Audit</span>
-              </button>
-              <button onclick="window.app.applySlashCommand('/refactor')" title="Refactor for clean architecture" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
-                <span class="text-cyan-400 font-bold">/refactor</span><span>Clean</span>
-              </button>
-              <button onclick="window.app.applySlashCommand('/ui')" title="Interactive HTML/JS Artifacts" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
-                <span class="text-pink-400 font-bold">/ui</span><span>Artifacts</span>
-              </button>
-              <button onclick="window.app.applySlashCommand('/fast')" title="Groq LPU (~280 tok/s)" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
-                <span class="text-orange-400 font-bold">/fast</span><span>Groq 280t/s</span>
-              </button>
-              <button onclick="window.app.applySlashCommand('/uncensored')" title="Dolphin Mistral 24B (Zero Refusal)" class="px-2 py-0.5 rounded-md bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 cursor-pointer flex items-center gap-1 transition-all">
-                <span class="text-red-400 font-bold">/uncensored</span><span>Dolphin</span>
-              </button>
-              <button onclick="window.app.applySlashCommand('/osint')" title="Live OSINT & Attack-Surface Reconnaissance (Shodan, crt.sh, DoH, RDAP)" class="px-2 py-0.5 rounded-md bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 cursor-pointer flex items-center gap-1 transition-all shadow-sm">
-                <span class="text-rose-400 font-bold">🔍 /osint</span><span>Recon</span>
+            <!-- Dynamic Quick-Stack Slash Command Bar -->
+            <div class="flex items-center justify-between pb-1.5 mb-1.5">
+              <div id="quick-stack-bar" class="flex items-center gap-1.5 overflow-x-auto text-[11px] font-mono no-scrollbar flex-1 mr-2">
+                <!-- Dynamically populated from CustomizationStore -->
+              </div>
+              <button onclick="window.settings && window.settings.openModal('slash')" title="Customize Slash Commands & Shortcuts" class="p-1 rounded text-stone-500 hover:text-amber-400 hover:bg-stone-850 cursor-pointer transition-colors flex-shrink-0">
+                ⚙️
               </button>
             </div>
 
@@ -478,6 +496,12 @@
                   class="px-3 py-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 cursor-pointer flex items-center gap-1.5 whitespace-nowrap transition-all">
             <span>🔄 Sync OmniRoute Models</span>
           </button>
+          <button id="test-models-health-btn"
+                  onclick="window.modelSelector.testAllModelsHealth()"
+                  title="Parallel ping test to measure real-time latency across all endpoints"
+                  class="px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-xs text-amber-400 hover:text-amber-300 hover:bg-amber-500/20 cursor-pointer flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <span>⚡ Test All Health</span>
+          </button>
         </div>
 
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
@@ -503,128 +527,323 @@
   </div>
 
   <!-- ======================================================== -->
-  <!-- MODAL: Settings & Key Configuration                      -->
+  <!-- MODAL: Settings & Full Workspace Customizer (v3.5)       -->
   <!-- ======================================================== -->
   <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4">
-    <div class="w-full max-w-lg bg-stone-900 border border-stone-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
-      <div class="p-4 border-b border-stone-800 flex items-center justify-between bg-stone-950/60">
-        <div>
-          <h3 class="text-sm font-bold text-stone-100">API Keys & Settings</h3>
-          <p class="text-xs text-stone-400">Keys are saved locally in your browser's secure localStorage.</p>
+    <div class="w-full max-w-2xl bg-stone-900 border border-stone-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      <!-- Modal Header -->
+      <div class="p-4 border-b border-stone-800 flex items-center justify-between bg-stone-950/70">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-sm">⚙️</div>
+          <div>
+            <h3 class="text-sm font-bold text-stone-100">LLM Hub Customization & Settings</h3>
+            <p class="text-[11px] text-stone-400">Zero-error streaming waterfall, live themes, custom models, and slash presets.</p>
+          </div>
         </div>
-        <button id="close-settings-modal-btn" class="text-stone-400 hover:text-white p-1 rounded-lg hover:bg-stone-800">
+        <button id="close-settings-modal-btn" class="text-stone-400 hover:text-white p-1 rounded-lg hover:bg-stone-800 transition-colors cursor-pointer">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
 
-      <div class="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
-        <div>
-          <label class="block font-medium text-stone-300 mb-1">OpenRouter API Key (Recommended)</label>
-          <input
-            id="openrouter-key-input"
-            type="password"
-            placeholder="sk-or-v1-..."
-            class="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-amber-500/50"
-          />
-          <span class="text-[11px] text-stone-500 mt-1 block">Unlocks DeepSeek R1, Kimi, GLM, Granite, Qwen 2.5 Coder, and 400+ models. Get free key at <a href="https://openrouter.ai/keys" target="_blank" class="text-amber-400 hover:underline">openrouter.ai/keys</a>.</span>
-        </div>
-
-        <div>
-          <label class="block font-medium text-stone-300 mb-1">Groq API Key (Optional Turbo Speed)</label>
-          <input
-            id="groq-key-input"
-            type="password"
-            placeholder="gsk_..."
-            class="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-amber-500/50"
-          />
-          <span class="text-[11px] text-stone-500 mt-1 block">Hyper-fast LPU inference (~450+ tok/s). Free key at <a href="https://console.groq.com/keys" target="_blank" class="text-amber-400 hover:underline">console.groq.com/keys</a>.</span>
-        </div>
-
-        <div>
-          <label class="block font-medium text-stone-300 mb-1">Self-Hosted Backend URL (Optional Hybrid Bridge)</label>
-          <input
-            id="backend-url-input"
-            type="text"
-            placeholder="https://...trycloudflare.com or http://localhost:5000"
-            class="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-amber-500/50"
-          />
-          <span class="text-[11px] text-stone-500 mt-1 block">Connects to your local machine for offline Ollama models and the Codex file-patching agent.</span>
-          <div class="mt-2">
-            <button type="button" onclick="window.modelSelector.scanLocalOllama()" class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-850 text-cyan-400 border border-cyan-500/30 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-all">
-              <span>🔄 Scan Local Ollama (http://localhost:11434)</span>
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-medium text-emerald-400 mb-1">⚡ OmniRoute Gateway Base URL (:20128)</label>
-          <input
-            id="omniroute-url-input"
-            type="text"
-            placeholder="http://localhost:5000 or https://lighter-hill-increase-jar.trycloudflare.com"
-            class="w-full bg-stone-950 border border-emerald-500/30 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-emerald-500/60"
-          />
-          <span class="text-[11px] text-stone-500 mt-1 block">Routes to OmniRoute 15-factor gateway with 352 providers, token compression, and multimodal features.</span>
-          <div class="mt-2 flex items-center gap-2">
-            <button type="button" onclick="window.modelSelector.syncOmniRouteModels()" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-all">
-              <span>🔄 Sync OmniRoute Models</span>
-            </button>
-            <button type="button" onclick="window.app && window.app.openOmniRouteDashboard()" class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-850 text-stone-300 border border-stone-800 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-all">
-              <span>🎛️ Control Panel</span>
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-medium text-stone-300 mb-1">System Prompt</label>
-          <textarea
-            id="system-prompt-input"
-            rows="3"
-            placeholder="Custom instructions for the model..."
-            class="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-stone-100 font-sans focus:outline-none focus:border-amber-500/50 resize-none"
-          ></textarea>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <div class="flex justify-between mb-1">
-              <span class="text-stone-300">Temperature</span>
-              <span id="temp-val" class="font-mono text-amber-400">0.7</span>
-            </div>
-            <input id="temp-slider" type="range" min="0" max="1" step="0.05" value="0.7" class="w-full accent-amber-500">
-          </div>
-          <div>
-            <div class="flex justify-between mb-1">
-              <span class="text-stone-300">Max Tokens</span>
-              <span id="tokens-val" class="font-mono text-amber-400">4096</span>
-            </div>
-            <input id="tokens-slider" type="range" min="512" max="16384" step="512" value="4096" class="w-full accent-amber-500">
-          </div>
-        </div>
-
-        <!-- IndexedDB Storage & Backup (.json) Section -->
-        <div class="pt-3 border-t border-stone-800 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Local Storage & Backups</span>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">IndexedDB Active</span>
-          </div>
-          <p class="text-xs text-stone-400 leading-relaxed">
-            All chats and Artifacts are stored locally with unlimited capacity. Backup your data or restore to another device anytime.
-          </p>
-          <div class="flex items-center gap-2 pt-1">
-            <button type="button" onclick="window.hubStorage.exportBackup()" class="flex-1 py-1.5 px-3 rounded-lg bg-stone-800 hover:bg-stone-750 border border-stone-700/60 text-xs text-stone-200 font-medium flex items-center justify-center gap-1.5 cursor-pointer">
-              <span>📥 Export Backup (.json)</span>
-            </button>
-            <button type="button" onclick="document.getElementById('import-file-input').click()" class="flex-1 py-1.5 px-3 rounded-lg bg-stone-800 hover:bg-stone-750 border border-stone-700/60 text-xs text-stone-200 font-medium flex items-center justify-center gap-1.5 cursor-pointer">
-              <span>📤 Import Backup (.json)</span>
-            </button>
-            <input id="import-file-input" type="file" accept=".json" class="hidden" onchange="window.app.handleImportBackup(this)">
-          </div>
-        </div>
+      <!-- Settings Tabs Navigation Bar -->
+      <div class="flex items-center border-b border-stone-800 bg-stone-950/40 px-3 overflow-x-auto no-scrollbar gap-1 text-xs">
+        <button type="button" class="settings-tab-btn px-3 py-2.5 font-medium border-b-2 border-amber-500/40 bg-amber-500/10 text-amber-300 transition-all cursor-pointer whitespace-nowrap" data-tab="keys">
+          🔑 API Keys & Gateways
+        </button>
+        <button type="button" class="settings-tab-btn px-3 py-2.5 font-medium border-b-2 border-transparent text-stone-400 hover:text-stone-200 transition-all cursor-pointer whitespace-nowrap" data-tab="customize">
+          🎨 Theme & Layout
+        </button>
+        <button type="button" class="settings-tab-btn px-3 py-2.5 font-medium border-b-2 border-transparent text-stone-400 hover:text-stone-200 transition-all cursor-pointer whitespace-nowrap" data-tab="slash">
+          ⚡ Slash Presets
+        </button>
+        <button type="button" class="settings-tab-btn px-3 py-2.5 font-medium border-b-2 border-transparent text-stone-400 hover:text-stone-200 transition-all cursor-pointer whitespace-nowrap" data-tab="models">
+          ➕ Custom Models
+        </button>
+        <button type="button" class="settings-tab-btn px-3 py-2.5 font-medium border-b-2 border-transparent text-stone-400 hover:text-stone-200 transition-all cursor-pointer whitespace-nowrap" data-tab="backup">
+          💾 Backup & Sync
+        </button>
       </div>
 
-      <div class="p-3 border-t border-stone-800 bg-stone-950/60 flex justify-end gap-2">
-        <button id="save-settings-btn" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs cursor-pointer">
+      <!-- Tab Body Container -->
+      <div class="flex-1 overflow-y-auto p-5 text-xs space-y-4">
+
+        <!-- PANE 1: Keys & Gateways -->
+        <div id="settings-pane-keys" class="settings-tab-pane space-y-4">
+          <div>
+            <label class="block font-semibold text-stone-200 mb-1">OpenRouter API Key (400+ Models & Live Free Discovery)</label>
+            <input id="openrouter-key-input" type="password" placeholder="sk-or-v1-..." class="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-amber-500/50" />
+            <span class="text-[11px] text-stone-500 mt-1 block">Unlocks DeepSeek R1, Kimi, GLM, Granite, Qwen 2.5 Coder. Get key at <a href="https://openrouter.ai/keys" target="_blank" class="text-amber-400 hover:underline">openrouter.ai/keys</a>.</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-stone-200 mb-1">Groq API Key (~450 tok/s Turbo)</label>
+              <input id="groq-key-input" type="password" placeholder="gsk_..." class="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-amber-500/50" />
+            </div>
+            <div>
+              <label class="block font-semibold text-blue-400 mb-1">Google AI Studio (Gemini 2.0 Flash)</label>
+              <input id="gemini-key-input" type="password" placeholder="AIzaSy..." class="w-full bg-stone-950 border border-blue-500/30 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-blue-500/60" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-stone-200 mb-1">Mistral Cloud API Key</label>
+              <input id="mistral-key-input" type="password" placeholder="Key..." class="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-amber-500/50" />
+            </div>
+            <div>
+              <label class="block font-semibold text-emerald-400 mb-1">OmniRoute Master API Key</label>
+              <input id="omniroute-key-input" type="password" placeholder="Optional bearer key..." class="w-full bg-stone-950 border border-emerald-500/30 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-emerald-500/60" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-stone-200 mb-1">Custom OpenAI Endpoint Base URL</label>
+              <input id="custom-endpoint-input" type="text" placeholder="https://api.together.xyz/v1" class="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-amber-500/50" />
+            </div>
+            <div>
+              <label class="block font-semibold text-stone-200 mb-1">Custom Endpoint API Key</label>
+              <input id="custom-key-input" type="password" placeholder="Custom API Key..." class="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-amber-500/50" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-stone-200 mb-1">Self-Hosted Backend URL (FastAPI Bridge)</label>
+            <input id="backend-url-input" type="text" placeholder="https://lighter-hill-increase-jar.trycloudflare.com or http://localhost:5000" class="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-amber-500/50" />
+          </div>
+
+          <div>
+            <label class="block font-semibold text-emerald-400 mb-1">⚡ OmniRoute Gateway Base URL (:20128)</label>
+            <input id="omniroute-url-input" type="text" placeholder="http://localhost:5000 or https://lighter-hill-increase-jar.trycloudflare.com" class="w-full bg-stone-950 border border-emerald-500/30 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-emerald-500/60" />
+            <div class="mt-2 flex items-center gap-2">
+              <button type="button" onclick="window.modelSelector.syncOmniRouteModels()" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono flex items-center gap-1.5 cursor-pointer transition-all">
+                <span>🔄 Sync OmniRoute Models</span>
+              </button>
+              <button type="button" onclick="window.app && window.app.openOmniRouteDashboard()" class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-850 text-stone-300 border border-stone-800 font-mono flex items-center gap-1.5 cursor-pointer transition-all">
+                <span>🎛️ Control Panel</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-stone-200 mb-1">System Instructions (Global Context)</label>
+            <textarea id="system-prompt-input" rows="3" placeholder="Custom system instructions..." class="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-stone-100 font-sans focus:outline-none focus:border-amber-500/50 resize-none"></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-stone-300">Temperature</span>
+                <span id="temp-val" class="font-mono text-amber-400">0.7</span>
+              </div>
+              <input id="temp-slider" type="range" min="0" max="1" step="0.05" value="0.7" class="w-full accent-amber-500">
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-stone-300">Max Tokens</span>
+                <span id="tokens-val" class="font-mono text-amber-400">4096</span>
+              </div>
+              <input id="tokens-slider" type="range" min="512" max="16384" step="512" value="4096" class="w-full accent-amber-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 2: Theme & Layout Customization -->
+        <div id="settings-pane-customize" class="settings-tab-pane hidden space-y-4">
+          <div>
+            <label class="block font-semibold text-stone-200 mb-2">Workspace Theme Preset</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div onclick="window.settings.selectTheme('gemini-obsidian')" data-theme-id="gemini-obsidian" class="theme-card-option p-3 rounded-xl border border-stone-800 bg-stone-950 hover:border-amber-500/50 cursor-pointer transition-all flex items-center gap-3">
+                <div class="w-6 h-6 rounded-lg bg-[#131314] border border-[#8ab4f8] flex items-center justify-center text-[10px]">✦</div>
+                <div>
+                  <div class="font-semibold text-stone-200">Google Gemini Obsidian</div>
+                  <div class="text-[10px] text-stone-400 font-mono">Dark · #131314 · Blue Aura</div>
+                </div>
+              </div>
+              <div onclick="window.settings.selectTheme('google-daylight')" data-theme-id="google-daylight" class="theme-card-option p-3 rounded-xl border border-stone-800 bg-stone-950 hover:border-amber-500/50 cursor-pointer transition-all flex items-center gap-3">
+                <div class="w-6 h-6 rounded-lg bg-[#f0f4f9] border border-[#0b57d0] flex items-center justify-center text-[10px] text-blue-600">☀️</div>
+                <div>
+                  <div class="font-semibold text-stone-200">Google Daylight</div>
+                  <div class="text-[10px] text-stone-400 font-mono">Light · Clean Google Doc Canvas</div>
+                </div>
+              </div>
+              <div onclick="window.settings.selectTheme('claude-warm')" data-theme-id="claude-warm" class="theme-card-option p-3 rounded-xl border border-stone-800 bg-stone-950 hover:border-amber-500/50 cursor-pointer transition-all flex items-center gap-3">
+                <div class="w-6 h-6 rounded-lg bg-[#191816] border border-[#d97757] flex items-center justify-center text-[10px] text-orange-400">✦</div>
+                <div>
+                  <div class="font-semibold text-stone-200">Claude Warm Studio</div>
+                  <div class="text-[10px] text-stone-400 font-mono">Dark Terracotta · Anthropic Tone</div>
+                </div>
+              </div>
+              <div onclick="window.settings.selectTheme('cyber-gold')" data-theme-id="cyber-gold" class="theme-card-option p-3 rounded-xl border border-stone-800 bg-stone-950 hover:border-amber-500/50 cursor-pointer transition-all flex items-center gap-3">
+                <div class="w-6 h-6 rounded-lg bg-[#0c0c0e] border border-[#f59e0b] flex items-center justify-center text-[10px] text-amber-400">⚡</div>
+                <div>
+                  <div class="font-semibold text-stone-200">OLED Cyber Gold</div>
+                  <div class="text-[10px] text-stone-400 font-mono">Pitch Black · Pure OLED Gold</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-semibold text-stone-200 mb-1">Custom Accent Color</label>
+              <div class="flex items-center gap-2">
+                <input id="custom-accent-picker" type="color" onchange="window.settings.onAccentColorChange(this.value)" class="w-10 h-8 rounded border border-stone-800 bg-transparent cursor-pointer" />
+                <span class="text-[11px] text-stone-400 font-mono">Interactive Picker</span>
+              </div>
+            </div>
+            <div>
+              <label class="block font-semibold text-stone-200 mb-1">Chat Max Width</label>
+              <select id="chat-width-select" onchange="window.settings.onChatWidthChange(this.value)" class="w-full bg-stone-950 border border-stone-800 rounded-xl px-2.5 py-1.5 text-stone-200 font-mono focus:outline-none">
+                <option value="760px">760px (Focused Read)</option>
+                <option value="1040px">1040px (Studio Standard)</option>
+                <option value="100%">100% (Full Bleed Wide)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-stone-200 mb-1">Chat Font Size</label>
+              <select id="chat-font-select" onchange="window.settings.onChatFontChange(this.value)" class="w-full bg-stone-950 border border-stone-800 rounded-xl px-2.5 py-1.5 text-stone-200 font-mono focus:outline-none">
+                <option value="13px">13px (Compact)</option>
+                <option value="14px">14px (Standard)</option>
+                <option value="15px">15px (Relaxed)</option>
+                <option value="16px">16px (Large)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-stone-800 flex items-center justify-between">
+            <div>
+              <div class="font-semibold text-stone-200">Auto-Expand &lt;think&gt; Accordions</div>
+              <div class="text-[11px] text-stone-400">Keep DeepThink reasoning thoughts expanded by default.</div>
+            </div>
+            <input id="thinking-autoexpand-toggle" type="checkbox" onchange="window.settings.onThinkingToggleChange(this.checked)" class="w-4 h-4 accent-amber-500 cursor-pointer" />
+          </div>
+        </div>
+
+        <!-- PANE 3: Slash Presets Customizer -->
+        <div id="settings-pane-slash" class="settings-tab-pane hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-bold text-stone-200">Quick-Stack Slash Pills</h4>
+              <p class="text-[11px] text-stone-400">Create custom shortcut buttons that configure models, system prompts, and web search in 1 click.</p>
+            </div>
+            <button type="button" onclick="window.settings.addSlashCommandPrompt()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold transition-all cursor-pointer flex items-center gap-1 shadow-sm">
+              <span>➕ Add Preset</span>
+            </button>
+          </div>
+
+          <div id="slash-commands-editor-list" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+            <!-- Populated dynamically by window.settings.renderSlashCommandManager() -->
+          </div>
+        </div>
+
+        <!-- PANE 4: Custom Models & Latency Tester -->
+        <div id="settings-pane-models" class="settings-tab-pane hidden space-y-4">
+          <div>
+            <h4 class="font-bold text-stone-200 mb-1">Add Custom Upstream Model</h4>
+            <p class="text-[11px] text-stone-400 mb-3">Add private endpoints, vLLM / llama.cpp servers, or new model slugs without touching code.</p>
+
+            <div class="p-3.5 rounded-xl border border-stone-800 bg-stone-950 space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-medium text-stone-300 mb-1">Display Name</label>
+                  <input id="custom-model-name" type="text" placeholder="e.g. My Private DeepSeek V3" class="w-full bg-stone-900 border border-stone-800 rounded-lg px-2.5 py-1.5 text-stone-100 focus:outline-none" />
+                </div>
+                <div>
+                  <label class="block font-medium text-stone-300 mb-1">Model Slug</label>
+                  <input id="custom-model-slug" type="text" placeholder="e.g. deepseek-ai/DeepSeek-V3" class="w-full bg-stone-900 border border-stone-800 rounded-lg px-2.5 py-1.5 text-stone-100 font-mono focus:outline-none" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label class="block font-medium text-stone-300 mb-1">Provider Protocol</label>
+                  <select id="custom-model-provider" class="w-full bg-stone-900 border border-stone-800 rounded-lg px-2 py-1.5 text-stone-200 focus:outline-none font-mono">
+                    <option value="custom">Custom Endpoint</option>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="groq">Groq</option>
+                    <option value="gemini">Google Gemini</option>
+                    <option value="ollama">Local Ollama</option>
+                  </select>
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block font-medium text-stone-300 mb-1">Custom Endpoint URL (Optional)</label>
+                  <input id="custom-model-endpoint" type="text" placeholder="https://my-vllm.domain.com/v1" class="w-full bg-stone-900 border border-stone-800 rounded-lg px-2.5 py-1.5 text-stone-100 font-mono focus:outline-none" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-medium text-stone-300 mb-1">Authorization Bearer Key (Optional)</label>
+                <input id="custom-model-key" type="password" placeholder="Key..." class="w-full bg-stone-900 border border-stone-800 rounded-lg px-2.5 py-1.5 text-stone-100 font-mono focus:outline-none" />
+              </div>
+
+              <div class="flex justify-end">
+                <button type="button" onclick="window.settings.addCustomModelFromForm()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold transition-all cursor-pointer">
+                  ➕ Add Model to Catalog
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-stone-800 flex items-center justify-between">
+            <div>
+              <div class="font-semibold text-stone-200">Endpoint Health Diagnostics</div>
+              <div class="text-[11px] text-stone-400">Ping all models in parallel to measure real-time latency badges (🟢 180ms, 🟡 Slow, 🔴 Offline).</div>
+            </div>
+            <button type="button" onclick="window.modelSelector.testAllModelsHealth()" class="px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-semibold font-mono flex items-center gap-1.5 cursor-pointer transition-all">
+              <span>⚡ Test All Health</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PANE 5: Backup & Sync -->
+        <div id="settings-pane-backup" class="settings-tab-pane hidden space-y-4">
+          <div class="p-3.5 rounded-xl border border-stone-800 bg-stone-950 space-y-2">
+            <h4 class="font-bold text-stone-200">Workspace Customizations & Configuration Backup</h4>
+            <p class="text-[11px] text-stone-400 leading-relaxed">
+              Export all themes, custom models, slug overrides, and slash command presets to a single portable JSON file.
+            </p>
+            <div class="flex items-center gap-2 pt-1">
+              <button type="button" onclick="window.settings.exportBackupFile()" class="flex-1 py-2 px-3 rounded-xl bg-stone-800 hover:bg-stone-750 border border-stone-700/60 font-semibold text-stone-100 flex items-center justify-center gap-1.5 cursor-pointer transition-all">
+                <span>📥 Export Customizer (.json)</span>
+              </button>
+              <button type="button" onclick="document.getElementById('import-workspace-file-input').click()" class="flex-1 py-2 px-3 rounded-xl bg-stone-800 hover:bg-stone-750 border border-stone-700/60 font-semibold text-stone-100 flex items-center justify-center gap-1.5 cursor-pointer transition-all">
+                <span>📤 Import Customizer (.json)</span>
+              </button>
+              <input id="import-workspace-file-input" type="file" accept=".json" class="hidden" onchange="window.settings.importBackupFile(this)">
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl border border-stone-800 bg-stone-950 space-y-2">
+            <h4 class="font-bold text-stone-200">Conversation History Backup (IndexedDB)</h4>
+            <p class="text-[11px] text-stone-400 leading-relaxed">
+              Export all past chat sessions, forks, and interactive Artifacts stored in unlimited local IndexedDB.
+            </p>
+            <div class="flex items-center gap-2 pt-1">
+              <button type="button" onclick="window.hubStorage.exportBackup()" class="flex-1 py-2 px-3 rounded-xl bg-stone-800 hover:bg-stone-750 border border-stone-700/60 font-medium text-stone-200 flex items-center justify-center gap-1.5 cursor-pointer transition-all">
+                <span>📥 Export Chats (.json)</span>
+              </button>
+              <button type="button" onclick="document.getElementById('import-file-input').click()" class="flex-1 py-2 px-3 rounded-xl bg-stone-800 hover:bg-stone-750 border border-stone-700/60 font-medium text-stone-200 flex items-center justify-center gap-1.5 cursor-pointer transition-all">
+                <span>📤 Import Chats (.json)</span>
+              </button>
+              <input id="import-file-input" type="file" accept=".json" class="hidden" onchange="window.app.handleImportBackup(this)">
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-stone-800 flex justify-end">
+            <button type="button" onclick="if(confirm('Reset all customizations to default settings?')) { window.customStore.resetDefaults(); window.location.reload(); }" class="px-3 py-1.5 rounded-xl text-xs font-mono text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/30 cursor-pointer transition-all">
+              ⚠️ Reset Workspace to Defaults
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-3.5 border-t border-stone-800 bg-stone-950/70 flex items-center justify-between">
+        <span class="text-[11px] font-mono text-stone-500">LLM Hub v3.5 · Zero Error Inference</span>
+        <button id="save-settings-btn" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold transition-all shadow-md cursor-pointer">
           Save Settings
         </button>
       </div>
@@ -767,6 +986,7 @@
   <script src="./js/storage.js"></script>
   <script src="./js/fabric_patterns.js"></script>
   <script src="./js/models_data.js"></script>
+  <script src="./js/customization_store.js"></script>
   <script src="./js/client_engine.js"></script>
   <script src="./js/model_selector.js"></script>
   <script src="./js/settings.js"></script>
