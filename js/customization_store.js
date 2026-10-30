@@ -253,6 +253,17 @@ class CustomizationStore {
         systemPrompt: "You are a Senior Quantitative Analyst. Solve mathematical options pricing (Black-Scholes), Greeks sensitivities (Delta, Gamma, Vega, Theta), Value at Risk (VaR), and risk parity portfolio weights.",
         webSearch: false,
         osint: false
+      },
+      {
+        id: "cmd_spatial_ai",
+        trigger: "/spatial",
+        label: "3D Spatial AI & ML Master",
+        icon: "🧠",
+        modelId: "auto/smart",
+        temperature: 0.2,
+        systemPrompt: "You are a Principal AI Architect and Spatial Computing Engineer mastering all 26 foundational Deep Machine Learning concepts mapped to 3D modeling, parametric CAD, mesh topology, BIM, and spatial graphics. Provide mathematically rigorous explanations and production-ready Blender/IfcOpenShell/PyTorch code.",
+        webSearch: false,
+        osint: false
       }
     ];
 
