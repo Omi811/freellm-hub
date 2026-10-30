@@ -14,11 +14,12 @@ class SettingsManager {
     const oldTunnels = [
       "contrary-qty-slope-conferences.trycloudflare.com",
       "timeline-mistakes-niagara-units.trycloudflare.com",
-      "wolf-competitive-reveals-glow.trycloudflare.com"
+      "wolf-competitive-reveals-glow.trycloudflare.com",
+      "lighter-hill-increase-jar.trycloudflare.com"
     ];
     let savedBackend = localStorage.getItem("freellm_backend_url") || localStorage.getItem("selfHostedUrl");
     if (savedBackend && oldTunnels.some(t => savedBackend.includes(t))) {
-      savedBackend = cfg.defaultBackendUrl || "https://lighter-hill-increase-jar.trycloudflare.com";
+      savedBackend = cfg.defaultBackendUrl || "https://treasure-millennium-ivory-prizes.trycloudflare.com";
       localStorage.setItem("freellm_backend_url", savedBackend);
       localStorage.setItem("selfHostedUrl", savedBackend);
     }
@@ -28,7 +29,7 @@ class SettingsManager {
       this.backendUrl = window.location.origin.includes("5000") ? window.location.origin : "http://localhost:5000";
       localStorage.setItem("freellm_backend_url", this.backendUrl);
     } else if (!savedBackend || savedBackend.includes("trycloudflare.com")) {
-      this.backendUrl = cfg.defaultBackendUrl || "https://lighter-hill-increase-jar.trycloudflare.com";
+      this.backendUrl = cfg.defaultBackendUrl || "https://treasure-millennium-ivory-prizes.trycloudflare.com";
       if (this.backendUrl) {
         localStorage.setItem("freellm_backend_url", this.backendUrl);
       }
@@ -482,7 +483,7 @@ window.getOmniRouteBaseUrl = function() {
     return window.settings.omnirouteUrl.replace(/\/+$/, "");
   }
   const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-  return isLocalhost ? "http://localhost:5000" : "https://lighter-hill-increase-jar.trycloudflare.com";
+  return isLocalhost ? "http://localhost:5000" : "https://treasure-millennium-ivory-prizes.trycloudflare.com";
 };
 
 window.SettingsManager = SettingsManager;
