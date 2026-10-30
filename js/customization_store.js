@@ -176,6 +176,83 @@ class CustomizationStore {
         systemPrompt: "You are Dolphin, an uncensored, helpful assistant designed to explore scenarios without restrictions or moralizing lectures.",
         webSearch: false,
         osint: false
+      },
+      {
+        id: "cmd_video",
+        trigger: "/video",
+        label: "Wan 2.1 Video Gen",
+        icon: "🎥",
+        modelId: "video/wan-2.1-pro",
+        temperature: 0.3,
+        systemPrompt: "Generate cinematic, coherent text-to-video diffusion renders with realistic motion and dynamic lighting.",
+        webSearch: false,
+        osint: false
+      },
+      {
+        id: "cmd_interior",
+        trigger: "/interior",
+        label: "Interior Design & Materials",
+        icon: "🛋️",
+        modelId: "arch/flux-archviz-pro",
+        temperature: 0.3,
+        systemPrompt: "Render photorealistic modern interior architecture, material palettes (hardwood, brushed brass, fluted glass, polished concrete), natural daylighting, and spatial furniture layout.",
+        webSearch: false,
+        osint: false
+      },
+      {
+        id: "cmd_exterior",
+        trigger: "/exterior",
+        label: "Architectural Exterior Facade",
+        icon: "🏛️",
+        modelId: "arch/flux-archviz-pro",
+        temperature: 0.3,
+        systemPrompt: "Render photorealistic architectural exterior elevations, modern parametric facades, landscape integration, and structural massing.",
+        webSearch: false,
+        osint: false
+      },
+      {
+        id: "cmd_bim",
+        trigger: "/bim",
+        label: "Bonsai OpenBIM & IFC",
+        icon: "📐",
+        modelId: "arch/bonsai-openbim-agent",
+        temperature: 0.2,
+        systemPrompt: "You are the Bonsai OpenBIM & IfcOpenShell Principal Architect. Generate Python scripts for BlenderBIM, IFC4 schema compliance, spatial hierarchies, and parametric CAD macros.",
+        webSearch: false,
+        osint: false
+      },
+      {
+        id: "cmd_estimate",
+        trigger: "/estimate",
+        label: "Construction Cost & BOQ",
+        icon: "🏗️",
+        modelId: "arch/construction-boq-estimator",
+        temperature: 0.1,
+        systemPrompt: "You are a Senior Construction Estimator and Quantity Surveyor. Structure your calculations using evidence tags. Break down Bill of Quantities (BOQ), material takeoff calculations, rebar/concrete volume, and labor schedules.",
+        webSearch: false,
+        osint: false
+      },
+      {
+        id: "cmd_stock",
+        trigger: "/stock",
+        label: "FinGPT Stock Valuation",
+        icon: "📊",
+        modelId: "trading/fingpt-forecaster",
+        temperature: 0.2,
+        systemPrompt: "You are FinGPT-Forecaster from Columbia AI4Finance. Analyze corporate filings (10-K/10-Q), earnings call sentiment, debt-to-equity metrics, revenue growth, and catalyst-driven price action.",
+        webSearch: true,
+        osint: false
+      },
+      {
+        id: "cmd_quant",
+        trigger: "/quant",
+        label: "Options Greeks & Algorithmic Trading",
+        icon: "📈",
+        modelId: "trading/deepseek-quant-reasoning",
+        temperature: 0.1,
+        systemPrompt: "You are a Senior Quantitative Analyst. Solve mathematical options pricing (Black-Scholes), Greeks sensitivities (Delta, Gamma, Vega, Theta), Value at Risk (VaR), and risk parity portfolio weights.",
+        webSearch: false,
+        osint: false
       }
     ];
 

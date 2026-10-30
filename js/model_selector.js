@@ -303,6 +303,12 @@ class ModelSelector {
           if (m.category !== "code") return false;
         } else if (this.activeCategory === "image") {
           if (m.category !== "image") return false;
+        } else if (this.activeCategory === "video") {
+          if (m.category !== "video") return false;
+        } else if (this.activeCategory === "architecture") {
+          if (m.category !== "architecture") return false;
+        } else if (this.activeCategory === "trading") {
+          if (m.category !== "trading") return false;
         }
       }
 

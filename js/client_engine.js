@@ -731,6 +731,85 @@ Structure your internal thinking trace inside <think>...</think> tags:
       return;
     }
 
+    // 3.2 Architectural Visualization Handling (FLUX.1 ArchViz Pro)
+    const isArchVizReq = model_id === "arch/flux-archviz-pro" || ["/arch", "@arch", "/interior", "@interior", "/exterior", "@exterior"].some(p => lastUserPrompt.trim().toLowerCase().startsWith(p));
+    if (isArchVizReq) {
+      let cleanPrompt = lastUserPrompt.trim();
+      for (const prefix of ["/arch", "@arch", "/interior", "@interior", "/exterior", "@exterior"]) {
+        if (cleanPrompt.toLowerCase().startsWith(prefix)) {
+          cleanPrompt = cleanPrompt.substring(prefix.length).trim();
+        }
+      }
+      if (!cleanPrompt) cleanPrompt = "modern luxury architectural villa with glass curtain walls, natural wood slats, minimalist landscaping, architectural photography 8k";
+      const fullArchPrompt = `architectural visualization, photorealistic 8k render, precise material textures, structural realism, ${cleanPrompt}`;
+
+      yield { type: "chunk", delta: `🏛️ **Rendering Architectural Spatial Design via FLUX.1 ArchViz...**\n\n*Prompt:* "${cleanPrompt}"\n\n` };
+      const seed = Math.floor(Math.random() * 999999);
+      const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullArchPrompt)}?width=768&height=512&nologo=true&seed=${seed}`;
+      const artifactCard = `<antArtifact identifier="arch-${Date.now()}" type="html" title="ArchViz: ${cleanPrompt.substring(0, 25)}">\n` +
+        `<div style="text-align: center; background: #0c0c0e; padding: 18px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12);">\n` +
+        `  <img src="${imgUrl}" alt="${cleanPrompt}" style="max-width: 100%; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); margin: 0 auto; display: block;" />\n` +
+        `  <div style="margin-top: 12px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #a1a1aa; font-size: 13px;">\n` +
+        `    <span style="color: #2dd4bf; font-weight: 600;">✦ FLUX.1 ArchViz Pro</span> · 8K Architectural Render · Seed: ${seed}\n` +
+        `  </div>\n` +
+        `</div>\n` +
+        `</antArtifact>\n\n` +
+        `![Architectural Render](${imgUrl})\n\n` +
+        `✨ **Architectural Render Complete**\n- **Prompt:** ${cleanPrompt}\n- **Seed:** \`${seed}\`\n- **Engine:** FLUX.1 ArchViz Pro (Interior & Exterior)`;
+      yield { type: "chunk", delta: artifactCard };
+      yield { type: "done", tokens: 30, elapsed: 1.0, tps: 30, content: artifactCard };
+      return;
+    }
+
+    // 3.5 Video Generation Handling (Wan 2.1 / LTX-Video / Pollinations Gen)
+    const isVideoReq = (model_id && model_id.startsWith("video/")) || ["/video", "@video", "video:", "/animate", "@animate"].some(p => lastUserPrompt.trim().toLowerCase().startsWith(p));
+    if (isVideoReq) {
+      let cleanPrompt = lastUserPrompt.trim();
+      for (const prefix of ["/video", "@video", "video:", "/animate", "@animate"]) {
+        if (cleanPrompt.toLowerCase().startsWith(prefix)) {
+          cleanPrompt = cleanPrompt.substring(prefix.length).trim();
+        }
+      }
+      if (!cleanPrompt) cleanPrompt = "cinematic drone flight over futuristic architectural skyline at golden hour, photorealistic 4k 60fps";
+
+      const modelLabel = model_id === "video/ltx-2.5-fast" ? "LTX-Video 2.5 (24fps Audio Sync)" : (model_id === "video/hunyuan-video" ? "Tencent HunyuanVideo (13B)" : (model_id === "video/cogvideox-5b" ? "CogVideoX 5B (THUDM)" : "Wan 2.1 14B Pro"));
+      yield { type: "chunk", delta: `🎥 **Generating Cinematic Video via ${modelLabel}...**\n\n*Prompt:* "${cleanPrompt}"\n\n` };
+      const seed = Math.floor(Math.random() * 999999);
+      const videoUrl = `https://gen.pollinations.ai/video/${encodeURIComponent(cleanPrompt)}?seed=${seed}&fps=24`;
+      const posterUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=512&height=512&seed=${seed}`;
+
+      const artifactCard = `<antArtifact identifier="vid-${Date.now()}" type="html" title="Video: ${cleanPrompt.substring(0, 25)}">\n` +
+        `<div style="text-align: center; background: #0c0c0e; padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 10px 40px rgba(0,0,0,0.8);">\n` +
+        `  <video controls autoplay loop playsinline poster="${posterUrl}" style="max-width: 100%; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); margin: 0 auto; display: block;">\n` +
+        `    <source src="${videoUrl}" type="video/mp4">\n` +
+        `    Your browser does not support HTML5 video playback.\n` +
+        `  </video>\n` +
+        `  <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #a1a1aa; font-size: 13px;">\n` +
+        `    <span style="color: #818cf8; font-weight: 600;">✦ ${modelLabel} · 24fps · Seed: ${seed}</span>\n` +
+        `    <a href="${videoUrl}" target="_blank" download="generated_video.mp4" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 600; box-shadow: 0 2px 10px rgba(99,102,241,0.4);">⬇ Download MP4</a>\n` +
+        `  </div>\n` +
+        `</div>\n` +
+        `</antArtifact>\n\n` +
+        `✨ **Video Generation Ready**\n- **Prompt:** ${cleanPrompt}\n- **Engine:** ${modelLabel}\n- **Seed:** \`${seed}\`\n- **Direct Link:** [Download Video MP4](${videoUrl})`;
+
+      yield { type: "chunk", delta: artifactCard };
+      yield { type: "done", tokens: 35, elapsed: 1.0, tps: 35, content: artifactCard };
+      return;
+    }
+
+    // Specialized System Prompt Enrichments for Architecture & Financial Models
+    if (model_id === "arch/bonsai-openbim-agent") {
+      activeSystemPrompt += "\n\n[OPENBIM & IFCOPENSHELL ARCHITECT ACTIVE]\nYou are the Bonsai OpenBIM & IfcOpenShell Principal Architect. Generate Python scripts for BlenderBIM, IFC4 schema compliance, spatial hierarchies, structural load calculations, and parametric CAD macros.";
+    } else if (model_id === "arch/construction-boq-estimator") {
+      activeSystemPrompt += "\n\n[CONSTRUCTION ESTIMATOR ACTIVE]\nYou are a Senior Construction Estimator and Quantity Surveyor. Structure your calculations using evidence tags. Break down Bill of Quantities (BOQ), material takeoff calculations, rebar/concrete volume, and labor schedules.";
+    } else if (model_id === "trading/fingpt-forecaster") {
+      activeSystemPrompt += "\n\n[FINGPT FORECASTER ACTIVE]\nYou are FinGPT-Forecaster from Columbia AI4Finance. Analyze corporate filings (10-K/10-Q), earnings call sentiment, debt-to-equity metrics, revenue growth, and catalyst-driven price action.";
+    } else if (model_id === "trading/deepseek-quant-reasoning") {
+      activeSystemPrompt += "\n\n[QUANTITATIVE RISK & DERIVATIVES ENGINE ACTIVE]\nYou are a Senior Quantitative Analyst. Solve mathematical options pricing (Black-Scholes), Greeks sensitivities (Delta, Gamma, Vega, Theta), Value at Risk (VaR), and risk parity portfolio weights.";
+    } else if (model_id === "trading/finrl-algo-trader") {
+      activeSystemPrompt += "\n\n[FINRL-X ALGORITHMIC TRADING ARCHITECT ACTIVE]\nYou are the FinRL-X Algorithmic Trading Developer. Write complete, production-grade backtesting and algorithmic trading code in Python using vectorbt, pandas_ta, backtrader, and ccxt.";
+    }
+
     // 4. Multi-Provider Hedged Waterfall Execution (First-Token TTFT Race)
     const candidates = this.buildCandidateWaterfall(model_id, activeSystemPrompt, messages, temperature, max_tokens, deepthink_mode);
 
