@@ -99,11 +99,11 @@ class ModelSelector {
     if (!trigger) return;
 
     const current = this.getSelectedModel();
-    let badgeClass = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+    let badgeClass = "bg-blue-500/10 text-blue-400 border-blue-500/20";
     if (current.provider === "omniroute") badgeClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
     if (current.provider === "google") badgeClass = "bg-blue-500/10 text-blue-400 border-blue-500/20";
     if (current.provider === "groq") badgeClass = "bg-orange-500/10 text-orange-400 border-orange-500/20";
-    if (current.provider === "openrouter") badgeClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+    if (current.provider === "openrouter") badgeClass = "bg-purple-500/10 text-purple-400 border-purple-500/20";
 
     const health = window.clientEngine ? window.clientEngine.getModelHealth(current.id) : "healthy";
     const healthDot = health === "healthy" ? "🟢" : (health === "degraded" ? "🟡" : "🔴");
@@ -119,16 +119,16 @@ class ModelSelector {
       routeType = "OCI Tunnel Online";
     }
 
+    trigger.className = "apple-pill-btn flex items-center gap-2 px-3 py-1.5 text-left transition-all cursor-pointer";
     trigger.innerHTML = `
       <div class="flex items-center gap-2 max-w-[280px] sm:max-w-[340px]">
-        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium border ${badgeClass}">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${badgeClass}">
           ${current.provider_name ? current.provider_name.split(' ')[0] : 'LLM'}
         </span>
-        <span class="font-medium text-sm text-stone-200 truncate">${current.name}</span>
-        <span class="text-xs cursor-help" title="Active Route: ${routeType} · Status: ${health}">${healthDot}</span>
-        <span class="hidden md:inline-block text-[10px] px-1.5 py-0.5 rounded font-mono bg-stone-900 border border-stone-800 text-stone-400" title="Active Routing Architecture">${routeType}</span>
+        <span class="font-medium text-xs text-stone-100 truncate tracking-tight">${current.name}</span>
+        <span class="text-[10px] cursor-help" title="Active Route: ${routeType} · Status: ${health}">${healthDot}</span>
       </div>
-      <svg class="w-4 h-4 text-stone-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-3.5 h-3.5 text-stone-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
       </svg>
     `;
@@ -139,10 +139,10 @@ class ModelSelector {
 
     if (autoBtn && autoLabel) {
       if (isAuto) {
-        autoBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/50 bg-emerald-500/20 text-emerald-300 font-bold text-xs transition-all cursor-pointer shadow-sm shadow-emerald-500/10";
+        autoBtn.className = "apple-pill-btn flex items-center gap-1.5 px-3 py-1.5 border-[#0A84FF]/60 bg-[#0A84FF]/15 text-[#2997ff] font-semibold text-xs transition-all cursor-pointer shadow-sm shadow-blue-500/10";
         autoLabel.textContent = "Auto Active";
       } else {
-        autoBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-800 bg-stone-900 hover:bg-stone-850 text-stone-400 hover:text-stone-200 font-medium text-xs transition-all cursor-pointer";
+        autoBtn.className = "apple-pill-btn flex items-center gap-1.5 px-3 py-1.5 text-stone-300 font-medium text-xs transition-all cursor-pointer";
         autoLabel.textContent = "Auto Select";
       }
     }
@@ -399,33 +399,33 @@ class ModelSelector {
       }
 
       return `
-        <div class="p-3.5 rounded-xl border ${isSelected ? 'border-amber-500/80 bg-amber-500/5' : 'border-stone-800 bg-stone-900/60'} hover:border-stone-700 transition-all flex flex-col justify-between group">
+        <div class="p-3.5 rounded-[18px] border ${isSelected ? 'border-[#0A84FF] bg-[#0A84FF]/10 shadow-md shadow-blue-500/10' : 'border-white/10 bg-white/[0.04]'} hover:border-white/20 transition-all flex flex-col justify-between group">
           <div>
             <div class="flex items-start justify-between gap-2 mb-1.5">
               <div class="flex items-center gap-2">
                 ${healthDot}
-                <span class="text-sm font-semibold text-stone-100">${m.name}</span>
+                <span class="text-xs font-semibold text-white tracking-tight">${m.name}</span>
                 ${isPinned ? '<span title="Pinned to Daily Drivers">⭐</span>' : ''}
-                ${isSelected ? '<span class="px-1.5 py-0.5 rounded text-[10px] bg-amber-500 text-stone-950 font-bold">ACTIVE</span>' : ''}
+                ${isSelected ? '<span class="px-2 py-0.5 rounded-full text-[9px] bg-[#0A84FF] text-white font-bold">ACTIVE</span>' : ''}
               </div>
               <div class="flex items-center gap-1.5">
                 ${latencyPill}
-                <span class="text-[11px] font-mono text-stone-400">${m.speed_rating || ''}</span>
+                <span class="text-[10px] font-mono text-stone-400">${m.speed_rating || ''}</span>
               </div>
             </div>
             <p class="text-xs text-stone-400 line-clamp-2 mb-2 leading-relaxed">${m.description || ''}</p>
             <div class="flex flex-wrap items-center gap-1.5 mb-3">
               ${groupBadge}
               ${privacyBadge}
-              ${(m.tags || []).slice(0, 2).map(t => `<span class="px-1.5 py-0.5 rounded text-[10px] bg-stone-800 text-stone-400 font-mono">${t}</span>`).join('')}
+              ${(m.tags || []).slice(0, 2).map(t => `<span class="px-1.5 py-0.5 rounded-md text-[10px] bg-white/5 text-stone-300 font-mono">${t}</span>`).join('')}
             </div>
           </div>
-          <div class="flex items-center justify-between pt-2 border-t border-stone-800/80 text-xs">
-            <div class="flex items-center gap-1 text-stone-500 font-mono text-[11px]">
+          <div class="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
+            <div class="flex items-center gap-1 text-stone-400 font-mono text-[11px]">
               <button onclick="window.modelSelector.togglePin('${m.id}')" title="Pin / Unpin to Daily Drivers" class="p-1 hover:text-amber-400 cursor-pointer">
                 ${isPinned ? '⭐' : '☆'}
               </button>
-              <button onclick="window.modelSelector.editModelSlug('${m.id}')" title="Edit Upstream Model Slug" class="p-1 hover:text-amber-400 cursor-pointer">
+              <button onclick="window.modelSelector.editModelSlug('${m.id}')" title="Edit Upstream Model Slug" class="p-1 hover:text-blue-400 cursor-pointer">
                 ✏️
               </button>
               <button onclick="window.modelSelector.toggleHide('${m.id}')" title="Hide Card" class="p-1 hover:text-red-400 cursor-pointer">
@@ -435,11 +435,11 @@ class ModelSelector {
             </div>
             <div class="flex items-center gap-2">
               <button onclick="window.modelSelector.toggleArenaModel('${m.id}')"
-                      class="px-2 py-1 rounded text-[11px] ${isArena ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' : 'bg-stone-800 text-stone-400 hover:text-stone-200'} transition-all cursor-pointer">
+                      class="px-2.5 py-1 rounded-lg text-[11px] ${isArena ? 'bg-[#bf5af2]/20 text-[#bf5af2] border border-[#bf5af2]/40' : 'bg-white/5 text-stone-400 hover:text-white'} transition-all cursor-pointer">
                 ${isArena ? '✓ In Arena' : '+ Arena'}
               </button>
               <button onclick="window.modelSelector.selectModel('${m.id}')"
-                      class="px-3 py-1 rounded font-medium ${isSelected ? 'bg-amber-500 text-stone-950' : 'bg-stone-800 hover:bg-stone-700 text-stone-200'} transition-all cursor-pointer">
+                      class="px-3.5 py-1 rounded-xl text-xs font-semibold ${isSelected ? 'bg-[#0A84FF] text-white shadow-sm shadow-blue-500/25' : 'bg-white/10 hover:bg-white/15 text-stone-200'} transition-all cursor-pointer">
                 ${isSelected ? 'Selected' : 'Use Model'}
               </button>
             </div>

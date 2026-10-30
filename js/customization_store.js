@@ -8,6 +8,32 @@ class CustomizationStore {
   constructor() {
     this.STORAGE_KEY = "llmhub_customization_v35";
     this.defaultThemes = {
+      "apple-sequoia": {
+        id: "apple-sequoia",
+        name: "Apple Intelligence (macOS Sequoia Dark)",
+        canvasBg: "#000000",
+        surfaceBg: "rgba(28, 28, 30, 0.82)",
+        cardBg: "rgba(44, 44, 46, 0.65)",
+        borderColor: "rgba(255, 255, 255, 0.12)",
+        textColor: "#f5f5f7",
+        textMuted: "#86868b",
+        accentPrimary: "#2997ff",
+        accentGradient: "linear-gradient(135deg, #0A84FF 0%, #5E5CE6 35%, #BF5AF2 70%, #FF375F 100%)",
+        isDark: true
+      },
+      "apple-cupertino": {
+        id: "apple-cupertino",
+        name: "Apple Cupertino (macOS Light)",
+        canvasBg: "#f5f5f7",
+        surfaceBg: "rgba(255, 255, 255, 0.82)",
+        cardBg: "#ffffff",
+        borderColor: "rgba(0, 0, 0, 0.08)",
+        textColor: "#1d1d1f",
+        textMuted: "#86868b",
+        accentPrimary: "#0071e3",
+        accentGradient: "linear-gradient(135deg, #0071e3 0%, #5e5ce6 50%, #bf5af2 100%)",
+        isDark: false
+      },
       "gemini-obsidian": {
         id: "gemini-obsidian",
         name: "Google Gemini Obsidian (Dark)",
@@ -162,8 +188,12 @@ class CustomizationStore {
       const raw = localStorage.getItem(this.STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
+        let themeId = parsed.activeThemeId;
+        if (!themeId || themeId === "gemini-obsidian") {
+          themeId = "apple-sequoia";
+        }
         return {
-          activeThemeId: parsed.activeThemeId || "gemini-obsidian",
+          activeThemeId: themeId,
           customAccent: parsed.customAccent || null,
           chatMaxWidth: parsed.chatMaxWidth || "1040px",
           chatFontSize: parsed.chatFontSize || "14px",
@@ -179,7 +209,7 @@ class CustomizationStore {
     }
 
     return {
-      activeThemeId: "gemini-obsidian",
+      activeThemeId: "apple-sequoia",
       customAccent: null,
       chatMaxWidth: "1040px",
       chatFontSize: "14px",

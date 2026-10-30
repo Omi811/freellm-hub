@@ -50,50 +50,59 @@
 <body class="bg-stone-950 text-stone-100 font-sans h-screen flex overflow-hidden antialiased select-text">
 
   <!-- ======================================================== -->
-  <!-- LEFT SIDEBAR: Claude / Antigravity Navigation            -->
+  <!-- LEFT SIDEBAR: macOS Sequoia Glass Navigation             -->
   <!-- ======================================================== -->
-  <aside id="sidebar" class="w-64 sm:w-72 bg-stone-900 border-r border-stone-800/80 flex flex-col justify-between flex-shrink-0 z-30 transition-all duration-200">
+  <aside id="sidebar" class="w-64 sm:w-72 flex flex-col justify-between flex-shrink-0 z-30 transition-all duration-200">
     <div class="p-3.5 flex flex-col h-full overflow-hidden">
+      <!-- macOS Window Traffic Lights -->
+      <div class="flex items-center gap-2 mb-3 px-1 pt-1">
+        <span class="traffic-light traffic-light-red" title="Close Window"></span>
+        <span class="traffic-light traffic-light-yellow" title="Minimize Window"></span>
+        <span class="traffic-light traffic-light-green" title="Zoom / Fullscreen"></span>
+      </div>
+
       <!-- App Header -->
       <div class="flex items-center justify-between mb-3 px-1">
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 font-black text-sm">
-            ✦
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0071e3] via-[#bf5af2] to-[#ff375f] p-[1.5px] shadow-md shadow-indigo-500/20 flex-shrink-0">
+            <div class="w-full h-full rounded-[10px] bg-[#1c1c1e] flex items-center justify-center text-white text-xs font-semibold">
+              ✦
+            </div>
           </div>
           <div>
-            <h1 class="text-sm font-bold tracking-tight text-stone-100 flex items-center gap-1.5">
+            <h1 class="text-xs font-semibold tracking-tight text-white flex items-center gap-1.5">
               LLM Hub
-              <span class="text-[10px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-400 font-mono font-medium">GitHub Pages</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded-full bg-white/10 text-stone-300 font-medium">Sequoia</span>
             </h1>
-            <p class="text-[10px] text-stone-400 font-mono">Claude & Antigravity Suite</p>
+            <p class="text-[10px] text-stone-400">Apple Intelligence Suite</p>
           </div>
         </div>
       </div>
 
-      <!-- New Chat Button -->
+      <!-- New Chat Button (Apple System Blue) -->
       <button onclick="window.app.newChat()"
-              class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-semibold text-xs shadow-sm transition-all mb-2 cursor-pointer">
+              class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#0A84FF] hover:bg-[#0071E3] text-white font-medium text-xs shadow-md shadow-blue-500/25 transition-all mb-2 cursor-pointer">
         <span class="flex items-center gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-          New Chat
+          <span>New Chat</span>
         </span>
-        <kbd class="px-1.5 py-0.5 text-[10px] rounded bg-stone-950/20 text-stone-950 font-mono">Ctrl+K</kbd>
+        <kbd class="px-1.5 py-0.5 text-[9px] rounded-md bg-white/20 text-white font-mono">⌘K</kbd>
       </button>
 
       <!-- Mount Local Project Folder (Native File System Access API) -->
       <button id="mount-project-btn" onclick="window.app.mountLocalProject()"
               title="Grant browser tab direct read/write access to a local project folder"
-              class="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-stone-800 bg-stone-950 hover:bg-stone-850 text-stone-300 font-medium text-xs transition-all mb-3 cursor-pointer">
+              class="w-full flex items-center justify-between px-3.5 py-2 rounded-xl apple-pill-btn text-xs mb-3 cursor-pointer">
         <span class="flex items-center gap-2 truncate">
           <span>📁</span>
           <span class="truncate">Mount Local Project</span>
         </span>
-        <span class="text-[10px] text-stone-500 font-mono">FS API</span>
+        <span class="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-stone-300 font-mono">FS API</span>
       </button>
 
       <!-- Conversations History Header -->
       <div class="flex items-center justify-between px-1 mb-1">
-        <span class="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">Conversations</span>
+        <span class="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">Recent Chats</span>
       </div>
 
       <!-- Conversations List -->
@@ -103,10 +112,10 @@
     </div>
 
     <!-- OmniRoute Admin Button -->
-    <div class="px-3 pb-2 pt-1 border-t border-stone-800/60 bg-stone-900/60">
+    <div class="px-3 pb-2 pt-1 border-t border-white/5">
       <button onclick="window.app && window.app.openOmniRouteDashboard()"
               title="Open OmniRoute Admin Dashboard (:20128/dashboard)"
-              class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-all cursor-pointer">
+              class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/25 transition-all cursor-pointer">
         <span class="flex items-center gap-2">
           <span>🎛️</span>
           <span>OmniRoute Admin</span>
@@ -116,13 +125,13 @@
     </div>
 
     <!-- Bottom Settings Footer -->
-    <div class="p-3 border-t border-stone-800/80 bg-stone-900/90 flex items-center justify-between">
+    <div class="p-3 border-t border-white/5 flex items-center justify-between">
       <button id="settings-trigger-btn"
-              class="flex items-center gap-2 text-xs text-stone-300 hover:text-white px-2 py-1.5 rounded-lg hover:bg-stone-800 transition-colors cursor-pointer">
-        <svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-        <span>API Keys & Config</span>
+              class="flex items-center gap-2 text-xs text-stone-300 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+        <svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        <span>Settings & Keys</span>
       </button>
-      <span class="text-[11px] font-mono text-stone-500 font-medium">v2.2 · OmniRoute + OSINT</span>
+      <span class="text-[11px] font-mono text-stone-500 font-medium">macOS Sequoia</span>
     </div>
   </aside>
 
@@ -233,76 +242,78 @@
         <div id="chat-scroll-area" class="flex-1 overflow-y-auto px-4 py-6">
           <div class="max-w-3xl mx-auto">
 
-            <!-- Welcome Hero (Google Search + Gemini Hybrid Omni-Bar) -->
-            <div id="chat-welcome-hero" class="py-10 text-center">
-              <div class="inline-flex items-center justify-center w-14 h-14 rounded-3xl bg-amber-500/10 border border-amber-500/20 shadow-xl mb-4 text-3xl font-bold">
-                <span class="gemini-sparkle-icon">✦</span>
+            <!-- Welcome Hero (Apple Intelligence Omni-Studio) -->
+            <div id="chat-welcome-hero" class="py-12 text-center">
+              <div class="inline-flex items-center justify-center w-16 h-16 rounded-[22px] apple-intelligence-orb p-[2px] mb-5 shadow-2xl">
+                <div class="w-full h-full rounded-[20px] bg-[#0c0c0e] flex items-center justify-center text-white text-2xl font-bold shadow-inner">
+                  <span class="gemini-sparkle-icon">✦</span>
+                </div>
               </div>
-              <h2 class="text-3xl font-extrabold tracking-tight text-stone-100 mb-2">
-                Where would you like to explore?
+              <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight text-white mb-2.5">
+                How can I help you today?
               </h2>
-              <p class="text-sm text-stone-400 max-w-lg mx-auto mb-6 leading-relaxed">
-                Single unified workspace for Google AI Search, Gemini Chat, OSINT Reconnaissance, and Arena synthesis across 42+ frontier models with zero subscription.
+              <p class="text-sm text-stone-400 max-w-lg mx-auto mb-8 leading-relaxed">
+                Multimodal frontier intelligence across 42+ models with zero subscription. Fast streaming, native code sandbox, and live internet grounding.
               </p>
 
-              <!-- Segmented Omni-Bar Mode Pills -->
-              <div class="inline-flex items-center p-1 rounded-2xl bg-stone-900 border border-stone-800 shadow-lg mb-8 max-w-full overflow-x-auto no-scrollbar gap-1 text-xs font-medium">
-                <button type="button" id="omni-mode-search-btn" onclick="window.app.setMode('search')" class="omni-mode-pill px-3.5 py-1.5 rounded-xl text-stone-400 hover:text-stone-200 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+              <!-- Apple Cupertino Segmented Control Bar -->
+              <div class="apple-segmented-bar inline-flex items-center mb-9 max-w-full overflow-x-auto no-scrollbar gap-1 text-xs">
+                <button type="button" id="omni-mode-search-btn" onclick="window.app.setMode('search')" class="omni-mode-pill apple-segmented-item px-4 py-1.5 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
                   <span>🔍</span>
                   <span>Google AI Search</span>
                 </button>
-                <button type="button" id="omni-mode-gemini-btn" onclick="window.app.setMode('gemini')" class="omni-mode-pill active-omni-pill px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap font-semibold">
-                  <span class="text-amber-400">✦</span>
-                  <span>Gemini Chat</span>
+                <button type="button" id="omni-mode-gemini-btn" onclick="window.app.setMode('gemini')" class="omni-mode-pill apple-segmented-item active px-4 py-1.5 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                  <span class="text-blue-400">✦</span>
+                  <span>Intelligence Chat</span>
                 </button>
-                <button type="button" id="omni-mode-osint-btn" onclick="window.app.setMode('osint')" class="omni-mode-pill px-3.5 py-1.5 rounded-xl text-stone-400 hover:text-stone-200 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                <button type="button" id="omni-mode-osint-btn" onclick="window.app.setMode('osint')" class="omni-mode-pill apple-segmented-item px-4 py-1.5 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
                   <span>🛰️</span>
                   <span>OSINT Recon</span>
                 </button>
-                <button type="button" id="omni-mode-arena-btn" onclick="window.app.setMode('arena')" class="omni-mode-pill px-3.5 py-1.5 rounded-xl text-stone-400 hover:text-stone-200 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                <button type="button" id="omni-mode-arena-btn" onclick="window.app.setMode('arena')" class="omni-mode-pill apple-segmented-item px-4 py-1.5 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
                   <span>⚔️</span>
                   <span>Arena Mode</span>
                 </button>
               </div>
 
-              <!-- Starter Prompt Cards -->
-              <div id="starter-prompt-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left max-w-xl mx-auto">
+              <!-- Starter Prompt Cards (Apple Squircle Glass) -->
+              <div id="starter-prompt-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-left max-w-xl mx-auto">
                 <div onclick="window.app.sendMessage('Search the web for the latest artificial intelligence model releases this week with key citations and technical overviews.')"
-                     class="p-3.5 rounded-xl border border-stone-800 bg-stone-900/60 hover:bg-stone-800/60 cursor-pointer transition-all hover:border-sky-500/40 group">
-                  <div class="flex items-center gap-2 mb-1">
-                    <span class="text-xs font-semibold text-sky-400">🔍 Google AI Overview</span>
+                     class="apple-card p-4 cursor-pointer group">
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-xs font-semibold text-[#2997ff]">🔍 Web Intelligence</span>
                   </div>
-                  <p class="text-xs text-stone-300 leading-snug">
-                    Synthesize live web, GitHub repositories, and tech news with citations.
+                  <p class="text-xs text-stone-300 leading-relaxed">
+                    Live synthesis of news, GitHub repositories, and tech discussions with citations.
                   </p>
                 </div>
 
                 <div onclick="window.app.sendMessage('Write an interactive HTML/JS retro arcade game in a single artifact file.')"
-                     class="p-3.5 rounded-xl border border-stone-800 bg-stone-900/60 hover:bg-stone-800/60 cursor-pointer transition-all hover:border-amber-500/40 group">
-                  <div class="flex items-center gap-2 mb-1">
-                    <span class="text-xs font-semibold text-amber-400">🎨 Interactive Artifact Canvas</span>
+                     class="apple-card p-4 cursor-pointer group">
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-xs font-semibold text-[#bf5af2]">🎨 Interactive Canvas</span>
                   </div>
-                  <p class="text-xs text-stone-300 leading-snug">
-                    Generate an interactive playable app rendered live in the split-screen Canvas.
+                  <p class="text-xs text-stone-300 leading-relaxed">
+                    Generate an interactive playable app rendered live in the split-view Canvas.
                   </p>
                 </div>
 
                 <div onclick="window.app.sendMessage('Analyze attack surface and open ports for example.com with Shodan InternetDB, crt.sh certificate logs, and DoH DNS records.')"
-                     class="p-3.5 rounded-xl border border-stone-800 bg-stone-900/60 hover:bg-stone-800/60 cursor-pointer transition-all hover:border-rose-500/40 group">
-                  <div class="flex items-center gap-2 mb-1">
-                    <span class="text-xs font-semibold text-rose-400">🛰️ OSINT Reconnaissance</span>
+                     class="apple-card p-4 cursor-pointer group">
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-xs font-semibold text-[#ff375f]">🛰️ OSINT Recon</span>
                   </div>
-                  <p class="text-xs text-stone-300 leading-snug">
-                    Scan Shodan InternetDB, crt.sh subdomains, and DNS with real telemetry.
+                  <p class="text-xs text-stone-300 leading-relaxed">
+                    Live telemetry scanning of open ports, certificates, and DNS records.
                   </p>
                 </div>
 
                 <div onclick="window.app.sendMessage('Compare how DeepSeek R1 and Qwen 2.5 Coder solve a distributed consensus algorithm with step-by-step reasoning.')"
-                     class="p-3.5 rounded-xl border border-stone-800 bg-stone-900/60 hover:bg-stone-800/60 cursor-pointer transition-all hover:border-purple-500/40 group">
-                  <div class="flex items-center gap-2 mb-1">
-                    <span class="text-xs font-semibold text-purple-400">🧠 DeepThink Reasoning</span>
+                     class="apple-card p-4 cursor-pointer group">
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-xs font-semibold text-[#5e5ce6]">🧠 Deep Reasoning</span>
                   </div>
-                  <p class="text-xs text-stone-300 leading-snug">
+                  <p class="text-xs text-stone-300 leading-relaxed">
                     Evidence-driven REA protocol with visible step-by-step reasoning traces.
                   </p>
                 </div>
@@ -318,14 +329,14 @@
         </div>
 
         <!-- Bottom Fixed Chat Input Box -->
-        <div class="p-4 border-t border-stone-800/80 bg-stone-950/80 backdrop-blur">
+        <div class="p-4 border-t border-white/5 bg-black/40 backdrop-blur-2xl">
           <div class="max-w-3xl mx-auto">
             <!-- Dynamic Quick-Stack Slash Command Bar -->
             <div class="flex items-center justify-between pb-1.5 mb-1.5">
               <div id="quick-stack-bar" class="flex items-center gap-1.5 overflow-x-auto text-[11px] font-mono no-scrollbar flex-1 mr-2">
                 <!-- Dynamically populated from CustomizationStore -->
               </div>
-              <button onclick="window.settings && window.settings.openModal('slash')" title="Customize Slash Commands & Shortcuts" class="p-1 rounded text-stone-500 hover:text-amber-400 hover:bg-stone-850 cursor-pointer transition-colors flex-shrink-0">
+              <button onclick="window.settings && window.settings.openModal('slash')" title="Customize Slash Commands & Shortcuts" class="p-1 rounded text-stone-500 hover:text-stone-300 hover:bg-white/10 cursor-pointer transition-colors flex-shrink-0">
                 ⚙️
               </button>
             </div>
@@ -333,57 +344,58 @@
             <!-- Attachment Preview Container (Clipboard Image / Dropped Files) -->
             <div id="attachment-preview-container" class="hidden pb-2 flex items-center gap-2"></div>
 
-            <div class="relative rounded-2xl bg-stone-900/90 border border-stone-800 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/30 transition-all shadow-lg p-2.5">
+            <!-- Apple Floating Prompt Capsule -->
+            <div class="relative apple-prompt-container p-3">
               <textarea
                 id="chat-input-textarea"
                 rows="1"
-                placeholder="Ask anything... (Paste image with Ctrl+V, drop code files, or type /code)"
+                placeholder="Ask anything or request code... (Paste screenshot with ⌘V, drop files, or type /code)"
                 class="w-full bg-transparent text-stone-100 placeholder-stone-500 text-sm focus:outline-none resize-none max-h-56 px-2 py-1 leading-relaxed"
               ></textarea>
 
-              <div class="flex items-center justify-between pt-2 px-1 border-t border-stone-800/60 mt-1">
+              <div class="flex items-center justify-between pt-2 px-1 border-t border-white/5 mt-1">
                 <div class="flex items-center gap-2 text-xs text-stone-500">
-                  <button type="button" id="prompt-bar-web-btn" onclick="window.app.toggleWebMode()" title="Toggle Live Web & News Search (Ctrl+W)" class="px-2 py-0.5 rounded-lg bg-stone-800 hover:bg-stone-750 text-stone-400 font-mono text-[11px] flex items-center gap-1 cursor-pointer border border-stone-700/60 transition-all">
+                  <button type="button" id="prompt-bar-web-btn" onclick="window.app.toggleWebMode()" title="Toggle Live Web & News Search (⌘W)" class="apple-pill-btn px-2.5 py-1 text-[11px] flex items-center gap-1 cursor-pointer transition-all">
                     <span class="text-sky-400">🌐</span>
                     <span>Web</span>
                   </button>
-                  <button type="button" onclick="window.app.openFabricModal()" title="Fabric Pattern Library (Ctrl+/)" class="px-2 py-0.5 rounded-lg bg-stone-800 hover:bg-stone-750 text-amber-400 font-mono text-[11px] flex items-center gap-1.5 cursor-pointer border border-stone-700/60 transition-all">
-                    <span>⚡ Patterns</span>
-                    <kbd class="text-[9px] text-stone-400 font-mono">Ctrl+/</kbd>
+                  <button type="button" onclick="window.app.openFabricModal()" title="Fabric Pattern Library (⌘/)" class="apple-pill-btn px-2.5 py-1 text-[11px] flex items-center gap-1.5 cursor-pointer transition-all">
+                    <span class="text-amber-400">⚡</span>
+                    <span>Patterns</span>
+                    <kbd class="text-[9px] text-stone-400 font-mono">⌘/</kbd>
                   </button>
                   <!-- OmniRoute Token Compression Pill -->
                   <div class="relative inline-block">
-                    <button type="button" id="compression-btn" onclick="window.app && window.app.toggleCompressionDropdown()" title="OmniRoute 12-Engine Token Compression" class="px-2 py-0.5 rounded-lg bg-stone-800 hover:bg-stone-750 text-emerald-400 font-mono text-[11px] flex items-center gap-1 cursor-pointer border border-stone-700/60 transition-all">
+                    <button type="button" id="compression-btn" onclick="window.app && window.app.toggleCompressionDropdown()" title="OmniRoute 12-Engine Token Compression" class="apple-pill-btn px-2.5 py-1 text-emerald-400 text-[11px] flex items-center gap-1 cursor-pointer transition-all">
                       <span>🗜️</span>
                       <span id="compression-label">Standard</span>
                       <span class="text-[9px] text-stone-400">▾</span>
                     </button>
-                    <div id="compression-dropdown" class="hidden absolute bottom-full mb-1 left-0 w-36 bg-stone-900 border border-stone-800 rounded-xl shadow-2xl py-1 z-30 font-sans text-xs">
-                      <div class="px-2.5 py-1 text-[10px] uppercase font-bold text-stone-500 border-b border-stone-800/80">Compression</div>
-                      <button type="button" onclick="window.app.setCompression('off')" class="w-full text-left px-2.5 py-1.5 hover:bg-stone-800 text-stone-300 flex items-center justify-between cursor-pointer"><span>Off (0%)</span></button>
-                      <button type="button" onclick="window.app.setCompression('lite')" class="w-full text-left px-2.5 py-1.5 hover:bg-stone-800 text-stone-300 flex items-center justify-between cursor-pointer"><span>Lite (15%)</span></button>
-                      <button type="button" onclick="window.app.setCompression('standard')" class="w-full text-left px-2.5 py-1.5 hover:bg-stone-800 text-emerald-400 font-semibold flex items-center justify-between cursor-pointer"><span>Standard (30%)</span><span class="text-[9px] text-emerald-500 font-mono">def</span></button>
-                      <button type="button" onclick="window.app.setCompression('rtk')" class="w-full text-left px-2.5 py-1.5 hover:bg-stone-800 text-stone-300 flex items-center justify-between cursor-pointer"><span>RTK (50%)</span></button>
-                      <button type="button" onclick="window.app.setCompression('aggressive')" class="w-full text-left px-2.5 py-1.5 hover:bg-stone-800 text-stone-300 flex items-center justify-between cursor-pointer"><span>Aggressive (65%)</span></button>
-                      <button type="button" onclick="window.app.setCompression('ultra')" class="w-full text-left px-2.5 py-1.5 hover:bg-stone-800 text-stone-300 flex items-center justify-between cursor-pointer"><span>Ultra (80%)</span></button>
+                    <div id="compression-dropdown" class="hidden absolute bottom-full mb-1 left-0 w-36 apple-sheet-modal py-1 z-30 font-sans text-xs">
+                      <div class="px-2.5 py-1 text-[10px] uppercase font-bold text-stone-500 border-b border-white/10">Compression</div>
+                      <button type="button" onclick="window.app.setCompression('off')" class="w-full text-left px-2.5 py-1.5 hover:bg-white/10 text-stone-300 flex items-center justify-between cursor-pointer"><span>Off (0%)</span></button>
+                      <button type="button" onclick="window.app.setCompression('lite')" class="w-full text-left px-2.5 py-1.5 hover:bg-white/10 text-stone-300 flex items-center justify-between cursor-pointer"><span>Lite (15%)</span></button>
+                      <button type="button" onclick="window.app.setCompression('standard')" class="w-full text-left px-2.5 py-1.5 hover:bg-white/10 text-emerald-400 font-semibold flex items-center justify-between cursor-pointer"><span>Standard (30%)</span><span class="text-[9px] text-emerald-500 font-mono">def</span></button>
+                      <button type="button" onclick="window.app.setCompression('rtk')" class="w-full text-left px-2.5 py-1.5 hover:bg-white/10 text-stone-300 flex items-center justify-between cursor-pointer"><span>RTK (50%)</span></button>
+                      <button type="button" onclick="window.app.setCompression('aggressive')" class="w-full text-left px-2.5 py-1.5 hover:bg-white/10 text-stone-300 flex items-center justify-between cursor-pointer"><span>Aggressive (65%)</span></button>
+                      <button type="button" onclick="window.app.setCompression('ultra')" class="w-full text-left px-2.5 py-1.5 hover:bg-white/10 text-stone-300 flex items-center justify-between cursor-pointer"><span>Ultra (80%)</span></button>
                     </div>
                   </div>
                   <span id="live-token-counter" class="font-mono text-stone-400 text-[11px]">~0 tokens</span>
-                  <span class="hidden sm:inline">•</span>
-                  <span class="hidden sm:inline">📎 @url, @github, PDFs</span>
                 </div>
 
                 <div class="flex items-center gap-2">
-                  <button type="button" id="mic-btn" onclick="window.app && window.app.toggleVoiceRecording()" title="Voice Input via OmniRoute Whisper (:20128/v1/audio/transcriptions)" class="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-200 transition-all cursor-pointer">
+                  <button type="button" id="mic-btn" onclick="window.app && window.app.toggleVoiceRecording()" title="Voice Input via OmniRoute Whisper (:20128/v1/audio/transcriptions)" class="p-2 rounded-full bg-white/10 hover:bg-white/15 text-stone-300 hover:text-white transition-all cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z"></path></svg>
                   </button>
                   <button id="send-btn" onclick="window.app.sendMessage()"
-                          class="p-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold transition-all shadow-sm cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                          title="Send Prompt (Return)"
+                          class="apple-send-btn p-2 text-white font-bold transition-all shadow-md cursor-pointer flex items-center justify-center w-8 h-8">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
                   </button>
                   <button id="stop-stream-btn" onclick="window.app.stopStreaming()"
-                          class="hidden p-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold transition-all shadow-sm cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                          class="hidden p-2 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center w-8 h-8">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
                   </button>
                 </div>
               </div>
@@ -453,10 +465,10 @@
   </main>
 
   <!-- ======================================================== -->
-  <!-- MODAL: Antigravity Floating Model Selector               -->
+  <!-- MODAL: Apple Intelligence Floating Model Selector        -->
   <!-- ======================================================== -->
-  <div id="model-selector-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4">
-    <div class="w-full max-w-3xl bg-stone-900 border border-stone-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+  <div id="model-selector-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+    <div class="w-full max-w-3xl apple-sheet-modal flex flex-col max-h-[85vh] overflow-hidden">
       <div class="p-4 border-b border-stone-800 flex items-center justify-between bg-stone-950/60">
         <div>
           <h3 class="text-sm font-bold text-stone-100">Select Model</h3>
@@ -529,8 +541,8 @@
   <!-- ======================================================== -->
   <!-- MODAL: Settings & Full Workspace Customizer (v3.5)       -->
   <!-- ======================================================== -->
-  <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4">
-    <div class="w-full max-w-2xl bg-stone-900 border border-stone-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+  <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+    <div class="w-full max-w-2xl apple-sheet-modal flex flex-col max-h-[90vh] overflow-hidden">
       <!-- Modal Header -->
       <div class="p-4 border-b border-stone-800 flex items-center justify-between bg-stone-950/70">
         <div class="flex items-center gap-2.5">
@@ -654,32 +666,37 @@
           <div>
             <label class="block font-semibold text-stone-200 mb-2">Workspace Theme Preset</label>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div onclick="window.settings.selectTheme('gemini-obsidian')" data-theme-id="gemini-obsidian" class="theme-card-option p-3 rounded-xl border border-stone-800 bg-stone-950 hover:border-amber-500/50 cursor-pointer transition-all flex items-center gap-3">
-                <div class="w-6 h-6 rounded-lg bg-[#131314] border border-[#8ab4f8] flex items-center justify-center text-[10px]">✦</div>
+              <div onclick="window.settings.selectTheme('apple-sequoia')" data-theme-id="apple-sequoia" class="theme-card-option p-3 rounded-xl border border-stone-800 bg-stone-950 hover:border-blue-500/50 cursor-pointer transition-all flex items-center gap-3">
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#0071e3] via-[#bf5af2] to-[#ff375f] p-[1.5px] flex items-center justify-center">
+                  <div class="w-full h-full bg-[#1c1c1e] rounded-[5px] flex items-center justify-center text-white text-[10px]">✦</div>
+                </div>
                 <div>
-                  <div class="font-semibold text-stone-200">Google Gemini Obsidian</div>
-                  <div class="text-[10px] text-stone-400 font-mono">Dark · #131314 · Blue Aura</div>
+                  <div class="font-semibold text-stone-100 flex items-center gap-1.5">
+                    Apple Intelligence
+                    <span class="text-[9px] px-1 py-0.2 rounded bg-blue-500/20 text-blue-400 font-medium">Default</span>
+                  </div>
+                  <div class="text-[10px] text-stone-400">macOS Sequoia · Dark Titanium</div>
                 </div>
               </div>
-              <div onclick="window.settings.selectTheme('google-daylight')" data-theme-id="google-daylight" class="theme-card-option p-3 rounded-xl border border-stone-800 bg-stone-950 hover:border-amber-500/50 cursor-pointer transition-all flex items-center gap-3">
-                <div class="w-6 h-6 rounded-lg bg-[#f0f4f9] border border-[#0b57d0] flex items-center justify-center text-[10px] text-blue-600">☀️</div>
+              <div onclick="window.settings.selectTheme('apple-cupertino')" data-theme-id="apple-cupertino" class="theme-card-option p-3 rounded-xl border border-stone-800 bg-stone-950 hover:border-blue-500/50 cursor-pointer transition-all flex items-center gap-3">
+                <div class="w-7 h-7 rounded-lg bg-[#ffffff] border border-[#0071e3] flex items-center justify-center text-[11px] text-[#0071e3]">🍎</div>
                 <div>
-                  <div class="font-semibold text-stone-200">Google Daylight</div>
-                  <div class="text-[10px] text-stone-400 font-mono">Light · Clean Google Doc Canvas</div>
+                  <div class="font-semibold text-stone-100">Apple Cupertino</div>
+                  <div class="text-[10px] text-stone-400">macOS Light · Crisp Minimalist</div>
+                </div>
+              </div>
+              <div onclick="window.settings.selectTheme('gemini-obsidian')" data-theme-id="gemini-obsidian" class="theme-card-option p-3 rounded-xl border border-stone-800 bg-stone-950 hover:border-amber-500/50 cursor-pointer transition-all flex items-center gap-3">
+                <div class="w-7 h-7 rounded-lg bg-[#131314] border border-[#8ab4f8] flex items-center justify-center text-[10px]">✦</div>
+                <div>
+                  <div class="font-semibold text-stone-200">Google Gemini Obsidian</div>
+                  <div class="text-[10px] text-stone-400">Dark · Google Material 3</div>
                 </div>
               </div>
               <div onclick="window.settings.selectTheme('claude-warm')" data-theme-id="claude-warm" class="theme-card-option p-3 rounded-xl border border-stone-800 bg-stone-950 hover:border-amber-500/50 cursor-pointer transition-all flex items-center gap-3">
-                <div class="w-6 h-6 rounded-lg bg-[#191816] border border-[#d97757] flex items-center justify-center text-[10px] text-orange-400">✦</div>
+                <div class="w-7 h-7 rounded-lg bg-[#191816] border border-[#d97757] flex items-center justify-center text-[10px] text-orange-400">✦</div>
                 <div>
                   <div class="font-semibold text-stone-200">Claude Warm Studio</div>
-                  <div class="text-[10px] text-stone-400 font-mono">Dark Terracotta · Anthropic Tone</div>
-                </div>
-              </div>
-              <div onclick="window.settings.selectTheme('cyber-gold')" data-theme-id="cyber-gold" class="theme-card-option p-3 rounded-xl border border-stone-800 bg-stone-950 hover:border-amber-500/50 cursor-pointer transition-all flex items-center gap-3">
-                <div class="w-6 h-6 rounded-lg bg-[#0c0c0e] border border-[#f59e0b] flex items-center justify-center text-[10px] text-amber-400">⚡</div>
-                <div>
-                  <div class="font-semibold text-stone-200">OLED Cyber Gold</div>
-                  <div class="text-[10px] text-stone-400 font-mono">Pitch Black · Pure OLED Gold</div>
+                  <div class="text-[10px] text-stone-400">Anthropic Terracotta Tone</div>
                 </div>
               </div>
             </div>
@@ -853,8 +870,8 @@
   <!-- ======================================================== -->
   <!-- MODAL: Fabric Prompt Library & Pattern Palette (Ctrl+/) -->
   <!-- ======================================================== -->
-  <div id="fabric-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4">
-    <div class="w-full max-w-xl bg-stone-900 border border-stone-800 rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden">
+  <div id="fabric-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+    <div class="w-full max-w-xl apple-sheet-modal flex flex-col max-h-[80vh] overflow-hidden">
       <div class="p-4 border-b border-stone-800 bg-stone-950/60 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="w-6 h-6 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xs font-bold">⚡</span>
@@ -883,8 +900,8 @@
   <!-- ======================================================== -->
   <!-- MODAL: One-Click Published Artifact (Host & Share Link) -->
   <!-- ======================================================== -->
-  <div id="publish-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4">
-    <div class="w-full max-w-md bg-stone-900 border border-stone-800 rounded-2xl shadow-2xl p-5 flex flex-col text-center">
+  <div id="publish-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+    <div class="w-full max-w-md apple-sheet-modal p-6 flex flex-col text-center">
       <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">
         🚀
       </div>
@@ -947,8 +964,8 @@
   <!-- ======================================================== -->
   <!-- MODAL: OpenMausBot-Style File Write Approval Card        -->
   <!-- ======================================================== -->
-  <div id="file-approval-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4">
-    <div class="w-full max-w-lg bg-stone-900 border border-stone-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+  <div id="file-approval-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+    <div class="w-full max-w-lg apple-sheet-modal flex flex-col overflow-hidden">
       <div class="p-4 border-b border-stone-800 flex items-center justify-between bg-stone-950/60">
         <div class="flex items-center gap-2">
           <span class="text-amber-400">📁</span>

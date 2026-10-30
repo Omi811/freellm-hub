@@ -241,8 +241,11 @@ class SettingsManager {
     const themeCards = document.querySelectorAll(".theme-card-option");
     themeCards.forEach(card => {
       const tid = card.dataset.themeId;
-      card.classList.toggle("border-amber-500", tid === store.state.activeThemeId);
-      card.classList.toggle("bg-amber-500/10", tid === store.state.activeThemeId);
+      const isSelected = tid === store.state.activeThemeId;
+      card.classList.toggle("border-[#0A84FF]", isSelected);
+      card.classList.toggle("bg-[#0A84FF]/10", isSelected);
+      card.classList.toggle("shadow-sm", isSelected);
+      card.classList.toggle("shadow-blue-500/10", isSelected);
     });
 
     const accentPicker = document.getElementById("custom-accent-picker");

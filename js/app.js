@@ -343,13 +343,13 @@ class App {
 
     // Update Omni-Bar Mode Pills
     document.querySelectorAll(".omni-mode-pill").forEach(p => {
-      p.classList.remove("active-omni-pill", "bg-amber-500/20", "text-amber-300", "border-amber-500/40", "font-semibold");
+      p.classList.remove("active", "active-omni-pill", "bg-amber-500/20", "text-amber-300", "border-amber-500/40", "font-semibold");
       p.classList.add("text-stone-400");
     });
 
     const activeBtn = document.getElementById(`omni-mode-${mode}-btn`);
     if (activeBtn) {
-      activeBtn.classList.add("active-omni-pill", "bg-amber-500/20", "text-amber-300", "border-amber-500/40", "font-semibold");
+      activeBtn.classList.add("active", "active-omni-pill", "font-semibold");
       activeBtn.classList.remove("text-stone-400");
     }
 
@@ -476,8 +476,8 @@ class App {
     if (existing) existing.remove();
     const toast = document.createElement("div");
     toast.id = "hub-toast-notification";
-    toast.className = "fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-amber-500 text-stone-950 font-bold text-xs shadow-2xl z-50 animate-bounce";
-    toast.textContent = text;
+    toast.className = "fixed top-5 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-black/85 backdrop-blur-2xl border border-white/20 text-white font-medium text-xs shadow-2xl z-50 flex items-center gap-2";
+    toast.innerHTML = `<span class="w-2 h-2 rounded-full bg-[#0A84FF] animate-pulse"></span><span>${text}</span>`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 2500);
   }
@@ -771,7 +771,7 @@ class App {
 
         return `
           <div class="group flex flex-col items-end mb-6">
-            <div class="max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 bg-stone-800 border border-stone-700/80 text-stone-100 text-[0.95rem] shadow-sm leading-relaxed whitespace-pre-wrap selection:bg-amber-500/30">
+            <div class="max-w-[85%] sm:max-w-[75%] rounded-[20px] rounded-br-[4px] px-4 py-3 bg-[#0A84FF] text-white text-[0.95rem] shadow-sm leading-relaxed whitespace-pre-wrap selection:bg-white/30">
               ${this.escapeHtml(msg.content)}
             </div>
             <div class="opacity-80 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 mt-1.5 px-1">
@@ -914,11 +914,13 @@ class App {
         const renderedContent = this.formatMarkdown(msg.content);
 
         return `
-          <div class="flex flex-col mb-8" id="msg-bubble-${index}">
+          <div class="flex flex-col mb-8 apple-assistant-container" id="msg-bubble-${index}">
             <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-md bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs font-bold">✦</span>
-                <span class="text-xs font-semibold text-stone-200">${modelMeta.name}</span>
+              <div class="flex items-center gap-2.5">
+                <div class="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#0071e3] via-[#bf5af2] to-[#ff375f] p-[1.5px] flex items-center justify-center shadow-xs flex-shrink-0">
+                  <div class="w-full h-full bg-[#1c1c1e] rounded-[6.5px] flex items-center justify-center text-white text-[10px] font-semibold">✦</div>
+                </div>
+                <span class="text-xs font-semibold text-white tracking-tight">${modelMeta.name}</span>
               </div>
               <div class="flex items-center gap-2">
                 ${statsPill}
@@ -1111,7 +1113,14 @@ class App {
       const header = document.createElement("div");
       header.className = "code-header flex items-center justify-between";
       header.innerHTML = `
-        <span class="lang-badge">${lang}</span>
+        <div class="flex items-center gap-2.5">
+          <div class="flex items-center gap-1.5 pl-0.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#ff5f56] inline-block shadow-xs"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-[#ffbd2e] inline-block shadow-xs"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-[#27c93f] inline-block shadow-xs"></span>
+          </div>
+          <span class="lang-badge font-mono text-[11px] font-semibold text-[#0A84FF] tracking-wide">${lang}</span>
+        </div>
         <div class="code-actions flex items-center gap-2">
           <button type="button" class="code-copy-btn">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
