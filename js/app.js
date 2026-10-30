@@ -164,27 +164,81 @@ class App {
     }
   }
 
-  async saveArtifactToFile(fileName = null) {
+  // --- OpenMausBot-Style File Write Approval System ---
+  proposeFileWrite(fileName, content) {
+    if (!this.projectDirHandle) {
+      this.mountLocalProject().then(() => {
+        if (this.projectDirHandle) this.proposeFileWrite(fileName, content);
+      });
+      return;
+    }
+
+    const targetName = fileName || prompt("Enter filename to save into mounted project folder (e.g. index.html, app.py, style.css):", "index.html");
+    if (!targetName) return;
+
+    this.pendingFileWrite = {
+      filename: targetName,
+      content: content
+    };
+
+    const modal = document.getElementById("file-approval-modal");
+    const nameEl = document.getElementById("approval-filename");
+    const folderEl = document.getElementById("approval-folder");
+    const sizeEl = document.getElementById("approval-filesize");
+    const diffContainer = document.getElementById("approval-diff-container");
+
+    if (modal && nameEl && folderEl && sizeEl) {
+      nameEl.textContent = targetName;
+      folderEl.textContent = this.mountedProjectName || "Mounted Workspace";
+      sizeEl.textContent = `${new Blob([content]).size} bytes`;
+      if (diffContainer) {
+        diffContainer.classList.add("hidden");
+        diffContainer.textContent = content.substring(0, 3000) + (content.length > 3000 ? "\n... (truncated)" : "");
+      }
+      modal.classList.remove("hidden");
+    } else {
+      this.confirmFileWrite();
+    }
+  }
+
+  toggleFileDiff() {
+    const diffContainer = document.getElementById("approval-diff-container");
+    if (diffContainer) {
+      diffContainer.classList.toggle("hidden");
+    }
+  }
+
+  async confirmFileWrite() {
+    if (!this.pendingFileWrite || !this.projectDirHandle) return;
+    const { filename, content } = this.pendingFileWrite;
+    try {
+      const fileHandle = await this.projectDirHandle.getFileHandle(filename, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(content);
+      await writable.close();
+      this.showCommandToast(`💾 Saved "${filename}" to local project folder!`);
+    } catch (err) {
+      alert(`Failed to save file: ${err.message}`);
+    } finally {
+      this.pendingFileWrite = null;
+      const modal = document.getElementById("file-approval-modal");
+      if (modal) modal.classList.add("hidden");
+    }
+  }
+
+  denyFileWrite() {
+    this.pendingFileWrite = null;
+    const modal = document.getElementById("file-approval-modal");
+    if (modal) modal.classList.add("hidden");
+    this.showCommandToast("❌ File write denied.");
+  }
+
+  saveArtifactToFile(fileName = null) {
     if (!this.currentArtifactContent) {
       alert("No active artifact to save.");
       return;
     }
-    if (!this.projectDirHandle) {
-      await this.mountLocalProject();
-      if (!this.projectDirHandle) return;
-    }
-    try {
-      const targetName = fileName || prompt("Enter filename to save into mounted project folder (e.g. index.html, app.py, style.css):", "index.html");
-      if (!targetName) return;
-
-      const fileHandle = await this.projectDirHandle.getFileHandle(targetName, { create: true });
-      const writable = await fileHandle.createWritable();
-      await writable.write(this.currentArtifactContent);
-      await writable.close();
-      this.showCommandToast(`💾 Saved "${targetName}" directly to local folder!`);
-    } catch (err) {
-      alert(`Failed to save file: ${err.message}`);
-    }
+    this.proposeFileWrite(fileName, this.currentArtifactContent);
   }
 
   // --- Clipboard Image Paste (Ctrl+V) & Drag-and-Drop Context ---
@@ -270,10 +324,14 @@ class App {
     const textarea = document.getElementById("chat-input-textarea");
 
     if (cleanCmd === "/code") {
-      this.modelSelector.selectModel("openrouter/qwen/qwen-2.5-coder-32b-instruct");
+      const targetModel = this.modelSelector.models.some(m => m.id === "auto/coding") ? "auto/coding" : "openrouter/qwen/qwen-2.5-coder-32b-instruct";
+      this.modelSelector.selectModel(targetModel);
       if (this.settings) this.settings.temperature = 0.2;
       localStorage.setItem("freellm_system_prompt", "You are an elite principal software engineer. Write clean, modular, production-ready code with complete implementations, zero placeholders, and exact syntax.");
-      this.showCommandToast("💻 Qwen 2.5 Coder 32B · Temp: 0.2");
+      this.showCommandToast("💻 OmniRoute Coding Combo (auto/coding) · Temp: 0.2");
+    } else if (cleanCmd === "/auto" || cleanCmd === "auto") {
+      this.modelSelector.selectModel("auto");
+      this.showCommandToast("✨ OmniRoute Auto Router (auto) · 15-Factor Score");
     } else if (cleanCmd === "/review") {
       this.modelSelector.selectModel("openrouter/deepseek/deepseek-r1-0528");
       if (this.settings) this.settings.temperature = 0.3;
@@ -289,9 +347,10 @@ class App {
       localStorage.setItem("freellm_system_prompt", "You are a creative UI/UX designer and frontend engineer. Build modern, interactive web applications using HTML, Tailwind CSS, and vanilla JavaScript. Always wrap the complete standalone code in an <antArtifact identifier=\"...\" type=\"html\" title=\"...\"> container.");
       this.showCommandToast("🎨 Interactive HTML/JS Artifact Studio");
     } else if (cleanCmd === "/fast") {
-      this.modelSelector.selectModel("groq/openai/gpt-oss-120b");
+      const fastModel = this.modelSelector.models.some(m => m.id === "auto/fast") ? "auto/fast" : "groq/openai/gpt-oss-120b";
+      this.modelSelector.selectModel(fastModel);
       if (this.settings) this.settings.temperature = 0.7;
-      this.showCommandToast("⚡ Groq LPU (~280 tok/s)");
+      this.showCommandToast("⚡ OmniRoute Fast Combo (auto/fast) · Low Latency");
     } else if (cleanCmd === "/deep") {
       this.toggleDeepThinkMode();
       this.showCommandToast("🧠 DeepThink REA Evidence-Driven Reasoning");
@@ -658,6 +717,13 @@ class App {
           </div>
         ` : '';
 
+        const speakAssistantBtn = `
+          <button type="button" onclick="window.app.speakMessage(${index})" title="Read aloud via OmniRoute TTS" class="text-stone-400 hover:text-emerald-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+            <span class="text-[10px] font-mono">Speak</span>
+          </button>
+        `;
+
         const copyAssistantBtn = `
           <button type="button" onclick="window.app.copyMessageContent(${index})" title="Copy response to clipboard" class="text-stone-400 hover:text-amber-400 p-1 rounded hover:bg-stone-800 transition-colors flex items-center gap-1 cursor-pointer">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
@@ -673,15 +739,33 @@ class App {
         `;
 
         // Transparent Fallback & Intent Routing Badge
-        const routeBadge = (msg.meta && msg.meta.routed_via) ? `
-          <div class="mb-2 flex items-center flex-wrap gap-2 text-xs font-mono">
-            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-stone-900 border ${msg.meta.is_fallback ? 'border-amber-500/50 text-amber-300' : 'border-stone-800 text-stone-400'}">
-              <span>⚡ Routed via ${msg.meta.routed_via}</span>
-              ${msg.meta.is_fallback ? '<span class="text-amber-400 font-bold ml-1">(Failover Active)</span>' : ''}
-            </span>
-            ${msg.meta.intent ? `<span class="text-stone-500">· Intent: ${msg.meta.intent}</span>` : ''}
-          </div>
-        ` : '';
+        let routeBadge = '';
+        if (msg.meta && (msg.meta.routed_via || msg.meta.is_omniroute)) {
+          if (msg.meta.is_omniroute || (msg.meta.routed_via && (msg.meta.routed_via.includes('omniroute') || msg.meta.routed_via.startsWith('auto')))) {
+            const comp = msg.meta.compression || 'STANDARD';
+            const cache = msg.meta.cache || 'MISS';
+            routeBadge = `
+              <div class="mb-2 flex items-center flex-wrap gap-2 text-xs font-mono">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300">
+                  <span>⚡ Routed via OmniRoute · ${msg.meta.routed_via}</span>
+                  <span class="text-stone-400">· Compression: <span class="text-emerald-400 font-bold">${comp}</span></span>
+                  <span class="px-1.5 py-0.2 rounded text-[10px] ${cache === 'HIT' ? 'bg-emerald-500/30 text-emerald-300 font-bold' : 'bg-stone-800 text-stone-400'}">Cache: ${cache}</span>
+                </span>
+                ${msg.meta.intent ? `<span class="text-stone-500">· Intent: ${msg.meta.intent}</span>` : ''}
+              </div>
+            `;
+          } else {
+            routeBadge = `
+              <div class="mb-2 flex items-center flex-wrap gap-2 text-xs font-mono">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-stone-900 border ${msg.meta.is_fallback ? 'border-amber-500/50 text-amber-300' : 'border-stone-800 text-stone-400'}">
+                  <span>⚡ Routed via ${msg.meta.routed_via}</span>
+                  ${msg.meta.is_fallback ? '<span class="text-amber-400 font-bold ml-1">(Failover Active)</span>' : ''}
+                </span>
+                ${msg.meta.intent ? `<span class="text-stone-500">· Intent: ${msg.meta.intent}</span>` : ''}
+              </div>
+            `;
+          }
+        }
 
         const thinkingBlock = msg.thinking ? `
           <div class="thinking-accordion mb-3">
@@ -704,6 +788,7 @@ class App {
               </div>
               <div class="flex items-center gap-2">
                 ${statsPill}
+                ${speakAssistantBtn}
                 ${copyAssistantBtn}
                 ${forkAssistantBtn}
               </div>
@@ -888,18 +973,37 @@ class App {
       const lang = langMatch ? langMatch[1] : "code";
 
       const header = document.createElement("div");
-      header.className = "code-header";
+      header.className = "code-header flex items-center justify-between";
       header.innerHTML = `
         <span class="lang-badge">${lang}</span>
-        <button type="button" class="code-copy-btn">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-          <span>Copy</span>
-        </button>
+        <div class="code-actions flex items-center gap-2">
+          <button type="button" class="code-copy-btn">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span>Copy</span>
+          </button>
+        </div>
       `;
 
       pre.parentNode.insertBefore(wrapper, pre);
       wrapper.appendChild(header);
       wrapper.appendChild(pre);
+
+      if (this.projectDirHandle) {
+        const actionsContainer = header.querySelector(".code-actions");
+        if (actionsContainer) {
+          const writeBtn = document.createElement("button");
+          writeBtn.type = "button";
+          writeBtn.className = "px-2 py-0.5 rounded text-[11px] font-mono text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 cursor-pointer flex items-center gap-1 transition-all";
+          writeBtn.innerHTML = `<span>📁 Write to Project</span>`;
+          writeBtn.title = "OpenMausBot: Confirm file write into mounted project folder";
+          writeBtn.addEventListener("click", () => {
+            const extMap = { python: ".py", javascript: ".js", typescript: ".ts", html: ".html", css: ".css", json: ".json", rust: ".rs", go: ".go", shell: ".sh", bash: ".sh" };
+            const defaultExt = extMap[lang.toLowerCase()] || ".txt";
+            this.proposeFileWrite(`snippet_${Date.now()}${defaultExt}`, el.textContent);
+          });
+          actionsContainer.insertBefore(writeBtn, actionsContainer.firstChild);
+        }
+      }
 
       const copyBtn = header.querySelector(".code-copy-btn");
       if (copyBtn) {
@@ -1526,6 +1630,205 @@ Please diagnose the root cause, fix the bug, and provide the complete, corrected
     if (input && input.value) {
       navigator.clipboard.writeText(input.value);
       this.showCommandToast("📋 Copied live artifact URL to clipboard!");
+    }
+  }
+
+  // --- OmniRoute Gateway Dashboard Drawer ---
+  openOmniRouteDashboard() {
+    const omnirouteBaseUrl = window.getOmniRouteBaseUrl ? window.getOmniRouteBaseUrl() : "http://localhost:20128";
+    const modal = document.getElementById("omniroute-dashboard-modal");
+    const iframe = document.getElementById("omniroute-dashboard-iframe");
+    const extLink = document.getElementById("omniroute-external-link");
+    const dashUrl = `${omnirouteBaseUrl.replace(/\/+$/, '')}/dashboard`;
+
+    if (iframe && iframe.src !== dashUrl) iframe.src = dashUrl;
+    if (extLink) extLink.href = dashUrl;
+    if (modal) modal.classList.remove("hidden");
+  }
+
+  closeOmniRouteDashboard() {
+    const modal = document.getElementById("omniroute-dashboard-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
+  // --- OmniRoute Token Compression Dropdown ---
+  toggleCompressionDropdown() {
+    const dropdown = document.getElementById("compression-dropdown");
+    if (dropdown) dropdown.classList.toggle("hidden");
+  }
+
+  setCompression(profile) {
+    if (window.clientEngine && window.clientEngine.setTokenCompression) {
+      window.clientEngine.setTokenCompression(profile);
+    }
+    const label = document.getElementById("compression-label");
+    if (label) {
+      label.textContent = profile.charAt(0).toUpperCase() + profile.slice(1);
+    }
+    const dropdown = document.getElementById("compression-dropdown");
+    if (dropdown) dropdown.classList.add("hidden");
+    this.showCommandToast(`🗜️ OmniRoute Compression: ${profile.toUpperCase()}`);
+  }
+
+  // --- Multimodal Voice Input (OmniRoute Whisper / Browser Fallback) ---
+  async toggleVoiceRecording() {
+    const micBtn = document.getElementById("mic-btn");
+    if (this.isRecordingVoice) {
+      this.isRecordingVoice = false;
+      if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
+        this.mediaRecorder.stop();
+      }
+      if (micBtn) {
+        micBtn.classList.remove("bg-red-500/20", "text-red-400", "border-red-500/40");
+        micBtn.innerHTML = `<span>⏳</span>`;
+      }
+      return;
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      this.fallbackSpeechRecognition();
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.voiceChunks = [];
+      this.mediaRecorder = new MediaRecorder(stream);
+      this.isRecordingVoice = true;
+
+      if (micBtn) {
+        micBtn.classList.add("bg-red-500/20", "text-red-400", "border-red-500/40");
+        micBtn.title = "Recording... Click again to send to Whisper transcription";
+        micBtn.innerHTML = `<span class="animate-pulse">🔴</span>`;
+      }
+      this.showCommandToast("🎙️ Listening... Speak your prompt now (click mic to finish)");
+
+      this.mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) this.voiceChunks.push(e.data);
+      };
+
+      this.mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const audioBlob = new Blob(this.voiceChunks, { type: "audio/webm" });
+        this.showCommandToast("⏳ Transcribing audio via OmniRoute Whisper...");
+
+        try {
+          const omnirouteBaseUrl = window.getOmniRouteBaseUrl ? window.getOmniRouteBaseUrl() : "http://localhost:20128";
+          const formData = new FormData();
+          formData.append("file", audioBlob, "audio.webm");
+          formData.append("model", "whisper-1");
+
+          const res = await fetch(`${omnirouteBaseUrl}/v1/audio/transcriptions`, {
+            method: "POST",
+            body: formData
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const text = data.text || "";
+            if (text) {
+              const ta = document.getElementById("chat-input-textarea");
+              if (ta) {
+                ta.value = (ta.value ? ta.value + " " : "") + text.trim();
+                ta.focus();
+                this.updateLiveTokenCount();
+              }
+              this.showCommandToast("✅ Voice transcribed successfully!");
+            }
+          } else {
+            throw new Error(`Whisper HTTP ${res.status}`);
+          }
+        } catch (err) {
+          console.warn("OmniRoute Whisper failed, attempting browser SpeechRecognition:", err);
+          this.fallbackSpeechRecognition();
+        } finally {
+          if (micBtn) {
+            micBtn.classList.remove("bg-red-500/20", "text-red-400", "border-red-500/40");
+            micBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z"></path></svg>`;
+            micBtn.title = "Voice Input via OmniRoute Whisper (:20128/v1/audio/transcriptions)";
+          }
+        }
+      };
+
+      this.mediaRecorder.start();
+    } catch (err) {
+      console.warn("Microphone access failed, trying SpeechRecognition:", err);
+      this.fallbackSpeechRecognition();
+      if (micBtn) {
+        micBtn.classList.remove("bg-red-500/20", "text-red-400", "border-red-500/40");
+      }
+    }
+  }
+
+  fallbackSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    this.showCommandToast("🎙️ Listening via browser SpeechRecognition...");
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      const ta = document.getElementById("chat-input-textarea");
+      if (ta) {
+        ta.value = (ta.value ? ta.value + " " : "") + transcript;
+        ta.focus();
+        this.updateLiveTokenCount();
+      }
+      this.showCommandToast("✅ Voice input captured!");
+    };
+    recognition.onerror = (e) => {
+      this.showCommandToast(`⚠️ Speech input error: ${e.error}`);
+    };
+    recognition.start();
+  }
+
+  // --- Multimodal Audio Read-Aloud (OmniRoute Speech / Browser TTS Fallback) ---
+  async speakMessage(index) {
+    if (!this.currentChat || !this.currentChat.messages[index]) return;
+    const rawText = this.currentChat.messages[index].content || "";
+    const cleanText = rawText
+      .replace(/<antArtifact[\s\S]*?<\/antArtifact>/g, "")
+      .replace(/```[\s\S]*?```/g, "")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/[*_#>-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!cleanText) return;
+    this.showCommandToast("🔊 Reading message aloud...");
+
+    try {
+      const omnirouteBaseUrl = window.getOmniRouteBaseUrl ? window.getOmniRouteBaseUrl() : "http://localhost:20128";
+      const res = await fetch(`${omnirouteBaseUrl}/v1/audio/speech`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "tts-1",
+          input: cleanText.substring(0, 4000),
+          voice: "alloy"
+        })
+      });
+
+      if (res.ok) {
+        const audioBlob = await res.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audio.play();
+        return;
+      }
+    } catch (e) {}
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(cleanText.substring(0, 1000));
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      window.speechSynthesis.speak(utterance);
     }
   }
 }

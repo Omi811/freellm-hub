@@ -1,5 +1,154 @@
 window.MODELS_CATALOG = [
   {
+    "id": "auto",
+    "name": "OmniRoute Auto (15-Factor Smart Score · Subscription → API → Free)",
+    "provider": "omniroute",
+    "provider_name": "OmniRoute Gateway",
+    "category": "fast",
+    "context_window": "128k - 2M tokens",
+    "speed_rating": "⚡⚡⚡ 352-Provider Smart Router",
+    "free_quota": "Subscription → API → Free → Offline",
+    "description": "OmniRoute intelligent 15-factor smart router. Evaluates provider health, active quotas, token latency, and pricing to route prompts dynamically across 352 providers with 4-tier automatic fallback.",
+    "tags": [
+      "OmniRoute",
+      "Smart Combos",
+      "352 Providers",
+      "Auto Fallback",
+      "15-Factor"
+    ],
+    "litellm_model": "omniroute/auto",
+    "key_env_var": null,
+    "free_key_url": "https://github.com/cheaper-inference/OmniRoute",
+    "icon": "zap",
+    "color": "emerald",
+    "group": "omniroute_combos",
+    "data_retention": "zero_retention"
+  },
+  {
+    "id": "auto/coding",
+    "name": "OmniRoute Coding Combo (Claude Code / Kiro / Qoder / DeepSeek V4 Pro)",
+    "provider": "omniroute",
+    "provider_name": "OmniRoute Gateway",
+    "category": "code",
+    "context_window": "200,000 tokens",
+    "speed_rating": "⚡⚡ SOTA Frontier Coding",
+    "free_quota": "OAuth Unlocked (Qoder, Kiro, Free Tier)",
+    "description": "Specialized coding combo cascading from Claude Code / Sonnet to Kiro, Qoder (Kimi K2 Thinking), and DeepSeek V4 Pro for robust refactoring and code synthesis.",
+    "tags": [
+      "OmniRoute",
+      "Coding Combo",
+      "Claude Code",
+      "Qoder",
+      "SWE-Bench"
+    ],
+    "litellm_model": "omniroute/auto/coding",
+    "key_env_var": null,
+    "free_key_url": "https://github.com/cheaper-inference/OmniRoute",
+    "icon": "terminal",
+    "color": "cyan",
+    "group": "omniroute_combos",
+    "data_retention": "zero_retention"
+  },
+  {
+    "id": "auto/fast",
+    "name": "OmniRoute Hyper-Fast Combo (Cerebras / Groq LPU / Gemini Flash)",
+    "provider": "omniroute",
+    "provider_name": "OmniRoute Gateway",
+    "category": "fast",
+    "context_window": "128,000 tokens",
+    "speed_rating": "⚡⚡⚡ Blazing (~450 - 1800 tok/s)",
+    "free_quota": "Cerebras & Groq Free Tier Pools",
+    "description": "Ultra low-latency combo targeting Cerebras Wafer-Scale chips, Groq LPUs, and Gemini 2.5 Flash for sub-second responses and instantaneous chat.",
+    "tags": [
+      "OmniRoute",
+      "Hyper-Fast",
+      "Cerebras",
+      "Groq LPU",
+      "Gemini Flash"
+    ],
+    "litellm_model": "omniroute/auto/fast",
+    "key_env_var": null,
+    "free_key_url": "https://github.com/cheaper-inference/OmniRoute",
+    "icon": "zap",
+    "color": "orange",
+    "group": "omniroute_combos",
+    "data_retention": "zero_retention"
+  },
+  {
+    "id": "auto/cheap",
+    "name": "OmniRoute Zero-Cost / Free-Pool Drainer (90+ Free Tiers)",
+    "provider": "omniroute",
+    "provider_name": "OmniRoute Gateway",
+    "category": "fast",
+    "context_window": "128,000 tokens",
+    "speed_rating": "⚡ High Speed Free Tier",
+    "free_quota": "100% Free / Zero Credits Consumed",
+    "description": "Zero-credit drainer cycling through 90+ permanent free tiers, trial quotas, and community pools without incurring any API billing.",
+    "tags": [
+      "OmniRoute",
+      "Zero Cost",
+      "Free Pool",
+      "90+ Providers"
+    ],
+    "litellm_model": "omniroute/auto/cheap",
+    "key_env_var": null,
+    "free_key_url": "https://github.com/cheaper-inference/OmniRoute",
+    "icon": "sparkles",
+    "color": "amber",
+    "group": "omniroute_combos",
+    "data_retention": "zero_retention"
+  },
+  {
+    "id": "auto/offline",
+    "name": "OmniRoute Local OCI / Ollama Fallback",
+    "provider": "omniroute",
+    "provider_name": "OmniRoute Gateway",
+    "category": "offline",
+    "context_window": "32,768 tokens",
+    "speed_rating": "💻 100% Offline Local",
+    "free_quota": "Unlimited Offline Localhost",
+    "description": "Air-gapped and offline routing to OCI Ampere A1 CPU models or local machine Ollama instances when internet or cloud proxies are unreachable.",
+    "tags": [
+      "OmniRoute",
+      "Offline",
+      "Localhost",
+      "OCI Ampere",
+      "Ollama"
+    ],
+    "litellm_model": "omniroute/auto/offline",
+    "key_env_var": null,
+    "free_key_url": "https://github.com/cheaper-inference/OmniRoute",
+    "icon": "cpu",
+    "color": "emerald",
+    "group": "omniroute_combos",
+    "data_retention": "zero_retention"
+  },
+  {
+    "id": "auto/smart",
+    "name": "OmniRoute Frontier Reasoning Combo (DeepSeek R1 / o3 / Claude Thinking)",
+    "provider": "omniroute",
+    "provider_name": "OmniRoute Gateway",
+    "category": "reasoning",
+    "context_window": "128,000 tokens",
+    "speed_rating": "🧠 Deep Evidence-Driven Reasoning",
+    "free_quota": "Frontier Smart Pool",
+    "description": "Frontier chain-of-thought algorithmic and mathematical problem solver combining DeepSeek R1, Claude Thinking, and reasoning cascades.",
+    "tags": [
+      "OmniRoute",
+      "Reasoning",
+      "DeepSeek R1",
+      "o3",
+      "Chain-of-Thought"
+    ],
+    "litellm_model": "omniroute/auto/smart",
+    "key_env_var": null,
+    "free_key_url": "https://github.com/cheaper-inference/OmniRoute",
+    "icon": "boxes",
+    "color": "purple",
+    "group": "omniroute_combos",
+    "data_retention": "zero_retention"
+  },
+  {
     "id": "openrouter/free",
     "name": "Auto Free Smart Router (Zero Setup)",
     "provider": "openrouter",
@@ -1703,6 +1852,14 @@ window.PROVIDERS_CONFIG = {
     "free_tier_info": "50 req/day free GPT-4o with GitHub Personal Token",
     "get_key_url": "https://github.com/settings/tokens"
   },
+  "omniroute": {
+    "name": "OmniRoute Gateway",
+    "env_var": null,
+    "is_keyless": true,
+    "badge_color": "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    "free_tier_info": "352 Providers · Smart Combos & Auto Failover",
+    "get_key_url": "https://github.com/cheaper-inference/OmniRoute"
+  },
   "zai": {
     "name": "Z.ai / Zhipu",
     "env_var": "ZAI_API_KEY",
@@ -1732,5 +1889,57 @@ window.loadDynamicOpenRouterModels = async function() {
     });
   } catch (err) {
     console.warn("Dynamic models check skipped:", err);
+  }
+};
+
+
+// Dynamic OmniRoute Live Models Fetcher
+window.loadDynamicOmniRouteModels = async function(omnirouteBaseUrl) {
+  try {
+    const base = omnirouteBaseUrl || (typeof getOmniRouteBaseUrl === 'function' ? getOmniRouteBaseUrl() : "http://localhost:20128");
+    const res = await fetch(`${base.replace(/\/+$/, '')}/v1/models`, {
+      headers: { "Accept": "application/json" }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    const liveModels = json.data || (Array.isArray(json) ? json : []);
+    let addedCount = 0;
+    liveModels.forEach(m => {
+      const modelId = typeof m === 'string' ? m : (m.id || m.name);
+      if (!modelId) return;
+      const existing = window.MODELS_CATALOG.find(x => x.id === modelId || x.litellm_model === modelId);
+      if (existing) {
+        existing.live_verified = true;
+        existing.is_omniroute_live = true;
+      } else {
+        window.MODELS_CATALOG.push({
+          id: modelId,
+          name: m.name || modelId,
+          provider: "omniroute",
+          provider_name: "OmniRoute Gateway",
+          category: modelId.includes('code') ? 'code' : (modelId.includes('fast') ? 'fast' : (modelId.includes('reason') ? 'reasoning' : 'general')),
+          context_window: (m.context_length ? `${m.context_length.toLocaleString()} tokens` : "128k context"),
+          speed_rating: "⚡ OmniRoute Live (~100 t/s)",
+          free_quota: "OmniRoute Active Gateway",
+          description: m.description || `Dynamic live model from OmniRoute gateway (${modelId}).`,
+          tags: ["OmniRoute", "Live", "Gateway"],
+          litellm_model: modelId,
+          key_env_var: null,
+          free_key_url: "https://github.com/cheaper-inference/OmniRoute",
+          icon: "zap",
+          color: "emerald",
+          group: "omniroute_live",
+          data_retention: "zero_retention",
+          live_verified: true,
+          is_omniroute_live: true
+        });
+        addedCount++;
+      }
+    });
+    console.log(`Live OmniRoute check: Synced ${liveModels.length} models (${addedCount} new added)`);
+    return { success: true, count: liveModels.length, added: addedCount };
+  } catch (err) {
+    console.warn("Dynamic OmniRoute models check failed:", err);
+    return { success: false, error: err.message };
   }
 };

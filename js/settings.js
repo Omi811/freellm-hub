@@ -29,6 +29,11 @@ class SettingsManager {
     } else {
       this.backendUrl = savedBackend;
     }
+
+    // OmniRoute Gateway Base URL (:20128)
+    this.omnirouteUrl = localStorage.getItem("omniroute_url") || localStorage.getItem("freellm_omniroute_url") || (isLocalhost ? "http://localhost:20128" : (this.backendUrl || "http://localhost:20128"));
+    localStorage.setItem("omniroute_url", this.omnirouteUrl);
+
     this.systemPrompt = localStorage.getItem("freellm_system_prompt") || "";
     this.temperature = parseFloat(localStorage.getItem("freellm_temperature") || "0.7");
     this.maxTokens = parseInt(localStorage.getItem("freellm_max_tokens") || "4096");
@@ -67,6 +72,9 @@ class SettingsManager {
     const backendInput = document.getElementById("backend-url-input");
     if (backendInput) backendInput.value = this.backendUrl;
 
+    const omniInput = document.getElementById("omniroute-url-input");
+    if (omniInput) omniInput.value = this.omnirouteUrl;
+
     const promptInput = document.getElementById("system-prompt-input");
     if (promptInput) promptInput.value = this.systemPrompt;
 
@@ -90,21 +98,28 @@ class SettingsManager {
     if (orInput) {
       this.openrouterKey = orInput.value.trim();
       localStorage.setItem("freellm_openrouter_key", this.openrouterKey);
-      window.clientEngine.saveKeys({ openrouter: this.openrouterKey });
+      if (window.clientEngine) window.clientEngine.saveKeys({ openrouter: this.openrouterKey });
     }
 
     const groqInput = document.getElementById("groq-key-input");
     if (groqInput) {
       this.groqKey = groqInput.value.trim();
       localStorage.setItem("freellm_groq_key", this.groqKey);
-      window.clientEngine.saveKeys({ groq: this.groqKey });
+      if (window.clientEngine) window.clientEngine.saveKeys({ groq: this.groqKey });
     }
 
     const backendInput = document.getElementById("backend-url-input");
     if (backendInput) {
       this.backendUrl = backendInput.value.trim().replace(/\/+$/, "");
       localStorage.setItem("freellm_backend_url", this.backendUrl);
-      window.clientEngine.saveKeys({ backendUrl: this.backendUrl });
+      if (window.clientEngine) window.clientEngine.saveKeys({ backendUrl: this.backendUrl });
+    }
+
+    const omniInput = document.getElementById("omniroute-url-input");
+    if (omniInput && omniInput.value.trim()) {
+      this.omnirouteUrl = omniInput.value.trim().replace(/\/+$/, "");
+      localStorage.setItem("omniroute_url", this.omnirouteUrl);
+      localStorage.setItem("freellm_omniroute_url", this.omnirouteUrl);
     }
 
     const promptInput = document.getElementById("system-prompt-input");
@@ -126,7 +141,11 @@ class SettingsManager {
     }
 
     this.closeModal();
-    alert("Settings saved successfully!");
+    if (window.app && window.app.showCommandToast) {
+      window.app.showCommandToast("💾 Settings saved successfully!");
+    } else {
+      alert("Settings saved successfully!");
+    }
   }
 
   setupEventListeners() {
@@ -156,5 +175,17 @@ class SettingsManager {
     }
   }
 }
+
+window.getOmniRouteBaseUrl = function() {
+  if (typeof localStorage !== "undefined") {
+    const stored = localStorage.getItem("omniroute_url") || localStorage.getItem("freellm_omniroute_url");
+    if (stored) return stored.replace(/\/+$/, "");
+  }
+  if (window.settings && window.settings.omnirouteUrl) {
+    return window.settings.omnirouteUrl.replace(/\/+$/, "");
+  }
+  const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+  return isLocalhost ? "http://localhost:20128" : "https://wolf-competitive-reveals-glow.trycloudflare.com";
+};
 
 window.SettingsManager = SettingsManager;

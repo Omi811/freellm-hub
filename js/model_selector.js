@@ -7,8 +7,8 @@ class ModelSelector {
     window.modelSelector = this;
     this.models = window.MODELS_CATALOG || [];
     this.providers = window.PROVIDERS_CONFIG || {};
-    this.selectedModelId = "openrouter/free";
-    this.arenaSelectedModelIds = ["openrouter/free", "openrouter/deepseek/deepseek-r1-0528"];
+    this.selectedModelId = "auto";
+    this.arenaSelectedModelIds = ["auto", "deepseek/deepseek-v4-pro"];
     this.activeCategory = "all";
     this.activeProvider = "all";
     this.searchQuery = "";
@@ -24,7 +24,8 @@ class ModelSelector {
     if (saved && saved !== "freellm/auto" && saved !== "freellm/keyless-llama" && this.models.some(m => m.id === saved)) {
       this.selectedModelId = saved;
     } else {
-      this.selectedModelId = "openrouter/free";
+      const hasAuto = this.models.some(m => m.id === "auto");
+      this.selectedModelId = hasAuto ? "auto" : "openrouter/free";
       localStorage.setItem("freellm_selected_model", this.selectedModelId);
     }
 
@@ -40,17 +41,17 @@ class ModelSelector {
 
   getSelectedModel() {
     return this.models.find(m => m.id === this.selectedModelId) || this.models[0] || {
-      id: "openrouter/free",
-      name: "Auto Free Smart Router",
-      provider_name: "OpenRouter Free",
-      speed_rating: "⚡ Fast"
+      id: "auto",
+      name: "OmniRoute Auto (15-Factor Smart Score)",
+      provider_name: "OmniRoute Gateway",
+      speed_rating: "⚡⚡⚡ 352 Providers"
     };
   }
 
   selectAutoModel() {
-    this.selectModel("openrouter/free");
+    this.selectModel("auto");
     if (this.app) {
-      this.app.showCommandToast("✨ Auto Model Selector Enabled: Intelligently routing prompts");
+      this.app.showCommandToast("✨ OmniRoute Auto Enabled: 15-Factor Smart Router active");
     }
   }
 
@@ -86,6 +87,7 @@ class ModelSelector {
 
     const current = this.getSelectedModel();
     let badgeClass = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+    if (current.provider === "omniroute") badgeClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
     if (current.provider === "google") badgeClass = "bg-blue-500/10 text-blue-400 border-blue-500/20";
     if (current.provider === "groq") badgeClass = "bg-orange-500/10 text-orange-400 border-orange-500/20";
     if (current.provider === "openrouter") badgeClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
@@ -93,9 +95,11 @@ class ModelSelector {
     const health = window.clientEngine ? window.clientEngine.getModelHealth(current.id) : "healthy";
     const healthDot = health === "healthy" ? "🟢" : (health === "degraded" ? "🟡" : "🔴");
 
-    // Compute route type indicator (Local Ollama, BYOK, OCI Tunnel Online, Cloud Keyless)
+    // Compute route type indicator (OmniRoute Gateway, Local Ollama, BYOK, OCI Tunnel Online, Cloud Keyless)
     let routeType = "Cloud Keyless";
-    if (current.provider === "ollama" || current.group === "local_ollama" || (current.id && current.id.startsWith("ollama/"))) {
+    if (current.provider === "omniroute" || (current.group && current.group.startsWith("omniroute"))) {
+      routeType = "OmniRoute Gateway";
+    } else if (current.provider === "ollama" || current.group === "local_ollama" || (current.id && current.id.startsWith("ollama/"))) {
       routeType = "Local Ollama";
     } else if (current.group === "byok") {
       routeType = "BYOK";
@@ -119,11 +123,11 @@ class ModelSelector {
 
     const autoBtn = document.getElementById("auto-model-btn");
     const autoLabel = document.getElementById("auto-model-btn-label");
-    const isAuto = this.selectedModelId === "openrouter/free" || this.selectedModelId === "auto" || this.selectedModelId === "freellm/auto";
+    const isAuto = this.selectedModelId === "auto" || this.selectedModelId === "openrouter/free" || this.selectedModelId === "freellm/auto";
 
     if (autoBtn && autoLabel) {
       if (isAuto) {
-        autoBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/50 bg-amber-500/20 text-amber-300 font-bold text-xs transition-all cursor-pointer shadow-sm shadow-amber-500/10";
+        autoBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/50 bg-emerald-500/20 text-emerald-300 font-bold text-xs transition-all cursor-pointer shadow-sm shadow-emerald-500/10";
         autoLabel.textContent = "Auto Active";
       } else {
         autoBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-800 bg-stone-900 hover:bg-stone-850 text-stone-400 hover:text-stone-200 font-medium text-xs transition-all cursor-pointer";
@@ -145,6 +149,36 @@ class ModelSelector {
           this.app.showCommandToast("⚠️ No running Ollama instance detected at localhost:11434");
         }
       }
+    }
+  }
+
+  async syncOmniRouteModels() {
+    const btn = document.getElementById("sync-omniroute-btn");
+    const originalText = btn ? btn.innerHTML : "";
+    if (btn) btn.innerHTML = `<span>⏳ Syncing...</span>`;
+    try {
+      const omnirouteBaseUrl = window.getOmniRouteBaseUrl ? window.getOmniRouteBaseUrl() : "http://localhost:20128";
+      if (this.app) this.app.showCommandToast(`🔄 Connecting to OmniRoute gateway (${omnirouteBaseUrl})...`);
+      
+      const res = await window.loadDynamicOmniRouteModels(omnirouteBaseUrl);
+      if (res && res.success) {
+        this.models = window.MODELS_CATALOG;
+        this.renderModalContent();
+        this.renderTriggerPill();
+        if (this.app) {
+          this.app.showCommandToast(`⚡ OmniRoute Synced: ${res.count} models active (${res.added} new added)`);
+        }
+      } else {
+        const errorMsg = res?.error || "Connection refused";
+        if (this.app) {
+          this.app.showCommandToast(`⚠️ OmniRoute Offline at ${omnirouteBaseUrl}`);
+        }
+        alert(`Cannot connect to OmniRoute Gateway at:\n${omnirouteBaseUrl}\n\nError: ${errorMsg}\n\nTip: Verify OmniRoute is running on port 20128 or update the Base URL in API Keys & Settings.`);
+      }
+    } catch (e) {
+      alert(`OmniRoute Sync Error: ${e.message}`);
+    } finally {
+      if (btn) btn.innerHTML = originalText;
     }
   }
 
@@ -190,14 +224,19 @@ class ModelSelector {
     const q = this.searchQuery.toLowerCase().trim();
     return this.models.filter(m => {
       // Privacy filter
-      if (this.zeroRetentionOnly && m.data_retention !== "zero_retention" && m.provider !== "ollama") {
+      if (this.zeroRetentionOnly && m.data_retention !== "zero_retention" && m.provider !== "ollama" && m.provider !== "omniroute") {
         return false;
       }
 
       // Category filters
       if (this.activeCategory !== "all") {
-        if (this.activeCategory === "daily") {
+        if (this.activeCategory === "omniroute") {
+          if (m.provider !== "omniroute" && m.group !== "omniroute_combos" && m.group !== "omniroute_live") return false;
+        } else if (this.activeCategory === "daily") {
           const dailyIds = [
+            "auto",
+            "auto/coding",
+            "auto/fast",
             "openrouter/free",
             "deepseek/deepseek-v4-pro",
             "moonshot/kimi-k3",
@@ -212,15 +251,23 @@ class ModelSelector {
             "ollama/ternary-bonsai-2-27b"
           ];
           if (!dailyIds.includes(m.id) && m.provider !== "ollama") return false;
+        } else if (this.activeCategory === "keyless") {
+          if (m.group !== "verified_keyless" && m.group !== "omniroute_combos") return false;
+        } else if (this.activeCategory === "byok") {
+          if (m.group !== "byok") return false;
+        } else if (this.activeCategory === "offline") {
+          if (m.provider !== "ollama" && m.id !== "auto/offline") return false;
+        } else if (this.activeCategory === "uncensored") {
+          if (m.category !== "uncensored") return false;
+        } else if (this.activeCategory === "fast") {
+          if (m.category !== "fast") return false;
+        } else if (this.activeCategory === "reasoning") {
+          if (m.category !== "reasoning") return false;
+        } else if (this.activeCategory === "code") {
+          if (m.category !== "code") return false;
+        } else if (this.activeCategory === "image") {
+          if (m.category !== "image") return false;
         }
-        if (this.activeCategory === "keyless" && m.group !== "verified_keyless") return false;
-        if (this.activeCategory === "byok" && m.group !== "byok") return false;
-        if (this.activeCategory === "offline" && m.provider !== "ollama") return false;
-        if (this.activeCategory === "uncensored" && m.category !== "uncensored") return false;
-        if (this.activeCategory === "fast" && m.category !== "fast") return false;
-        if (this.activeCategory === "reasoning" && m.category !== "reasoning") return false;
-        if (this.activeCategory === "code" && m.category !== "code") return false;
-        if (this.activeCategory === "image" && m.category !== "image") return false;
       }
 
       if (q) {
@@ -259,16 +306,19 @@ class ModelSelector {
                         (health === "degraded" ? '<span class="text-amber-400" title="Endpoint Status: Degraded / Rate Limited">🟡</span>' : 
                         '<span class="text-red-400" title="Endpoint Status: Offline / 503">🔴</span>');
 
-      const isZeroRetention = m.data_retention === "zero_retention" || m.provider === "ollama";
+      const isZeroRetention = m.data_retention === "zero_retention" || m.provider === "ollama" || m.provider === "omniroute";
       const privacyBadge = isZeroRetention 
         ? '<span class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">🛡️ Zero-Retention</span>'
         : '<span class="px-1.5 py-0.5 rounded text-[10px] bg-stone-800 text-stone-400 font-mono">🌐 Cloud Logged</span>';
 
-      const groupBadge = m.group === "verified_keyless"
-        ? '<span class="px-1.5 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">⚡ Keyless</span>'
-        : (m.group === "local_ollama" 
-           ? '<span class="px-1.5 py-0.5 rounded text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono">💻 100% Offline</span>'
-           : '<span class="px-1.5 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono">🔑 BYOK</span>');
+      let groupBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono">🔑 BYOK</span>';
+      if (m.group === "omniroute_combos" || m.group === "omniroute_live") {
+        groupBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-mono">⚡ OmniRoute</span>';
+      } else if (m.group === "verified_keyless") {
+        groupBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">⚡ Keyless</span>';
+      } else if (m.group === "local_ollama" || m.provider === "ollama") {
+        groupBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono">💻 100% Offline</span>';
+      }
 
       return `
         <div class="p-3.5 rounded-xl border ${isSelected ? 'border-amber-500/80 bg-amber-500/5' : 'border-stone-800 bg-stone-900/60'} hover:border-stone-700 transition-all flex flex-col justify-between">
@@ -292,11 +342,11 @@ class ModelSelector {
             <span class="text-stone-500 font-mono text-[11px]">${m.context_window || ''}</span>
             <div class="flex items-center gap-2">
               <button onclick="window.modelSelector.toggleArenaModel('${m.id}')"
-                      class="px-2 py-1 rounded text-[11px] ${isArena ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' : 'bg-stone-800 text-stone-400 hover:text-stone-200'} transition-all">
+                      class="px-2 py-1 rounded text-[11px] ${isArena ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' : 'bg-stone-800 text-stone-400 hover:text-stone-200'} transition-all cursor-pointer">
                 ${isArena ? '✓ In Arena' : '+ Arena'}
               </button>
               <button onclick="window.modelSelector.selectModel('${m.id}')"
-                      class="px-3 py-1 rounded font-medium ${isSelected ? 'bg-amber-500 text-stone-950' : 'bg-stone-800 hover:bg-stone-700 text-stone-200'} transition-all">
+                      class="px-3 py-1 rounded font-medium ${isSelected ? 'bg-amber-500 text-stone-950' : 'bg-stone-800 hover:bg-stone-700 text-stone-200'} transition-all cursor-pointer">
                 ${isSelected ? 'Selected' : 'Use Model'}
               </button>
             </div>

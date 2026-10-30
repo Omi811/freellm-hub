@@ -102,6 +102,19 @@
       </div>
     </div>
 
+    <!-- OmniRoute Admin Button -->
+    <div class="px-3 pb-2 pt-1 border-t border-stone-800/60 bg-stone-900/60">
+      <button onclick="window.app && window.app.openOmniRouteDashboard()"
+              title="Open OmniRoute Admin Dashboard (:20128/dashboard)"
+              class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-all cursor-pointer">
+        <span class="flex items-center gap-2">
+          <span>🎛️</span>
+          <span>OmniRoute Admin</span>
+        </span>
+        <span class="text-[10px] bg-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-300 font-mono">:20128</span>
+      </button>
+    </div>
+
     <!-- Bottom Settings Footer -->
     <div class="p-3 border-t border-stone-800/80 bg-stone-900/90 flex items-center justify-between">
       <button id="settings-trigger-btn"
@@ -109,7 +122,7 @@
         <svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         <span>API Keys & Config</span>
       </button>
-      <span class="text-[11px] font-mono text-stone-500 font-medium">v2.1 · OCI Hybrid + OSINT</span>
+      <span class="text-[11px] font-mono text-stone-500 font-medium">v2.2 · OmniRoute + OSINT</span>
     </div>
   </aside>
 
@@ -320,12 +333,32 @@
                     <span>⚡ Patterns</span>
                     <kbd class="text-[9px] text-stone-400 font-mono">Ctrl+/</kbd>
                   </button>
+                  <!-- OmniRoute Token Compression Pill -->
+                  <div class="relative inline-block">
+                    <button type="button" id="compression-btn" onclick="window.app && window.app.toggleCompressionDropdown()" title="OmniRoute 12-Engine Token Compression" class="px-2 py-0.5 rounded-lg bg-stone-800 hover:bg-stone-750 text-emerald-400 font-mono text-[11px] flex items-center gap-1 cursor-pointer border border-stone-700/60 transition-all">
+                      <span>🗜️</span>
+                      <span id="compression-label">Standard</span>
+                      <span class="text-[9px] text-stone-400">▾</span>
+                    </button>
+                    <div id="compression-dropdown" class="hidden absolute bottom-full mb-1 left-0 w-36 bg-stone-900 border border-stone-800 rounded-xl shadow-2xl py-1 z-30 font-sans text-xs">
+                      <div class="px-2.5 py-1 text-[10px] uppercase font-bold text-stone-500 border-b border-stone-800/80">Compression</div>
+                      <button type="button" onclick="window.app.setCompression('off')" class="w-full text-left px-2.5 py-1.5 hover:bg-stone-800 text-stone-300 flex items-center justify-between cursor-pointer"><span>Off (0%)</span></button>
+                      <button type="button" onclick="window.app.setCompression('lite')" class="w-full text-left px-2.5 py-1.5 hover:bg-stone-800 text-stone-300 flex items-center justify-between cursor-pointer"><span>Lite (15%)</span></button>
+                      <button type="button" onclick="window.app.setCompression('standard')" class="w-full text-left px-2.5 py-1.5 hover:bg-stone-800 text-emerald-400 font-semibold flex items-center justify-between cursor-pointer"><span>Standard (30%)</span><span class="text-[9px] text-emerald-500 font-mono">def</span></button>
+                      <button type="button" onclick="window.app.setCompression('rtk')" class="w-full text-left px-2.5 py-1.5 hover:bg-stone-800 text-stone-300 flex items-center justify-between cursor-pointer"><span>RTK (50%)</span></button>
+                      <button type="button" onclick="window.app.setCompression('aggressive')" class="w-full text-left px-2.5 py-1.5 hover:bg-stone-800 text-stone-300 flex items-center justify-between cursor-pointer"><span>Aggressive (65%)</span></button>
+                      <button type="button" onclick="window.app.setCompression('ultra')" class="w-full text-left px-2.5 py-1.5 hover:bg-stone-800 text-stone-300 flex items-center justify-between cursor-pointer"><span>Ultra (80%)</span></button>
+                    </div>
+                  </div>
                   <span id="live-token-counter" class="font-mono text-stone-400 text-[11px]">~0 tokens</span>
                   <span class="hidden sm:inline">•</span>
                   <span class="hidden sm:inline">📎 @url, @github, PDFs</span>
                 </div>
 
                 <div class="flex items-center gap-2">
+                  <button type="button" id="mic-btn" onclick="window.app && window.app.toggleVoiceRecording()" title="Voice Input via OmniRoute Whisper (:20128/v1/audio/transcriptions)" class="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-200 transition-all cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z"></path></svg>
+                  </button>
                   <button id="send-btn" onclick="window.app.sendMessage()"
                           class="p-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold transition-all shadow-sm cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -439,10 +472,17 @@
                   class="px-3 py-2 rounded-xl border border-stone-800 bg-stone-950 text-xs text-cyan-400 hover:text-cyan-300 hover:bg-stone-900 cursor-pointer flex items-center gap-1.5 whitespace-nowrap transition-all">
             <span>🔄 Scan Local Ollama</span>
           </button>
+          <button id="sync-omniroute-btn"
+                  onclick="window.modelSelector.syncOmniRouteModels()"
+                  title="Sync live models from OmniRoute Gateway (:20128/v1/models)"
+                  class="px-3 py-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 cursor-pointer flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <span>🔄 Sync OmniRoute Models</span>
+          </button>
         </div>
 
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
           <button class="category-pill active-pill px-3 py-1 rounded-lg bg-amber-500 text-stone-950 font-medium whitespace-nowrap" data-category="all">All Models</button>
+          <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-emerald-400 hover:bg-stone-700 whitespace-nowrap" data-category="omniroute">⚡ OmniRoute Live</button>
           <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-amber-300 hover:bg-stone-700 whitespace-nowrap" data-category="daily">⭐ Daily Drivers</button>
           <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-amber-400 hover:bg-stone-700 whitespace-nowrap" data-category="keyless">⚡ Keyless</button>
           <button class="category-pill px-3 py-1 rounded-lg bg-stone-800 text-purple-400 hover:bg-stone-700 whitespace-nowrap" data-category="byok">🔑 BYOK</button>
@@ -512,6 +552,25 @@
           <div class="mt-2">
             <button type="button" onclick="window.modelSelector.scanLocalOllama()" class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-850 text-cyan-400 border border-cyan-500/30 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-all">
               <span>🔄 Scan Local Ollama (http://localhost:11434)</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-medium text-emerald-400 mb-1">⚡ OmniRoute Gateway Base URL (:20128)</label>
+          <input
+            id="omniroute-url-input"
+            type="text"
+            placeholder="http://localhost:20128 or https://wolf-competitive-reveals-glow.trycloudflare.com"
+            class="w-full bg-stone-950 border border-emerald-500/30 rounded-xl px-3 py-2 text-stone-100 font-mono focus:outline-none focus:border-emerald-500/60"
+          />
+          <span class="text-[11px] text-stone-500 mt-1 block">Routes to OmniRoute 15-factor gateway with 352 providers, token compression, and multimodal features.</span>
+          <div class="mt-2 flex items-center gap-2">
+            <button type="button" onclick="window.modelSelector.syncOmniRouteModels()" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-all">
+              <span>🔄 Sync OmniRoute Models</span>
+            </button>
+            <button type="button" onclick="window.app && window.app.openOmniRouteDashboard()" class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-850 text-stone-300 border border-stone-800 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-all">
+              <span>🎛️ Control Panel</span>
             </button>
           </div>
         </div>
@@ -630,6 +689,76 @@
         <button onclick="document.getElementById('publish-modal').classList.add('hidden')" class="w-full py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-medium cursor-pointer">
           Done
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: OmniRoute Control Panel Slide-Over Drawer         -->
+  <!-- ======================================================== -->
+  <div id="omniroute-dashboard-modal" class="hidden fixed inset-0 z-50 flex justify-end bg-stone-950/80 backdrop-blur-sm transition-all">
+    <div class="w-full max-w-4xl h-full bg-stone-900 border-l border-stone-800 flex flex-col shadow-2xl">
+      <div class="p-3.5 border-b border-stone-800 flex items-center justify-between bg-stone-950/80">
+        <div class="flex items-center gap-2">
+          <span class="text-base">🎛️</span>
+          <div>
+            <h3 class="text-xs font-bold text-stone-100 flex items-center gap-2">
+              OmniRoute Gateway Control Panel
+              <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono border border-emerald-500/30">Active :20128</span>
+            </h3>
+            <p class="text-[11px] text-stone-400">Live 15-factor routing metrics, active quotas, and provider health.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a id="omniroute-external-link" href="http://localhost:20128/dashboard" target="_blank" class="px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-emerald-400 text-xs flex items-center gap-1 font-mono transition-colors">
+            <span>Open in New Tab</span>
+            <span>↗</span>
+          </a>
+          <button onclick="window.app && window.app.closeOmniRouteDashboard()" class="p-1 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800 cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex-1 bg-stone-950 relative overflow-hidden">
+        <iframe id="omniroute-dashboard-iframe" src="about:blank" class="w-full h-full border-none" title="OmniRoute Dashboard"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: OpenMausBot-Style File Write Approval Card        -->
+  <!-- ======================================================== -->
+  <div id="file-approval-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4">
+    <div class="w-full max-w-lg bg-stone-900 border border-stone-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+      <div class="p-4 border-b border-stone-800 flex items-center justify-between bg-stone-950/60">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-400">📁</span>
+          <h3 class="text-sm font-bold text-stone-100">Confirm File Write to Local Folder</h3>
+        </div>
+        <button onclick="window.app && window.app.denyFileWrite()" class="text-stone-400 hover:text-white p-1 rounded-lg hover:bg-stone-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="p-4 space-y-3 text-xs">
+        <div class="p-3 rounded-xl bg-stone-950 border border-stone-800 font-mono">
+          <div class="text-stone-400 mb-1">Target File: <span id="approval-filename" class="text-emerald-400 font-bold"></span></div>
+          <div class="text-stone-500">Mounted Folder: <span id="approval-folder" class="text-stone-300"></span></div>
+          <div class="text-stone-500">Size: <span id="approval-filesize" class="text-stone-300"></span></div>
+        </div>
+        <div id="approval-diff-container" class="hidden max-h-60 overflow-y-auto p-3 rounded-xl bg-[#0d0d10] border border-stone-800 font-mono text-[11px] text-stone-300 whitespace-pre leading-relaxed"></div>
+      </div>
+      <div class="p-4 border-t border-stone-800 bg-stone-950/60 flex items-center justify-between">
+        <button type="button" onclick="window.app && window.app.toggleFileDiff()" class="px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-cyan-400 font-medium text-xs flex items-center gap-1 cursor-pointer transition-all">
+          <span>👀 View Diff</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="window.app && window.app.denyFileWrite()" class="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-750 text-stone-300 font-medium text-xs cursor-pointer transition-all">
+            ❌ Deny
+          </button>
+          <button type="button" onclick="window.app && window.app.confirmFileWrite()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold text-xs cursor-pointer transition-all shadow-sm">
+            ✅ Allow Write
+          </button>
+        </div>
       </div>
     </div>
   </div>

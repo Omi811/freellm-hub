@@ -82,8 +82,116 @@ class ClientEngine {
       localStorage.setItem("freellm_auth_token", "antigravity2026");
     }
 
+    this.tokenCompression = localStorage.getItem("freellm_token_compression") || "standard";
+
     // NOTE: Removed automatic scanLocalOllamaModels() on page load to eliminate
     // Chrome's intrusive "Local Network Access" popup. Scanned lazily instead.
+  }
+
+  setTokenCompression(profile) {
+    this.tokenCompression = profile;
+    localStorage.setItem("freellm_token_compression", profile);
+  }
+
+  // --- Dynamic OmniRoute Gateway Direct Streaming (:20128/v1/chat/completions) ---
+  async *streamOmniRouteDirect(model, messages, system_prompt, abortSignal, temperature = 0.7, max_tokens = 4096) {
+    const omnirouteBase = (window.getOmniRouteBaseUrl ? window.getOmniRouteBaseUrl() : "http://localhost:20128").replace(/\/+$/, "");
+    const startTime = Date.now();
+    let tokenCount = 0;
+    let fullContent = "";
+
+    try {
+      const formatted = [];
+      if (system_prompt) formatted.push({ role: "system", content: system_prompt });
+      for (const m of messages) formatted.push({ role: m.role || "user", content: m.content || "" });
+
+      const controller = new AbortController();
+      let streamSignal = controller.signal;
+      if (abortSignal) {
+        streamSignal = typeof AbortSignal.any === "function" 
+          ? AbortSignal.any([abortSignal, controller.signal])
+          : abortSignal;
+      }
+
+      const res = await fetch(`${omnirouteBase}/v1/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-omniroute-compression": this.tokenCompression || "standard"
+        },
+        signal: streamSignal,
+        body: JSON.stringify({
+          model: model,
+          messages: formatted,
+          temperature: temperature,
+          max_tokens: max_tokens,
+          stream: true
+        })
+      });
+
+      if (!res.ok) {
+        console.warn(`OmniRoute gateway returned HTTP ${res.status}`);
+        return false;
+      }
+
+      const cacheStatus = res.headers.get("x-omniroute-cache") || res.headers.get("X-OmniRoute-Cache") || "MISS";
+      const actualModel = res.headers.get("x-omniroute-model") || model;
+
+      yield {
+        type: "meta",
+        intent: "OmniRoute Gateway",
+        routed_via: actualModel,
+        compression: (this.tokenCompression || "standard").toUpperCase(),
+        cache: cacheStatus,
+        is_omniroute: true
+      };
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed === "data: [DONE]") continue;
+          if (trimmed.startsWith("data: ")) {
+            try {
+              const parsed = JSON.parse(trimmed.slice(6));
+              const delta = parsed.choices?.[0]?.delta;
+              if (delta) {
+                if (delta.reasoning_content || delta.reasoning) {
+                  yield { type: "thinking", delta: delta.reasoning_content || delta.reasoning };
+                }
+                if (delta.content) {
+                  fullContent += delta.content;
+                  tokenCount++;
+                  yield { type: "chunk", delta: delta.content };
+                }
+              }
+            } catch (e) {}
+          }
+        }
+      }
+
+      const elapsed = (Date.now() - startTime) / 1000;
+      yield {
+        type: "done",
+        tokens: tokenCount,
+        elapsed: elapsed,
+        tps: Math.round(tokenCount / Math.max(elapsed, 0.05)),
+        content: fullContent
+      };
+      return true;
+    } catch (err) {
+      console.warn("Direct OmniRoute streaming failed:", err);
+      return false;
+    }
   }
 
   // --- Dynamic Localhost Ollama Auto-Scan (Direct Browser to http://localhost:11434) ---
@@ -469,6 +577,18 @@ class ClientEngine {
       activeModel = "openrouter/free";
     }
 
+    // 2.5 OmniRoute Gateway Handling (:20128/v1/chat/completions)
+    const isOmniModel = activeModel === "auto" || activeModel.startsWith("auto/") || activeModel.startsWith("omniroute/") || (window.MODELS_CATALOG && window.MODELS_CATALOG.some(m => m.id === activeModel && (m.provider === "omniroute" || m.group === "omniroute_combos" || m.group === "omniroute_live")));
+    if (isOmniModel) {
+      const omniSuccess = yield* this.streamOmniRouteDirect(activeModel, messages, activeSystemPrompt, abortSignal, temperature, max_tokens);
+      if (omniSuccess) {
+        this.recordHealth(activeModel, true);
+        return;
+      }
+      yield { type: "chunk", delta: "\n\n*(OmniRoute gateway offline at :20128, falling back to Cloud Smart Router...)*\n\n" };
+      activeModel = "openrouter/free";
+    }
+
     // 3. Image Generation Handling
     const isImageReq = image_mode || (activeModel && activeModel.startsWith("image/")) || ["/image", "@image", "image:"].some(p => lastUserPrompt.trim().toLowerCase().startsWith(p));
     if (isImageReq) {
@@ -512,7 +632,10 @@ class ClientEngine {
 
         const response = await fetch(`${this.backendUrl}/api/chat/stream`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-omniroute-compression": this.tokenCompression || "standard"
+          },
           signal: backendSignal,
           body: JSON.stringify({
             model_id: activeModel,
