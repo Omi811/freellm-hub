@@ -90,7 +90,8 @@
       // 1. Studio Modal Overlay
       this.modal = document.createElement('div');
       this.modal.id = 'quant-studio-modal';
-      this.modal.className = 'fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden flex items-center justify-center p-2 sm:p-5 transition-all';
+      this.modal.className = 'fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-2 sm:p-5 transition-all hidden';
+      this.modal.style.display = 'none';
       this.modal.innerHTML = `
         <div class="w-full max-w-6xl h-[94vh] rounded-3xl bg-stone-950/95 border border-cyan-500/40 shadow-2xl flex flex-col overflow-hidden font-sans text-stone-100"
              style="box-shadow: 0 24px 60px -12px rgba(6, 182, 212, 0.25);">
@@ -204,6 +205,14 @@
       `;
       document.body.appendChild(this.modal);
 
+      this.modal.addEventListener('click', (e) => {
+        if (e.target === this.modal) this.close();
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.isOpen) this.close();
+      });
+
       this.renderRightPanel();
     }
 
@@ -255,33 +264,7 @@
             </div>
 
             <!-- Messages Stream Area -->
-            <div id="quant-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3.5 font-sans text-xs">
-              ${this.studioMessages.length === 0 ? `
-                <div class="h-full flex flex-col items-center justify-center text-center p-6 text-stone-400 space-y-3">
-                  <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-300 text-2xl shadow-inner">
-                    💬
-                  </div>
-                  <div>
-                    <h4 class="font-bold text-stone-200 text-sm">Neural Studio Interactive Chatbox</h4>
-                    <p class="text-[11px] text-stone-400 max-w-xs mt-1">Submit developer prompts directly inside the studio. Watch the 3D Quant Neural Network react live to tokens!</p>
-                  </div>
-                  <div class="flex flex-wrap gap-1.5 justify-center pt-2 max-w-sm">
-                    <button type="button" onclick="window.quantStudio.applyPromptChip('/ponytail Optimize for minimal diff: ')"
-                            class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 hover:border-amber-500/40 text-amber-300 text-[11px] font-mono transition-all cursor-pointer">
-                      ⚡ /ponytail
-                    </button>
-                    <button type="button" onclick="window.quantStudio.applyPromptChip('Write comprehensive unit tests with edge-case coverage: ')"
-                            class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 hover:border-emerald-500/40 text-emerald-300 text-[11px] transition-all cursor-pointer">
-                      🧪 Unit Tests
-                    </button>
-                    <button type="button" onclick="window.quantStudio.applyPromptChip('Analyze quantization latency and memory bandwidth: ')"
-                            class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 hover:border-cyan-500/40 text-cyan-300 text-[11px] transition-all cursor-pointer">
-                      ⚛️ Quant Analysis
-                    </button>
-                  </div>
-                </div>
-              ` : ''}
-            </div>
+            <div id="quant-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3.5 font-sans text-xs"></div>
 
             <!-- Prompt Submission Box -->
             <div class="p-3 border-t border-stone-800 bg-stone-900/40 space-y-2">
@@ -506,7 +489,31 @@
       if (!container) return;
 
       if (this.studioMessages.length === 0) {
-        this.renderRightPanel();
+        container.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-center p-6 text-stone-400 space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-300 text-2xl shadow-inner">
+              💬
+            </div>
+            <div>
+              <h4 class="font-bold text-stone-200 text-sm">Neural Studio Interactive Chatbox</h4>
+              <p class="text-[11px] text-stone-400 max-w-xs mt-1">Submit developer prompts directly inside the studio. Watch the 3D Quant Neural Network react live to tokens!</p>
+            </div>
+            <div class="flex flex-wrap gap-1.5 justify-center pt-2 max-w-sm">
+              <button type="button" onclick="window.quantStudio.applyPromptChip('/ponytail Optimize for minimal diff: ')"
+                      class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 hover:border-amber-500/40 text-amber-300 text-[11px] font-mono transition-all cursor-pointer">
+                ⚡ /ponytail
+              </button>
+              <button type="button" onclick="window.quantStudio.applyPromptChip('Write comprehensive unit tests with edge-case coverage: ')"
+                      class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 hover:border-emerald-500/40 text-emerald-300 text-[11px] transition-all cursor-pointer">
+                🧪 Unit Tests
+              </button>
+              <button type="button" onclick="window.quantStudio.applyPromptChip('Analyze quantization latency and memory bandwidth: ')"
+                      class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 hover:border-cyan-500/40 text-cyan-300 text-[11px] transition-all cursor-pointer">
+                ⚛️ Quant Analysis
+              </button>
+            </div>
+          </div>
+        `;
         return;
       }
 
@@ -724,6 +731,7 @@
       this.isOpen = true;
       if (this.modal) {
         this.modal.classList.remove('hidden');
+        this.modal.style.display = 'flex';
       }
 
       this.canvas = document.getElementById('quant-neural-canvas');
@@ -732,12 +740,17 @@
         this.resize();
         this.startLoop();
       }
+
+      setTimeout(() => {
+        this.resize();
+      }, 50);
     }
 
     close() {
       this.isOpen = false;
       if (this.modal) {
         this.modal.classList.add('hidden');
+        this.modal.style.display = 'none';
       }
       this.stopLoop();
     }
@@ -978,7 +991,11 @@
 
   function autoMountQuantStudio() {
     if (!global.quantStudio) {
-      global.quantStudio = new QuantStudio();
+      try {
+        global.quantStudio = new QuantStudio();
+      } catch (err) {
+        console.error('Failed to initialize QuantStudio:', err);
+      }
     }
   }
 
