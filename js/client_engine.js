@@ -13,7 +13,7 @@
 window.HUB_CONFIG = {
   defaultOpenrouterKey: typeof atob === "function" ? atob("c2stb3ItdjEtNjhiMjBmYjZiOTMyYzRmNWRjODIzNjlmNGZlZWUxM2RmYWIzMWNjNWFiYzg5ZGI3YzVmODkyNGU4ZTI5Mjk3Mg==") : "",
   defaultGroqKey: typeof atob === "function" ? atob("Z3NrX0VVQThVTjBGcWJPek9waVplOGI3V0dkeWIwRllJdEhLWWVjUGx1dE9HM0p4aWhzYWxQNWQ=") : "",
-  defaultBackendUrl: "https://anne-rendering-massive-modifications.trycloudflare.com",
+  defaultBackendUrl: "https://planners-themes-distant-television.trycloudflare.com",
   ollamaBaseUrl: "http://localhost:11434"
 };
 
@@ -62,7 +62,8 @@ class ClientEngine {
     const oldTunnels = [
       "contrary-qty-slope-conferences.trycloudflare.com",
       "timeline-mistakes-niagara-units.trycloudflare.com",
-      "wolf-competitive-reveals-glow.trycloudflare.com"
+      "wolf-competitive-reveals-glow.trycloudflare.com",
+      "anne-rendering-massive-modifications.trycloudflare.com"
     ];
     let savedBackend = localStorage.getItem("freellm_backend_url") || localStorage.getItem("selfHostedUrl");
     if (savedBackend && oldTunnels.some(t => savedBackend.includes(t))) {
@@ -298,7 +299,17 @@ You possess comprehensive, mathematical mastery over the following 26 foundation
 - Inference Optimization: INT8/FP4/AWQ quantization for local workstation execution; KV Cache for instant iterative parametric CAD revisions; FlashAttention for dense point clouds; Perplexity (PPL) minimized for zero-error syntax generation.
 
 [EXECUTION DIRECTIVE]
-Deliver mathematically rigorous, clear, and perfectly structured responses. When writing 3D/CAD/BIM code (Blender Python, IfcOpenShell, PyTorch), write production-grade, complete code without placeholders.`;
+Deliver mathematically rigorous, clear, and perfectly structured responses. When writing 3D/CAD/BIM code (Blender Python, IfcOpenShell, PyTorch), write production-grade, complete code without placeholders.
+
+[PONYTAIL SAFE & MINIMALIST CODE MANDATE]
+1. SAFETY FIRST: Order of importance is strictly: Correct -> Safe -> Holds under real load -> Tested -> Fast -> Lean.
+2. NEVER CUT: Validation at trust boundaries, error handling that prevents data loss, security sanitization (preventing SQLi, XSS, SSRF, path traversal, command injection), or accessibility.
+3. THE BEST CODE IS THE CODE NEVER WRITTEN: Solve the whole problem with the least new code. Follow the decision ladder:
+   (a) Skip speculative flexibility/features nobody asked for.
+   (b) Reuse existing helpers/patterns already in the codebase.
+   (c) Use standard library or platform-native features.
+   (d) Use already-installed dependencies.
+   (e) Write the shortest, cleanest working diff that a reviewer understands at a glance.`;
   }
 
   // --- Always-Working Keyless Web Search Engine ---

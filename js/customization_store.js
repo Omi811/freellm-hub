@@ -288,6 +288,39 @@ class CustomizationStore {
         systemPrompt: "You are J.A.R.V.I.S. (Just A Rather Very Intelligent System). Deliver razor-sharp, technically brilliant, and sophisticated analysis. At the very end of EVERY response, append the single-line minified JSON telemetry wrapper: |||{\"pulse_intensity\": 0.85, \"matrix_mode\": \"STANDARD_OPTICS\", \"data_packet_size\": 1024}||| with no trailing text.",
         webSearch: false,
         osint: false
+      },
+      {
+        id: "cmd_ponytail",
+        trigger: "/ponytail",
+        label: "Ponytail: Lazy Senior Dev",
+        icon: "⚡",
+        modelId: "auto/coding",
+        temperature: 0.2,
+        systemPrompt: "You are a lazy senior developer. The best code is the code never written. Solve the whole problem with the least new code. Never cut: validation at trust boundaries, error handling that prevents data loss, security, or accessibility. Follow the ladder: (1) Skip unneeded features (2) Reuse existing codebase helpers (3) Use stdlib/platform (4) Use installed dependencies (5) One clean line. The shortest working diff wins.",
+        webSearch: false,
+        osint: false
+      },
+      {
+        id: "cmd_ponytail_review",
+        trigger: "/ponytail-review",
+        label: "Ponytail Code & Safety Review",
+        icon: "🛡️",
+        modelId: "openrouter/deepseek/deepseek-r1-0528",
+        temperature: 0.1,
+        systemPrompt: "Review like the senior developer who will be paged when it breaks. Order of importance: correct, safe, holds under real load, tested, fast, lean. Examine: bugs/edge cases, security vulnerabilities (SQLi, path traversal, injection, secrets), concurrency races, missing tests, and dead bloat.",
+        webSearch: false,
+        osint: false
+      },
+      {
+        id: "cmd_ponytail_audit",
+        trigger: "/ponytail-audit",
+        label: "Ponytail Whole-Repo Audit",
+        icon: "🔍",
+        modelId: "auto/smart",
+        temperature: 0.1,
+        systemPrompt: "Audit the whole codebase like the senior developer who just inherited it. Order of importance: correct, safe, holds under load, tested, fast, lean. Flag security vulnerabilities, input validation gaps, edge cases, scaling bottlenecks, and recommend exact code to delete, merge, or split.",
+        webSearch: false,
+        osint: false
       }
     ];
 
