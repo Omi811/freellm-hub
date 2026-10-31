@@ -11,9 +11,13 @@
  *       embedded inside an asymmetric Volumetric Point Cloud.
  *     - Additive Volumetric Pass (globalCompositeOperation = 'lighter') with
  *       bucketed LUT batches (~8 fillStyle switches per frame instead of 1,500).
- *  2. DietrichGebert/ponytail ("Lazy Senior Dev") Low-Load Engineering Rules:
+ *  2. 3D Helix Engine Design Language & Scroll Interaction:
+ *     - Mouse wheel / touch scroll directly pitches and zooms the RoPE double helix.
+ *     - 4 Working Modes: 5-Stage Transformer, RoPE Helix Engine, Quant AWQ, Turbo Stream.
+ *     - Dynamic in-studio Model Selectors (Header + Chatbox router bar).
+ *  3. DietrichGebert/ponytail ("Lazy Senior Dev") Low-Load Engineering Rules:
  *     - 0.0% CPU/GPU load when modal is closed or tab is hidden (cancelAnimationFrame).
- *     - Adaptive 30 FPS idle throttle -> instant 60 FPS wake on typing/drag/stream.
+ *     - Adaptive 30 FPS idle throttle -> instant 60 FPS wake on typing/drag/scroll/stream.
  *     - Zero object or string creation inside renderFrame().
  * ============================================================================
  */
@@ -78,6 +82,8 @@
       this.attentionHeads = saved.attentionHeads || 16;
       this.theme = saved.theme || 'quantum_cyan'; // quantum_cyan | stark_amber | matrix_purple | emerald_tensor
       this.selectedModels = saved.selectedModels || ['claude-3-7-sonnet', 'deepseek-r1', 'groq/llama-3.3-70b-versatile'];
+      this.selectedModelId = saved.selectedModelId || (window.modelSelector && window.modelSelector.selectedModelId) || 'auto';
+      this.engineMode = saved.engineMode || 'TRANSFORMER_QKV'; // 'TRANSFORMER_QKV' | 'ROPE_HELIX' | 'QUANT_AWQ' | 'TURBO_STREAM'
 
       // In-Studio Chatbox State
       this.studioMessages = [];
@@ -117,6 +123,13 @@
       this.targetTiltY = 0.0;
       this.currentTiltX = 0.0;
       this.currentTiltY = 0.0;
+
+      // Scroll & Zoom Dynamics
+      this.targetZoom = 1.0;
+      this.currentZoom = 1.0;
+      this.helixPitch = 1.0;
+      this.currentHelixPitch = 1.0;
+
       this.time = 0;
       this.lastFrameTs = performance.now();
       this.lut = buildLut(this.theme, 0);
@@ -142,7 +155,9 @@
         quantPrecision: this.quantPrecision,
         attentionHeads: this.attentionHeads,
         theme: this.theme,
-        selectedModels: this.selectedModels
+        selectedModels: this.selectedModels,
+        selectedModelId: this.selectedModelId,
+        engineMode: this.engineMode
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
     }
@@ -216,6 +231,16 @@
       this.initGeometry();
     }
 
+    getEngineModeLabel() {
+      const labels = {
+        TRANSFORMER_QKV: '5-STAGE TRANSFORMER',
+        ROPE_HELIX: 'RoPE HELIX ENGINE',
+        QUANT_AWQ: 'QUANT AWQ SALIENCE',
+        TURBO_STREAM: 'SPECULATIVE TURBO'
+      };
+      return labels[this.engineMode] || this.engineMode;
+    }
+
     initDom() {
       // 1. Studio Modal Overlay
       this.modal = document.createElement('div');
@@ -227,7 +252,7 @@
              style="box-shadow: 0 24px 60px -12px rgba(6, 182, 212, 0.25);">
 
           <!-- Top Studio Header -->
-          <div class="px-5 py-3 border-b border-stone-800 bg-stone-900/60 flex items-center justify-between flex-wrap gap-2">
+          <div class="px-5 py-3 border-b border-stone-800 bg-stone-900/60 flex items-center justify-between flex-wrap gap-2.5">
             <div class="flex items-center gap-3">
               <span class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center text-cyan-400 text-lg shadow-inner">
                 ⚛️
@@ -236,14 +261,23 @@
                 <div class="flex items-center gap-2">
                   <h2 class="text-sm sm:text-base font-bold font-mono tracking-wider text-cyan-300">J.A.R.V.I.S. QUANT NEURAL STUDIO</h2>
                   <span class="text-[10px] px-2 py-0.5 rounded-full font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                    AGE OF ULTRON V4.0
+                    HELIX V4.5
                   </span>
                 </div>
-                <p class="text-[11px] text-stone-400">SideFX SOP Neural Hologram, Quantization Architecture, and Live Streaming Chatbox.</p>
+                <p class="text-[11px] text-stone-400">SideFX SOP Neural Hologram, Interactive RoPE Helix Engine, and Live Streaming Chatbox.</p>
               </div>
             </div>
 
-            <div class="flex items-center gap-2.5">
+            <div class="flex items-center gap-2 flex-wrap">
+              <!-- Interactive Model Select Dropdown -->
+              <div class="flex items-center gap-1.5 bg-stone-900 border border-stone-800 hover:border-cyan-500/40 rounded-xl px-2.5 py-1.5 shadow-sm transition-all">
+                <span class="text-xs font-mono text-cyan-400">🤖 Model:</span>
+                <select id="quant-header-model-select" onchange="window.quantStudio.onModelSelect(this.value)"
+                        class="bg-transparent text-cyan-300 text-xs font-mono font-semibold focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[210px] truncate">
+                  <option value="auto">OmniRoute Auto</option>
+                </select>
+              </div>
+
               <!-- Prompt Submitting Toggle Chatbox Button -->
               <button id="quant-chatbox-toggle-btn" onclick="window.quantStudio.toggleChatbox()"
                       title="Toggle Prompt Submitting Chatbox inside the Neural Studio"
@@ -279,26 +313,45 @@
               <div class="flex-1 relative flex items-center justify-center overflow-hidden" id="quant-canvas-container">
                 <canvas id="quant-neural-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
 
-                <!-- Floating HUD Overlays -->
-                <div class="absolute top-3 left-3 text-[10px] font-mono text-cyan-400/80 space-y-0.5 pointer-events-none bg-stone-950/75 p-2 rounded-lg border border-cyan-500/20 backdrop-blur shadow">
-                  <div>ROTARY EMBEDDING: <span class="text-cyan-300 font-bold">RoPE 3D HELIX</span></div>
+                <!-- Floating Holographic Telemetry HUD (Top-Left) -->
+                <div class="absolute top-3 left-3 text-[10px] font-mono text-cyan-400/90 space-y-0.5 pointer-events-none bg-stone-950/80 p-2.5 rounded-xl border border-cyan-500/30 backdrop-blur shadow-lg">
+                  <div class="flex items-center justify-between gap-3 pb-1 mb-1 border-b border-cyan-500/20 text-[9px] text-cyan-300 font-bold">
+                    <span>⚡ HUD // HELIX_CORE_V4</span>
+                    <span id="quant-hud-fps" class="text-emerald-400">60 FPS</span>
+                  </div>
+                  <div>ENGINE MODE: <span id="quant-hud-mode" class="text-cyan-300 font-bold">${this.getEngineModeLabel()}</span></div>
+                  <div>ROTARY EMBEDDING: <span id="quant-hud-helix" class="text-cyan-300 font-bold">RoPE 3D HELIX (1.0x PITCH)</span></div>
                   <div>ATTENTION HEADS: <span id="quant-hud-heads" class="text-cyan-300 font-bold">${this.attentionHeads} HEADS (GQA)</span></div>
                   <div>QUANTIZATION MODE: <span id="quant-hud-precision" class="text-amber-300 font-bold">${this.quantPrecision} (${this.quantPrecision === 'INT4' ? 'AWQ SALIENT' : this.quantPrecision === 'NF4' ? 'QLORA 4-BIT' : this.quantPrecision === 'INT8' ? 'VECTOR QUANT' : 'FULL WEIGHT'})</span></div>
                   <div>SYNAPSE PULSE: <span id="quant-pulse-status" class="text-emerald-400 font-bold">READY</span></div>
                 </div>
 
-                <div class="absolute bottom-3 right-3 text-[10px] font-mono text-stone-400 pointer-events-none bg-stone-950/70 px-2.5 py-1 rounded border border-stone-800">
-                  DRAG TO ROTATE 3D • TOKENS FIRE SYNAPSES
+                <!-- Floating Interaction Guide (Bottom-Right) -->
+                <div class="absolute bottom-3 right-3 text-[10px] font-mono text-stone-400 pointer-events-none bg-stone-950/80 px-3 py-1.5 rounded-xl border border-stone-800 backdrop-blur space-y-0.5">
+                  <div class="text-cyan-400/90 font-bold">◈ 3D HELIX ENGINE INTERACTION</div>
+                  <div id="quant-hud-telemetry" class="text-stone-300">SCROLL: ZOOM 100% • PITCH 1.0x</div>
+                  <div class="text-[9px] text-stone-500">DRAG TO ROTATE 3D • SCROLL TO PITCH HELIX</div>
                 </div>
               </div>
 
               <!-- Canvas Bottom Personalization Toolbar -->
               <div class="p-3 border-t border-stone-800 bg-stone-900/40 backdrop-blur flex items-center justify-between gap-2.5 flex-wrap">
+                <!-- Working Mode Switcher -->
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-mono text-stone-400">Mode:</span>
+                  <div class="flex items-center gap-1 bg-stone-950 p-0.5 rounded-lg border border-stone-800">
+                    <button onclick="window.quantStudio.setEngineMode('TRANSFORMER_QKV')" data-mode="TRANSFORMER_QKV" class="engine-mode-btn px-2 py-0.5 rounded text-[10px] font-mono ${this.engineMode === 'TRANSFORMER_QKV' ? 'bg-cyan-500 text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-200'} cursor-pointer">5-Stage</button>
+                    <button onclick="window.quantStudio.setEngineMode('ROPE_HELIX')" data-mode="ROPE_HELIX" class="engine-mode-btn px-2 py-0.5 rounded text-[10px] font-mono ${this.engineMode === 'ROPE_HELIX' ? 'bg-cyan-500 text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-200'} cursor-pointer">RoPE Helix</button>
+                    <button onclick="window.quantStudio.setEngineMode('QUANT_AWQ')" data-mode="QUANT_AWQ" class="engine-mode-btn px-2 py-0.5 rounded text-[10px] font-mono ${this.engineMode === 'QUANT_AWQ' ? 'bg-cyan-500 text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-200'} cursor-pointer">Quant AWQ</button>
+                    <button onclick="window.quantStudio.setEngineMode('TURBO_STREAM')" data-mode="TURBO_STREAM" class="engine-mode-btn px-2 py-0.5 rounded text-[10px] font-mono ${this.engineMode === 'TURBO_STREAM' ? 'bg-cyan-500 text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-200'} cursor-pointer">Turbo</button>
+                  </div>
+                </div>
+
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-mono text-stone-400">Rotation:</span>
                   <input type="range" min="0.2" max="3.0" step="0.1" value="${this.rotSpeed}"
                           oninput="window.quantStudio.setRotSpeed(this.value)"
-                          class="w-20 sm:w-24 accent-cyan-400 cursor-pointer" />
+                          class="w-16 sm:w-20 accent-cyan-400 cursor-pointer" />
                   <span id="quant-rotspeed-val" class="text-xs font-mono text-cyan-400">${this.rotSpeed}x</span>
                 </div>
 
@@ -344,6 +397,108 @@
       });
 
       this.renderRightPanel();
+    }
+
+    setEngineMode(mode) {
+      this.engineMode = mode;
+      this.saveConfig();
+      this.updateEngineModeButtons();
+      this.updateEngineModeHud();
+      this.triggerSynapticSurge();
+      if (window.app && window.app.showCommandToast) {
+        window.app.showCommandToast('⚙️ Helix Engine Working Mode: ' + this.getEngineModeLabel());
+      }
+    }
+
+    updateEngineModeButtons() {
+      document.querySelectorAll('.engine-mode-btn').forEach(btn => {
+        const mode = btn.getAttribute('data-mode');
+        if (mode === this.engineMode) {
+          btn.className = 'engine-mode-btn px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500 text-stone-950 font-bold cursor-pointer shadow-sm';
+        } else {
+          btn.className = 'engine-mode-btn px-2 py-0.5 rounded text-[10px] font-mono text-stone-400 hover:text-stone-200 cursor-pointer';
+        }
+      });
+    }
+
+    updateEngineModeHud() {
+      const modeHud = document.getElementById('quant-hud-mode');
+      if (modeHud) {
+        modeHud.textContent = this.getEngineModeLabel();
+      }
+    }
+
+    updateScrollTelemetry() {
+      const el = document.getElementById('quant-hud-telemetry');
+      if (el) {
+        el.textContent = `SCROLL: ZOOM ${Math.round(this.currentZoom * 100)}% • PITCH ${this.currentHelixPitch.toFixed(1)}x`;
+      }
+      const helixHud = document.getElementById('quant-hud-helix');
+      if (helixHud) {
+        helixHud.textContent = `RoPE 3D HELIX (${this.currentHelixPitch.toFixed(1)}x PITCH)`;
+      }
+    }
+
+    onModelSelect(modelId) {
+      if (!modelId) return;
+      this.selectedModelId = modelId;
+      this.saveConfig();
+
+      if (window.modelSelector && typeof window.modelSelector.selectModel === 'function') {
+        window.modelSelector.selectModel(modelId);
+      }
+
+      this.syncModelSelectDropdowns();
+      this.triggerSynapticSurge();
+
+      if (window.app && window.app.showCommandToast) {
+        window.app.showCommandToast('⚛️ Quant Copilot routed to: ' + modelId);
+      }
+    }
+
+    syncModelSelectDropdowns() {
+      const activeId = this.selectedModelId || (window.modelSelector && window.modelSelector.selectedModelId) || 'auto';
+      ['quant-header-model-select', 'quant-chatbox-model-select'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (sel) {
+          sel.value = activeId;
+        }
+      });
+    }
+
+    populateModelSelects() {
+      const dropdownIds = ['quant-header-model-select', 'quant-chatbox-model-select'];
+      const currentId = this.selectedModelId || (window.modelSelector && window.modelSelector.selectedModelId) || 'auto';
+
+      let modelList = [];
+      if (window.modelSelector && window.modelSelector.models && window.modelSelector.models.length > 0) {
+        modelList = window.modelSelector.models;
+      } else {
+        modelList = [
+          { id: 'auto', name: 'Auto OmniRoute (Smart Fallback)' },
+          { id: 'openrouter/free', name: 'Free Daily Router' },
+          { id: 'claude-3-7-sonnet', name: 'Claude 3.7 Sonnet' },
+          { id: 'deepseek-r1', name: 'DeepSeek R1 (Reasoning)' },
+          { id: 'groq/llama-3.3-70b-versatile', name: 'Groq Llama 3.3 70B (450 t/s)' },
+          { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
+          { id: 'qwen-2.5-coder-32b', name: 'Qwen 2.5 Coder 32B' }
+        ];
+      }
+
+      const optionsHtml = modelList.map(m => {
+        const id = m.id;
+        const name = m.name || m.id;
+        const selected = id === currentId ? 'selected' : '';
+        return `<option value="${id}" ${selected}>${name}</option>`;
+      }).join('');
+
+      dropdownIds.forEach(id => {
+        const sel = document.getElementById(id);
+        if (sel) {
+          sel.innerHTML = optionsHtml;
+          sel.value = currentId;
+        }
+      });
     }
 
     toggleChatbox() {
@@ -405,11 +560,13 @@
               </div>
 
               <div class="flex items-center justify-between gap-2">
+                <!-- Interactive Model Selector in Chatbox Router Bar -->
                 <div class="flex items-center gap-1.5">
                   <span class="text-[10px] font-mono text-stone-400">Router:</span>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">
-                    ${(window.modelSelector && window.modelSelector.selectedModelId) || 'OmniRoute Auto'}
-                  </span>
+                  <select id="quant-chatbox-model-select" onchange="window.quantStudio.onModelSelect(this.value)"
+                          class="bg-stone-950 text-cyan-300 border border-cyan-500/30 text-[10px] font-mono rounded px-2 py-0.5 focus:outline-none focus:border-cyan-400 cursor-pointer max-w-[170px] truncate">
+                    <option value="auto">OmniRoute Auto</option>
+                  </select>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -433,6 +590,7 @@
 
         this.renderStudioMessages();
         this.bindChatInputEvents();
+        this.populateModelSelects();
 
       } else {
         // --- 2. MULTI-MODEL INTEGRATION & TELEMETRY VIEW ---
@@ -566,7 +724,7 @@
       this.lifecycle = 'COMPUTATIONAL_THINKING';
       this.renderStudioMessages();
 
-      const activeModelId = (window.modelSelector && window.modelSelector.selectedModelId) || 'auto';
+      const activeModelId = this.selectedModelId || (window.modelSelector && window.modelSelector.selectedModelId) || 'auto';
       this.abortController = new AbortController();
 
       try {
@@ -847,6 +1005,25 @@
 
       window.addEventListener('mouseup', () => { isDragging = false; });
 
+      // Mouse Wheel / Trackpad Scroll interaction for RoPE Helix zoom & pitch
+      window.addEventListener('wheel', (e) => {
+        if (this.isOpen && e.target && e.target.id === 'quant-neural-canvas') {
+          e.preventDefault();
+          this.wakeUp();
+          const delta = Math.sign(e.deltaY);
+          if (delta > 0) {
+            // Scroll down: zoom out & compact pitch
+            this.targetZoom = Math.max(0.45, this.targetZoom - 0.08);
+            this.helixPitch = Math.max(0.4, this.helixPitch - 0.1);
+          } else {
+            // Scroll up: zoom in & expand pitch
+            this.targetZoom = Math.min(2.4, this.targetZoom + 0.08);
+            this.helixPitch = Math.min(2.8, this.helixPitch + 0.1);
+          }
+          this.updateScrollTelemetry();
+        }
+      }, { passive: false });
+
       window.addEventListener('keydown', (e) => {
         if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')) {
           this.recordKeystroke();
@@ -890,6 +1067,11 @@
         this.resize();
         this.startLoop();
       }
+
+      this.populateModelSelects();
+      this.updateEngineModeButtons();
+      this.updateEngineModeHud();
+      this.updateScrollTelemetry();
 
       setTimeout(() => {
         this.resize();
@@ -1019,12 +1201,23 @@
       const isIdle =
         this.lifecycle === 'IDLE' &&
         this.synapticPulse < 0.03 &&
+        Math.abs(this.targetZoom - this.currentZoom) < 0.005 &&
+        Math.abs(this.helixPitch - this.currentHelixPitch) < 0.005 &&
         now - this.lastInteractionTs > 2500;
       if (isIdle && this.frameCount % 2 === 1) return;
 
       const dt = Math.min((now - this.lastFrameTs) * 0.001, 0.1);
       this.lastFrameTs = now;
       this.time += dt;
+
+      // Update FPS HUD telemetry periodically
+      if (this.frameCount % 30 === 0) {
+        const fpsEl = document.getElementById('quant-hud-fps');
+        if (fpsEl) {
+          fpsEl.textContent = isIdle ? '30 FPS (IDLE)' : '60 FPS';
+          fpsEl.className = isIdle ? 'text-amber-400 font-mono text-[9px]' : 'text-emerald-400 font-mono text-[9px]';
+        }
+      }
 
       // Fluid exponential decay: current += (target - current) * 0.08
       const isThinking = this.lifecycle === 'COMPUTATIONAL_THINKING';
@@ -1039,11 +1232,16 @@
       this.currentTiltX += (this.targetTiltX - this.currentTiltX) * 0.1;
       this.currentTiltY += (this.targetTiltY - this.currentTiltY) * 0.1;
 
+      // Smooth scroll zoom & helix pitch interpolation
+      this.currentZoom += (this.targetZoom - this.currentZoom) * 0.1;
+      this.currentHelixPitch += (this.helixPitch - this.currentHelixPitch) * 0.1;
+
       if (Math.round(this.currentAlert * 10) !== prevAlertBucket) {
         this.lut = buildLut(this.theme, this.currentAlert);
       }
 
-      this.rotY += 0.36 * this.rotSpeed * this.currentOmega * dt;
+      const speedMult = this.engineMode === 'TURBO_STREAM' ? 1.4 : 1.0;
+      this.rotY += 0.36 * this.rotSpeed * this.currentOmega * speedMult * dt;
       const cosY = Math.cos(this.rotY + this.currentTiltX);
       const sinY = Math.sin(this.rotY + this.currentTiltX);
       const cosX = Math.cos(0.2 + this.rotX + this.currentTiltY);
@@ -1060,9 +1258,10 @@
 
       const cx = this.cx;
       const cy = this.cy;
-      const radiusScale = Math.min(this.width, this.height) * 0.42 * this.currentScale;
+      const radiusScale = Math.min(this.width, this.height) * 0.42 * this.currentScale * this.currentZoom;
       const waveAmp = 0.025 + this.synapticPulse * 0.11 + (isThinking ? 0.08 : 0);
       const isInt4 = this.quantPrecision === 'INT4';
+      const helixPitchMult = this.currentHelixPitch;
       const points = this.points;
       const N = this.pointCount;
 
@@ -1077,11 +1276,11 @@
         const salience = points[off + 6];
         let size = points[off + 7];
 
-        // Analytic VEX-style trigonometric displacement (zero simulation cost)
+        // Analytic VEX-style trigonometric displacement (modulated by helix pitch & mode)
         const wave =
           1.0 +
-          Math.sin(this.time * 5.5 + phase + ux * 4.0) *
-            (layerId === 5 ? waveAmp * 1.4 : waveAmp);
+          Math.sin(this.time * 5.5 * helixPitchMult + phase + ux * 4.0 * helixPitchMult) *
+            (layerId === 5 ? (this.engineMode === 'ROPE_HELIX' ? waveAmp * 2.2 : waveAmp * 1.5) : waveAmp);
 
         const x0 = ux * wave;
         const y0 = uy * wave;
@@ -1099,12 +1298,32 @@
         // Combine pre-baked SOP core glow + z-depth + AWQ salience into LUT bucket 0..7
         const depthFactor = (z2 + 1.0) * 0.5;
         let intensity = bakedGlow * 0.65 + depthFactor * 0.35 + this.synapticPulse * 0.25;
+
+        // Working Mode specific highlights
+        if (this.engineMode === 'ROPE_HELIX') {
+          if (layerId === 5) {
+            size *= 1.85;
+            intensity = Math.min(1.0, intensity * 1.4 + 0.2);
+          } else if (layerId === 6) {
+            intensity *= 0.55; // Dim shell to spotlight DNA helix
+          }
+        } else if (this.engineMode === 'QUANT_AWQ') {
+          if (salience > 0.8) {
+            intensity = 1.0;
+            size *= 1.6;
+          }
+        } else if (this.engineMode === 'TURBO_STREAM') {
+          intensity = Math.min(1.0, intensity * 1.25);
+          size *= 1.15;
+        }
+
         if (isInt4 && salience > 0.8) {
           intensity = 1.0;
           size *= 1.35;
         } else if (this.quantPrecision === 'NF4') {
           intensity = Math.min(1.0, intensity * 1.12);
         }
+
         const bIdx = Math.min(BUCKETS - 1, Math.max(0, (intensity * BUCKETS) | 0));
         const cIdx = this.bucketCounts[bIdx] * 3;
         this.bucketCoords[bIdx][cIdx] = sx;
@@ -1158,7 +1377,8 @@
         ctx.quadraticCurveTo(cpx, cpy, bsx, bsy);
 
         // Traveling synaptic energy spark along the curve
-        const sparkT = (this.time * (1.2 + this.currentOmega * 0.5) + s * 0.25) % 1;
+        const sparkSpeed = this.engineMode === 'TURBO_STREAM' ? 2.8 : (1.2 + this.currentOmega * 0.5);
+        const sparkT = (this.time * sparkSpeed + s * 0.25) % 1;
         const invT = 1 - sparkT;
         const spx = invT * invT * asx + 2 * invT * sparkT * cpx + sparkT * sparkT * bsx;
         const spy = invT * invT * asy + 2 * invT * sparkT * cpy + sparkT * sparkT * bsy;
