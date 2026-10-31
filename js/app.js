@@ -1416,7 +1416,7 @@ Output the combined, perfected synthesis directly:`;
         system_prompt: activeSystemPrompt,
         temperature: (this.settings && this.settings.temperature) ?? (window.settings && window.settings.temperature) ?? 0.3,
         max_tokens: (this.settings && this.settings.maxTokens) ?? (window.settings && window.settings.maxTokens) ?? 4096,
-        turbo_mode: this.turboMode,
+        turbo_mode: this.turboMode || (window.quantStudio && window.quantStudio.doubleTurbo),
         deepthink_mode: this.deepthinkMode,
         image_mode: this.imageMode,
         web_mode: this.webMode,

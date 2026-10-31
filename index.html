@@ -94,12 +94,23 @@
       <!-- Mount Local Project Folder (Native File System Access API) -->
       <button id="mount-project-btn" onclick="window.app.mountLocalProject()"
               title="Grant browser tab direct read/write access to a local project folder"
-              class="w-full flex items-center justify-between px-3.5 py-2 rounded-xl apple-pill-btn text-xs mb-3 cursor-pointer">
+              class="w-full flex items-center justify-between px-3.5 py-2 rounded-xl apple-pill-btn text-xs mb-1.5 cursor-pointer">
         <span class="flex items-center gap-2 truncate">
           <span>📁</span>
           <span class="truncate">Mount Local Project</span>
         </span>
         <span class="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-stone-300 font-mono">FS API</span>
+      </button>
+
+      <!-- Quant Neural Network & ML Visualizer Studio (Double Turbo Mode) -->
+      <button id="quant-studio-btn" onclick="window.quantStudio && window.quantStudio.toggle()"
+              title="Quant Studio: Spinning 3D J.A.R.V.I.S. Neural Net & ML Visualizer, Double Turbo Mode, Multi-Model Integration & Smart Coping"
+              class="w-full flex items-center justify-between px-3.5 py-2 rounded-xl border border-cyan-500/30 bg-cyan-950/20 hover:bg-cyan-900/30 text-cyan-300 hover:text-cyan-200 text-xs mb-3 transition-all cursor-pointer shadow-sm group">
+        <span class="flex items-center gap-2 truncate">
+          <span class="text-sm">⚛️</span>
+          <span class="truncate font-semibold">Quant Neural Studio</span>
+        </span>
+        <span id="quant-btn-badge" class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono border border-cyan-500/30">2x Turbo</span>
       </button>
 
       <!-- Conversations History Header -->
@@ -1053,6 +1064,7 @@
   <script src="./js/osint_engine.js"></script>
   <script src="./js/jarvis_holographic.js"></script>
   <script src="./js/jarvis_pet.js"></script>
+  <script src="./js/quant_studio.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>
