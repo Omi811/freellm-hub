@@ -13,7 +13,7 @@
 window.HUB_CONFIG = {
   defaultOpenrouterKey: typeof atob === "function" ? atob("c2stb3ItdjEtNjhiMjBmYjZiOTMyYzRmNWRjODIzNjlmNGZlZWUxM2RmYWIzMWNjNWFiYzg5ZGI3YzVmODkyNGU4ZTI5Mjk3Mg==") : "",
   defaultGroqKey: typeof atob === "function" ? atob("Z3NrX0VVQThVTjBGcWJPek9waVplOGI3V0dkeWIwRllJdEhLWWVjUGx1dE9HM0p4aWhzYWxQNWQ=") : "",
-  defaultBackendUrl: "https://norman-guided-independently-interventions.trycloudflare.com",
+  defaultBackendUrl: "https://anne-rendering-massive-modifications.trycloudflare.com",
   ollamaBaseUrl: "http://localhost:11434"
 };
 
@@ -680,6 +680,11 @@ Structure your internal thinking trace inside <think>...</think> tags:
 4. [EVIDENCE TAGS]: Clearly distinguish what is [CONFIRMED], [INFERRED], or [UNKNOWN / LIMITATION].
 5. [SYNTHESIS]: Deliver the final, mathematically and factually verified answer.`;
       activeSystemPrompt = `${activeSystemPrompt}\n\n${reaPrompt}`.trim();
+    }
+
+    // J.A.R.V.I.S. Holographic Matrix Telemetry rule
+    if (typeof window !== "undefined" && window.JarvisHolographicSuite && window.JarvisHolographicSuite.SYSTEM_PROMPT_ADDON) {
+      activeSystemPrompt = `${activeSystemPrompt}\n\n${window.JarvisHolographicSuite.SYSTEM_PROMPT_ADDON}`.trim();
     }
 
     // 1. Check for Web Search Intent or mode

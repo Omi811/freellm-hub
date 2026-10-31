@@ -210,6 +210,14 @@
           <span>⚔️ Arena</span>
         </button>
 
+        <!-- J.A.R.V.I.S. Holographic Matrix Status & Toggle Button -->
+        <button id="jarvis-hud-badge"
+                onclick="window.jarvis && window.jarvis.toggle()"
+                title="Toggle J.A.R.V.I.S. 3D Holographic Particle Matrix"
+                class="text-[10px] px-2.5 py-1 rounded-full bg-[#191919]/70 border border-[#8a99a5]/30 text-[#8a99a5] hover:text-[#fdd222] hover:border-[#fdd222]/40 font-mono transition-all cursor-pointer">
+          <span>✦ J.A.R.V.I.S. // STANDARD_OPTICS</span>
+        </button>
+
         <!-- Settings Button -->
         <button onclick="window.settings.openModal()"
                 title="Settings & API Keys"
@@ -704,6 +712,13 @@
                   <div class="text-[10px] text-stone-400">Anthropic Terracotta Tone</div>
                 </div>
               </div>
+              <div onclick="window.settings.selectTheme('jarvis-matrix')" data-theme-id="jarvis-matrix" class="theme-card-option p-3 rounded-xl border border-stone-800 bg-stone-950 hover:border-[#fdd222]/50 cursor-pointer transition-all flex items-center gap-3">
+                <div class="w-7 h-7 rounded-lg bg-[#191919] border border-[#fdd222] flex items-center justify-center text-[10px] text-[#fdd222]">✦</div>
+                <div>
+                  <div class="font-semibold text-stone-200">J.A.R.V.I.S. Stark Matrix</div>
+                  <div class="text-[10px] text-stone-400">Iron Man Gold & Crimson Core</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1013,6 +1028,7 @@
   <script src="./js/model_selector.js"></script>
   <script src="./js/settings.js"></script>
   <script src="./js/osint_engine.js"></script>
+  <script src="./js/jarvis_holographic.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>

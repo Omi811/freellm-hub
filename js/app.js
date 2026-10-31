@@ -49,6 +49,20 @@ class App {
   async init() {
     this.modelSelector.init();
     this.settings.init();
+
+    // Mount J.A.R.V.I.S. 3D Volumetric Holographic Suite
+    if (window.JarvisHolographicSuite && !window.jarvis) {
+      window.jarvis = window.JarvisHolographicSuite.mount({
+        container: document.body,
+        inputSelector: 'textarea, input[type="text"]',
+        palette: 'stark_matrix',
+        showRings: true,
+        particleCount: 2000,
+        zIndex: 0
+      });
+      if (window.jarvis.updateHudBadge) window.jarvis.updateHudBadge();
+    }
+
     if (window.customStore) {
       this.setMode(window.customStore.getActiveMode() || "gemini");
     }
@@ -1377,6 +1391,14 @@ Output the combined, perfected synthesis directly:`;
         assistantMsg.content = "";
       }
 
+      // J.A.R.V.I.S. Holographic Suite: Trigger Computational Thinking state
+      if (window.jarvis) {
+        window.jarvis.setState('COMPUTATIONAL_THINKING');
+      }
+      if (window.JarvisHolographicSuite && window.JarvisHolographicSuite.SYSTEM_PROMPT_ADDON) {
+        activeSystemPrompt = `${activeSystemPrompt}\n\n${window.JarvisHolographicSuite.SYSTEM_PROMPT_ADDON}`.trim();
+      }
+
       const stream = window.clientEngine.streamChat({
         model_id: selectedModel.id,
         messages: this.currentChat.messages.slice(0, -1),
@@ -1404,6 +1426,10 @@ Output the combined, perfected synthesis directly:`;
         } else if (chunk.type === "thinking") {
           thinkingText += chunk.delta;
           assistantMsg.thinking = thinkingText;
+          if (window.jarvis) {
+            window.jarvis.setState('COMPUTATIONAL_THINKING');
+            window.jarvis.ingestToken(chunk.delta);
+          }
           const thEl = document.getElementById(`msg-thinking-${assistantIndex}`);
           if (thEl) {
             thEl.innerHTML = this.formatMarkdown(thinkingText);
@@ -1414,6 +1440,10 @@ Output the combined, perfected synthesis directly:`;
         } else if (chunk.type === "chunk") {
           fullText += chunk.delta;
           assistantMsg.content = fullText;
+          if (window.jarvis) {
+            window.jarvis.setState('STREAMING_RESPONSE');
+            window.jarvis.ingestToken(chunk.delta);
+          }
           const cEl = document.getElementById(`msg-content-${assistantIndex}`);
           if (cEl) {
             cEl.innerHTML = this.formatMarkdown(fullText);
@@ -1430,6 +1460,14 @@ Output the combined, perfected synthesis directly:`;
           };
           this.renderMessages();
         }
+      }
+
+      // J.A.R.V.I.S. Holographic Suite: Parse telemetry payload & return to IDLE
+      if (window.jarvis) {
+        fullText = window.jarvis.parseAndStripPayload(fullText);
+        assistantMsg.content = fullText;
+        window.jarvis.setState('IDLE');
+        this.renderMessages();
       }
 
       // Update active branch cache in the preceding user message if variants exist
@@ -1463,6 +1501,7 @@ Output the combined, perfected synthesis directly:`;
         this.renderMessages();
       }
     } finally {
+      if (window.jarvis) window.jarvis.setState('IDLE');
       this.isStreaming = false;
       this.toggleStreamButtons(false);
       const input = document.getElementById("chat-input-textarea");

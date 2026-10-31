@@ -85,6 +85,19 @@ class CustomizationStore {
         accentPrimary: "#f59e0b",
         accentGradient: "linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)",
         isDark: true
+      },
+      "jarvis-matrix": {
+        id: "jarvis-matrix",
+        name: "J.A.R.V.I.S. Stark Holographic Matrix",
+        canvasBg: "#191919",
+        surfaceBg: "rgba(32, 28, 28, 0.82)",
+        cardBg: "rgba(84, 30, 24, 0.28)",
+        borderColor: "rgba(253, 210, 34, 0.22)",
+        textColor: "#f5f5f7",
+        textMuted: "#8a99a5",
+        accentPrimary: "#fdd222",
+        accentGradient: "linear-gradient(135deg, #fdd222 0%, #a92e22 50%, #541e18 100%)",
+        isDark: true
       }
     };
 
@@ -262,6 +275,17 @@ class CustomizationStore {
         modelId: "auto/smart",
         temperature: 0.2,
         systemPrompt: "You are a Principal AI Architect and Spatial Computing Engineer mastering all 26 foundational Deep Machine Learning concepts mapped to 3D modeling, parametric CAD, mesh topology, BIM, and spatial graphics. Provide mathematically rigorous explanations and production-ready Blender/IfcOpenShell/PyTorch code.",
+        webSearch: false,
+        osint: false
+      },
+      {
+        id: "cmd_jarvis",
+        trigger: "/jarvis",
+        label: "J.A.R.V.I.S. Holographic Matrix",
+        icon: "✦",
+        modelId: "auto/smart",
+        temperature: 0.3,
+        systemPrompt: "You are J.A.R.V.I.S. (Just A Rather Very Intelligent System). Deliver razor-sharp, technically brilliant, and sophisticated analysis. At the very end of EVERY response, append the single-line minified JSON telemetry wrapper: |||{\"pulse_intensity\": 0.85, \"matrix_mode\": \"STANDARD_OPTICS\", \"data_packet_size\": 1024}||| with no trailing text.",
         webSearch: false,
         osint: false
       }
