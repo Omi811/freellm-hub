@@ -1,29 +1,35 @@
 /**
  * ============================================================================
- * J.A.R.V.I.S. WORKSPACE PET COMPANION & STARK COPILOT (CLIPPY-STYLE HUD)
+ * J.A.R.V.I.S. WORKSPACE PET COMPANION & STARK COPILOT (IN-WINDOW 3D PET)
  * ============================================================================
- * Features:
- *  1. 3D Volumetric J.A.R.V.I.S. Arc Reactor Core Pet:
- *     - Multi-shell Fibonacci particle sphere with hollow inner acoustic core.
- *     - Counter-rotating tactical vector rings that harmonize with active model color.
- *     - Reactive physics: Typing velocity, mouse cursor magnetism, LLM lifecycle.
- *  2. Stark Clippy Assistant HUD Overlay:
- *     - Live contextual prompt suggestions (Click to insert!).
- *     - One-click Show Downloads:
- *       * Download Chat (.md)
- *       * Export Full JSON (.json)
- *       * Copy All Code Blocks from latest response
- *       * Save Active Canvas Artifact
- *     - Various Assistant Tools:
- *       * Shortcuts cheat sheet (Ctrl+T, Ctrl+D, Ctrl+W, Ctrl+I)
- *       * Real-time model telemetry & latency stats
- *       * Voice response readout via Web Speech Synthesis
- *  3. Dynamic Background Model Color Adaptation:
- *     - Automatically adjusts workspace background gradient to match active model color
- *     - Harmonizes tactical rings, aura sparks, and HUD borders with model brand color
- *  4. One-Click Header Toggle Button:
- *     - "✦ J.A.R.V.I.S. PET: ON" / "✦ J.A.R.V.I.S. PET: OFF"
- *     - Persists in localStorage; cancels rAF loop when OFF for 0% CPU consumption
+ * The 3D J.A.R.V.I.S. holographic Arc Reactor animation lives INSIDE the
+ * J.A.R.V.I.S. companion window itself (like Microsoft Clippy in its own widget).
+ *
+ * Workspace Background:
+ *   The chat workspace background is cleanly adjusted to the active model's
+ *   color gradient (emerald, sky, amber, orange, purple, rose, cyan).
+ *
+ * Inside the J.A.R.V.I.S. Window:
+ *  1. 3D Holographic Viewport:
+ *     - Multi-shell Fibonacci volumetric sphere
+ *     - Counter-rotating tactical vector rings
+ *     - Central pulsing Arc Reactor acoustic core
+ *     - Reacts to typing velocity, thinking inference, and cursor proximity
+ *  2. Clippy-Style Speech Bubble:
+ *     - Dynamic context-aware status and greetings
+ *  3. Contextual Suggestions:
+ *     - Clickable shortcuts to insert prompts (/ponytail, Unit Tests, Optimize, Deep Explain)
+ *  4. Show Downloads & Exports Hub:
+ *     - Download Chat as Markdown (.md)
+ *     - Export Chat as JSON (.json)
+ *     - Copy All Code snippets from the latest assistant response
+ *     - Save active Canvas/Artifact HTML
+ *  5. Assistant Tools:
+ *     - Keyboard shortcut reference (Ctrl+D, Ctrl+W, Ctrl+T, Ctrl+I)
+ *     - Web Speech Synthesis readout ("Speak with J.A.R.V.I.S.")
+ *  6. One-Click Header Action Bar Toggle:
+ *     - "✦ J.A.R.V.I.S. PET: ON / OFF" to show or hide the window
+ *     - Stops rAF animation loop when hidden for 0% CPU/GPU overhead
  * ============================================================================
  */
 
@@ -39,7 +45,7 @@
       name: 'emerald',
       primary: '#10b981',
       accent: '#34d399',
-      glow: 'rgba(16, 185, 129, 0.14)',
+      glow: 'rgba(16, 185, 129, 0.16)',
       ringRgb: '16, 185, 129',
       bgGradient: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(16, 185, 129, 0.16), rgba(9, 9, 11, 0) 75%), #09090b'
     },
@@ -47,7 +53,7 @@
       name: 'cyan',
       primary: '#06b6d4',
       accent: '#22d3ee',
-      glow: 'rgba(6, 182, 212, 0.14)',
+      glow: 'rgba(6, 182, 212, 0.16)',
       ringRgb: '6, 182, 212',
       bgGradient: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(6, 182, 212, 0.16), rgba(9, 9, 11, 0) 75%), #090a0f'
     },
@@ -55,7 +61,7 @@
       name: 'orange',
       primary: '#f97316',
       accent: '#fb923c',
-      glow: 'rgba(249, 115, 22, 0.14)',
+      glow: 'rgba(249, 115, 22, 0.16)',
       ringRgb: '249, 115, 22',
       bgGradient: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(249, 115, 22, 0.15), rgba(9, 9, 11, 0) 75%), #110d0a'
     },
@@ -63,7 +69,7 @@
       name: 'amber',
       primary: '#f59e0b',
       accent: '#fdd222',
-      glow: 'rgba(245, 158, 11, 0.14)',
+      glow: 'rgba(245, 158, 11, 0.16)',
       ringRgb: '245, 158, 11',
       bgGradient: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(245, 158, 11, 0.15), rgba(9, 9, 11, 0) 75%), #110e09'
     },
@@ -71,7 +77,7 @@
       name: 'purple',
       primary: '#a855f7',
       accent: '#c084fc',
-      glow: 'rgba(168, 85, 247, 0.14)',
+      glow: 'rgba(168, 85, 247, 0.16)',
       ringRgb: '168, 85, 247',
       bgGradient: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(168, 85, 247, 0.15), rgba(9, 9, 11, 0) 75%), #0f0a14'
     },
@@ -79,7 +85,7 @@
       name: 'sky',
       primary: '#0ea5e9',
       accent: '#38bdf8',
-      glow: 'rgba(14, 165, 233, 0.14)',
+      glow: 'rgba(14, 165, 233, 0.16)',
       ringRgb: '14, 165, 233',
       bgGradient: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(14, 165, 233, 0.16), rgba(9, 9, 11, 0) 75%), #080d14'
     },
@@ -87,7 +93,7 @@
       name: 'blue',
       primary: '#3b82f6',
       accent: '#60a5fa',
-      glow: 'rgba(59, 130, 246, 0.14)',
+      glow: 'rgba(59, 130, 246, 0.16)',
       ringRgb: '59, 130, 246',
       bgGradient: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(59, 130, 246, 0.15), rgba(9, 9, 11, 0) 75%), #080b14'
     },
@@ -95,7 +101,7 @@
       name: 'rose',
       primary: '#f43f5e',
       accent: '#fb7185',
-      glow: 'rgba(244, 63, 94, 0.14)',
+      glow: 'rgba(244, 63, 94, 0.16)',
       ringRgb: '244, 63, 94',
       bgGradient: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(244, 63, 94, 0.15), rgba(9, 9, 11, 0) 75%), #120a0d'
     },
@@ -103,7 +109,7 @@
       name: 'indigo',
       primary: '#6366f1',
       accent: '#818cf8',
-      glow: 'rgba(99, 102, 241, 0.14)',
+      glow: 'rgba(99, 102, 241, 0.16)',
       ringRgb: '99, 102, 241',
       bgGradient: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(99, 102, 241, 0.15), rgba(9, 9, 11, 0) 75%), #0c0b14'
     }
@@ -118,10 +124,15 @@
       this.currentPalette = MODEL_PALETTES.amber;
       this.activeModel = null;
 
-      // 3D Holographic Pet State
-      this.cx = 0;
-      this.cy = 0;
-      this.petRadius = 38;
+      // 3D In-Window Animation State
+      this.canvas = null;
+      this.ctx = null;
+      this.viewportWidth = 320;
+      this.viewportHeight = 135;
+      this.cx = 160;
+      this.cy = 67;
+      this.petRadius = 34;
+
       this.rotX = 0.22;
       this.rotY = 0;
       this.omega = 1.0;
@@ -135,27 +146,43 @@
       // Lifecycle: 'IDLE' | 'COMPUTATIONAL_THINKING' | 'STREAMING_RESPONSE'
       this.lifecycle = 'IDLE';
 
-      // Mouse proximity & interaction
+      // Mouse proximity tracking inside the window
       this.mouseX = -1000;
       this.mouseY = -1000;
-      this.isHovered = false;
+      this.targetTiltX = 0;
+      this.targetTiltY = 0;
 
       // Tactical Vector Rings
       this.rings = [
-        { radiusOffset: 1.15, speed: 0.85, dir: 1, angle: 0, weight: 1.6, dash: [7, 4, 2, 4] },
+        { radiusOffset: 1.15, speed: 0.85, dir: 1, angle: 0, weight: 1.5, dash: [7, 4, 2, 4] },
         { radiusOffset: 1.42, speed: 0.55, dir: -1, angle: 0.5, weight: 1.2, dash: [14, 6, 4, 6] },
         { radiusOffset: 1.72, speed: 0.35, dir: 1, angle: 1.2, weight: 1.0, dash: [20, 8] }
       ];
 
-      // Fibonacci Volumetric Nodes (Stark AI Core)
+      // Fibonacci Volumetric Nodes
       this.nodes = [];
-      this.initNodes(450);
+      this.initNodes(380);
 
       this.initDom();
       this.bindEvents();
 
+      // Suppress any stray background canvas on the document body
+      this.suppressBodyBackgroundCanvas();
+
       if (this.enabled) {
         this.startLoop();
+      }
+    }
+
+    suppressBodyBackgroundCanvas() {
+      // Clean up any full-bleed canvas that may have been mounted directly on document.body
+      const fullCanvas = document.getElementById('jarvis-holographic-canvas');
+      if (fullCanvas && fullCanvas.parentNode) {
+        fullCanvas.style.display = 'none';
+      }
+      const petCanvas = document.getElementById('jarvis-pet-canvas');
+      if (petCanvas && petCanvas.parentNode && petCanvas.parentNode === document.body) {
+        petCanvas.parentNode.removeChild(petCanvas);
       }
     }
 
@@ -175,29 +202,14 @@
           uy: yNorm,
           uz: Math.sin(theta) * rAtY,
           shell: shell,
-          size: 1.2 + Math.random() * 1.6,
+          size: 1.2 + Math.random() * 1.5,
           phase: Math.random() * Math.PI * 2
         });
       }
     }
 
     initDom() {
-      // 1. Full-bleed background/pet canvas
-      this.canvas = document.createElement('canvas');
-      this.canvas.id = 'jarvis-pet-canvas';
-      Object.assign(this.canvas.style, {
-        position: 'fixed',
-        inset: '0',
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-        zIndex: '1',
-        display: this.enabled ? 'block' : 'none'
-      });
-      document.body.appendChild(this.canvas);
-      this.ctx = this.canvas.getContext('2d');
-
-      // 2. Stark Clippy Assistant HUD Card
+      // Create J.A.R.V.I.S. Companion Window
       this.hud = document.createElement('div');
       this.hud.id = 'jarvis-clippy-hud';
       Object.assign(this.hud.style, {
@@ -205,7 +217,7 @@
         bottom: '84px',
         right: '24px',
         zIndex: '30',
-        maxWidth: '380px',
+        maxWidth: '360px',
         width: 'calc(100vw - 48px)',
         pointerEvents: 'auto',
         display: this.enabled ? 'block' : 'none',
@@ -214,7 +226,6 @@
       document.body.appendChild(this.hud);
 
       this.renderHudContent();
-      this.resize();
       this.updateToggleButton();
     }
 
@@ -222,7 +233,7 @@
       const p = this.currentPalette;
 
       if (this.minimized) {
-        // Compact Holographic Orb Pill
+        // Compact Minimized Pill
         this.hud.innerHTML = `
           <div onclick="window.jarvisPet && window.jarvisPet.toggleMinimize()"
                title="Expand J.A.R.V.I.S. Stark Copilot"
@@ -235,13 +246,13 @@
         return;
       }
 
-      // Full Stark Clippy Assistant HUD Card
+      // Full J.A.R.V.I.S. Companion Window with Embedded 3D Viewport
       this.hud.innerHTML = `
-        <div class="rounded-2xl bg-stone-950/90 border border-stone-800 shadow-2xl backdrop-blur-xl overflow-hidden font-sans transition-all"
-             style="box-shadow: 0 12px 36px -8px ${p.glow}; border-color: rgba(${p.ringRgb}, 0.35);">
+        <div class="jarvis-pet-window rounded-2xl bg-stone-950/95 border shadow-2xl backdrop-blur-2xl overflow-hidden font-sans transition-all"
+             style="box-shadow: 0 16px 48px -8px ${p.glow}; border-color: rgba(${p.ringRgb}, 0.35);">
 
-          <!-- Top Holographic Header Bar -->
-          <div class="px-3.5 py-2.5 border-b border-stone-800/80 bg-stone-900/60 flex items-center justify-between">
+          <!-- Top Holographic Title Bar -->
+          <div class="px-3.5 py-2 border-b border-stone-800/80 bg-stone-900/70 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full animate-pulse" style="background-color: ${p.primary};"></span>
               <span class="text-xs font-mono font-bold tracking-wider text-stone-200">✦ J.A.R.V.I.S. // STARK COPILOT</span>
@@ -263,10 +274,26 @@
             </div>
           </div>
 
-          <!-- Speech / Dialogue Balloon -->
-          <div class="p-3.5 space-y-3">
+          <!-- 3D Holographic Arc Reactor Viewport (ANIMATION LIVES HERE!) -->
+          <div id="jarvis-viewport-wrapper"
+               onclick="window.jarvisPet && window.jarvisPet.onViewportClick()"
+               title="J.A.R.V.I.S. Arc Reactor Core (Click to pulse &amp; speak)"
+               class="relative overflow-hidden bg-black/50 border-b border-stone-800/80 cursor-pointer select-none"
+               style="height: 135px;">
+            <!-- Tactical HUD Reticles & Optical Watermark -->
+            <div class="absolute top-2 left-2 text-[9px] font-mono text-stone-500 pointer-events-none tracking-widest">┌ OPTIC_V3</div>
+            <div class="absolute top-2 right-2 text-[9px] font-mono text-stone-500 pointer-events-none tracking-widest">432Hz ┐</div>
+            <div class="absolute bottom-2 left-2 text-[8px] font-mono text-stone-500 pointer-events-none tracking-widest">└ FIBONACCI</div>
+            <div class="absolute bottom-2 right-2 text-[8px] font-mono text-stone-500 pointer-events-none tracking-widest">ARC_CORE ┘</div>
+
+            <!-- In-Window Canvas -->
+            <canvas id="jarvis-pet-viewport-canvas" class="w-full h-full block"></canvas>
+          </div>
+
+          <!-- Assistant Body & Clippy Speech -->
+          <div class="p-3 space-y-3">
             <div class="flex items-start gap-2.5">
-              <div class="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-mono font-bold"
+              <div class="w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-mono font-bold"
                    style="background: rgba(${p.ringRgb}, 0.15); color: ${p.accent}; border: 1px solid rgba(${p.ringRgb}, 0.4);">
                 ✦
               </div>
@@ -277,7 +304,7 @@
               </div>
             </div>
 
-            <!-- Contextual Suggestions Carousel (Clippy-Style) -->
+            <!-- Contextual Suggestions Carousel -->
             <div class="space-y-1.5 pt-1 border-t border-stone-800/80">
               <div class="text-[10px] font-mono text-stone-400 font-semibold uppercase tracking-wider flex items-center justify-between">
                 <span>💡 Contextual Suggestions</span>
@@ -311,19 +338,19 @@
               </div>
               <div class="grid grid-cols-2 gap-1.5">
                 <button type="button" onclick="window.jarvisPet && window.jarvisPet.downloadChatMarkdown()"
-                        class="px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-stone-900/90 hover:bg-stone-800 border border-stone-800 hover:border-stone-700 text-stone-200 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm">
+                        class="px-2 py-1.5 rounded-lg text-[11px] font-medium bg-stone-900/90 hover:bg-stone-800 border border-stone-800 hover:border-stone-700 text-stone-200 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm">
                   <span>📄</span><span>Download .md</span>
                 </button>
                 <button type="button" onclick="window.jarvisPet && window.jarvisPet.downloadChatJson()"
-                        class="px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-stone-900/90 hover:bg-stone-800 border border-stone-800 hover:border-stone-700 text-stone-200 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm">
+                        class="px-2 py-1.5 rounded-lg text-[11px] font-medium bg-stone-900/90 hover:bg-stone-800 border border-stone-800 hover:border-stone-700 text-stone-200 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm">
                   <span>📦</span><span>Export JSON</span>
                 </button>
                 <button type="button" onclick="window.jarvisPet && window.jarvisPet.copyLatestCode()"
-                        class="px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-stone-900/90 hover:bg-stone-800 border border-stone-800 hover:border-stone-700 text-stone-200 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm">
+                        class="px-2 py-1.5 rounded-lg text-[11px] font-medium bg-stone-900/90 hover:bg-stone-800 border border-stone-800 hover:border-stone-700 text-stone-200 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm">
                   <span>📋</span><span>Copy All Code</span>
                 </button>
                 <button type="button" onclick="window.jarvisPet && window.jarvisPet.saveArtifact()"
-                        class="px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-stone-900/90 hover:bg-stone-800 border border-stone-800 hover:border-stone-700 text-stone-200 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm">
+                        class="px-2 py-1.5 rounded-lg text-[11px] font-medium bg-stone-900/90 hover:bg-stone-800 border border-stone-800 hover:border-stone-700 text-stone-200 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm">
                   <span>💾</span><span>Save Artifact</span>
                 </button>
               </div>
@@ -342,63 +369,75 @@
           </div>
         </div>
       `;
+
+      // Mount canvas inside viewport
+      this.mountViewportCanvas();
+    }
+
+    mountViewportCanvas() {
+      this.canvas = document.getElementById('jarvis-pet-viewport-canvas');
+      if (!this.canvas) return;
+
+      this.ctx = this.canvas.getContext('2d');
+      this.resize();
     }
 
     resize() {
       if (!this.canvas) return;
+
+      const wrapper = document.getElementById('jarvis-viewport-wrapper');
+      if (wrapper) {
+        const rect = wrapper.getBoundingClientRect();
+        this.viewportWidth = Math.max(rect.width || 320, 240);
+        this.viewportHeight = Math.max(rect.height || 135, 120);
+      } else {
+        this.viewportWidth = 320;
+        this.viewportHeight = 135;
+      }
+
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      this.width = window.innerWidth;
-      this.height = window.innerHeight;
-      this.canvas.width = this.width * dpr;
-      this.canvas.height = this.height * dpr;
+      this.canvas.width = this.viewportWidth * dpr;
+      this.canvas.height = this.viewportHeight * dpr;
       this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      // Anchor J.A.R.V.I.S. Pet Core in workspace background
-      // Positions subtly floating above prompt bar on lower right or ambient bottom
-      if (this.width < 768) {
-        this.cx = this.width - 60;
-        this.cy = this.height - 130;
-        this.petRadius = 28;
-      } else {
-        this.cx = this.width - 100;
-        this.cy = this.height - 160;
-        this.petRadius = 38;
-      }
+      // Centered cleanly in the viewport window
+      this.cx = this.viewportWidth / 2;
+      this.cy = this.viewportHeight / 2;
+      this.petRadius = Math.min(this.viewportWidth, this.viewportHeight) * 0.28;
     }
 
     bindEvents() {
       window.addEventListener('resize', () => this.resize());
 
-      // Mouse tracking
+      // Mouse tracking inside viewport
       window.addEventListener('mousemove', (e) => {
-        this.mouseX = e.clientX;
-        this.mouseY = e.clientY;
-        const dx = e.clientX - this.cx;
-        const dy = e.clientY - this.cy;
-        const dist = Math.hypot(dx, dy);
-        this.isHovered = dist < this.petRadius * 1.8;
+        if (!this.canvas) return;
+        const rect = this.canvas.getBoundingClientRect();
+        const localX = e.clientX - rect.left;
+        const localY = e.clientY - rect.top;
+
+        if (localX >= 0 && localX <= rect.width && localY >= 0 && localY <= rect.height) {
+          const dx = localX - this.cx;
+          const dy = localY - this.cy;
+          this.targetTiltX = (dx / (this.viewportWidth * 0.5)) * 0.35;
+          this.targetTiltY = (dy / (this.viewportHeight * 0.5)) * 0.35;
+        } else {
+          this.targetTiltX = 0;
+          this.targetTiltY = 0;
+        }
       }, { passive: true });
 
-      // Click on J.A.R.V.I.S. Pet Core triggers speech/pulse
-      window.addEventListener('click', (e) => {
-        if (!this.enabled) return;
-        const dx = e.clientX - this.cx;
-        const dy = e.clientY - this.cy;
-        if (Math.hypot(dx, dy) < this.petRadius * 1.8) {
-          this.pulseEnergy = 1.0;
-          this.speakGreeting();
-          if (this.minimized) {
-            this.toggleMinimize(false);
-          }
-        }
-      });
-
-      // Typing reaction
+      // Typing reactivity
       window.addEventListener('keydown', (e) => {
         if (e.target && e.target.matches && e.target.matches('textarea, input[type="text"]')) {
           this.onTyping();
         }
       }, { passive: true });
+    }
+
+    onViewportClick() {
+      this.pulseEnergy = 1.0;
+      this.speakGreeting();
     }
 
     onTyping() {
@@ -484,6 +523,7 @@
       // Re-render HUD cards to adopt new model color accents
       this.renderHudContent();
       this.updateToggleButton();
+      this.suppressBodyBackgroundCanvas();
     }
 
     toggle(forceState) {
@@ -495,9 +535,6 @@
 
       localStorage.setItem(STORAGE_KEY_ENABLED, this.enabled ? 'true' : 'false');
 
-      if (this.canvas) {
-        this.canvas.style.display = this.enabled ? 'block' : 'none';
-      }
       if (this.hud) {
         this.hud.style.display = this.enabled ? 'block' : 'none';
       }
@@ -505,7 +542,7 @@
       this.updateToggleButton();
 
       if (this.enabled) {
-        this.resize();
+        this.renderHudContent();
         this.startLoop();
       } else {
         this.stopLoop();
@@ -578,30 +615,25 @@
       this.targetScale = Math.max(1.0, this.targetScale - dt * 0.1);
 
       this.rotY += 0.5 * this.omega * dt;
-
-      // Mouse proximity tilt
-      const dx = this.mouseX - this.cx;
-      const dy = this.mouseY - this.cy;
-      this.targetTiltX = (dx / Math.max(this.width * 0.5, 1)) * 0.35;
-      this.targetTiltY = (dy / Math.max(this.height * 0.5, 1)) * 0.35;
-      this.rotX = 0.22 + this.targetTiltY;
+      this.rotX = 0.22 + (this.targetTiltY || 0);
     }
 
     draw(now) {
+      if (!this.ctx || !this.canvas) return;
       const ctx = this.ctx;
-      ctx.clearRect(0, 0, this.width, this.height);
+      ctx.clearRect(0, 0, this.viewportWidth, this.viewportHeight);
 
       const p = this.currentPalette;
       const baseR = this.petRadius * this.scale;
-      const floatY = Math.sin(this.time * 2.2) * 6;
+      const floatY = Math.sin(this.time * 2.2) * 4;
       const cx = this.cx;
       const cy = this.cy + floatY;
 
-      // 1. Draw Counter-Rotating Tactical Rings
+      // 1. Draw Counter-Rotating Tactical Rings inside the window viewport
       for (let i = 0; i < this.rings.length; i++) {
         const ring = this.rings[i];
         ring.angle += ring.dir * ring.speed * this.omega * 0.016;
-        const rr = baseR * ring.radiusOffset + this.pulseEnergy * 10;
+        const rr = baseR * ring.radiusOffset + this.pulseEnergy * 6;
 
         ctx.save();
         ctx.translate(cx, cy);
@@ -618,13 +650,13 @@
         ctx.restore();
       }
 
-      // 2. Draw 3D Volumetric Fibonacci Particle Sphere
+      // 2. Draw 3D Volumetric Fibonacci Particle Sphere inside the window viewport
       const cosY = Math.cos(this.rotY);
       const sinY = Math.sin(this.rotY);
       const cosX = Math.cos(this.rotX);
       const sinX = Math.sin(this.rotX);
-      const fov = 320;
-      const hollowRadius = baseR * 0.38;
+      const fov = 260;
+      const hollowRadius = baseR * 0.36;
 
       for (let i = 0; i < this.nodes.length; i++) {
         const n = this.nodes[i];
@@ -641,7 +673,7 @@
         const y2 = y0 * cosX - z1 * sinX;
         const z2 = y0 * sinX + z1 * cosX;
 
-        const perspective = fov / Math.max(fov + z2 * baseR + 100, 40);
+        const perspective = fov / Math.max(fov + z2 * baseR + 80, 30);
         let sx = cx + x1 * baseR * perspective;
         let sy = cy + y2 * baseR * perspective;
 
@@ -654,20 +686,20 @@
         }
 
         const depth = Math.min(1, Math.max(0, (z2 + 1) * 0.5));
-        const alpha = (0.25 + depth * 0.75 + this.pulseEnergy * 0.2).toFixed(2);
+        const alpha = (0.28 + depth * 0.72 + this.pulseEnergy * 0.25).toFixed(2);
         const dotSize = n.size * (0.7 + depth * 0.6) * perspective;
 
         ctx.fillStyle = `rgba(${p.ringRgb}, ${alpha})`;
         ctx.fillRect(sx - dotSize * 0.5, sy - dotSize * 0.5, dotSize, dotSize);
       }
 
-      // 3. Central Arc Reactor Acoustic Core Pulse
+      // 3. Central Arc Reactor Core Pulse
       ctx.save();
       ctx.fillStyle = p.accent;
       ctx.shadowColor = p.primary;
-      ctx.shadowBlur = 12 + this.pulseEnergy * 16;
+      ctx.shadowBlur = 10 + this.pulseEnergy * 14;
       ctx.beginPath();
-      ctx.arc(cx, cy, 3.5 + Math.sin(this.time * 5) * 1.5 + this.pulseEnergy * 3, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 3.2 + Math.sin(this.time * 5) * 1.2 + this.pulseEnergy * 2.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
       ctx.restore();
@@ -679,7 +711,6 @@
       if (textarea) {
         textarea.value = text;
         textarea.focus();
-        // Trigger auto-resize if available
         if (window.app && window.app.autoResizeTextarea) {
           window.app.autoResizeTextarea(textarea);
         }
@@ -778,7 +809,6 @@
 
     destroy() {
       this.stopLoop();
-      if (this.canvas && this.canvas.parentNode) this.canvas.parentNode.removeChild(this.canvas);
       if (this.hud && this.hud.parentNode) this.hud.parentNode.removeChild(this.hud);
     }
   }

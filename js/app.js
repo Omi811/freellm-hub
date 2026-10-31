@@ -50,17 +50,14 @@ class App {
     this.modelSelector.init();
     this.settings.init();
 
-    // Mount J.A.R.V.I.S. 3D Volumetric Holographic Suite
-    if (window.JarvisHolographicSuite && !window.jarvis) {
-      window.jarvis = window.JarvisHolographicSuite.mount({
-        container: document.body,
-        inputSelector: 'textarea, input[type="text"]',
-        palette: 'stark_matrix',
-        showRings: true,
-        particleCount: 2000,
-        zIndex: 0
-      });
-      if (window.jarvis.updateHudBadge) window.jarvis.updateHudBadge();
+    // J.A.R.V.I.S. In-Window Pet Companion & Stark Copilot
+    if (!window.jarvis) {
+      window.jarvis = {
+        setState: (st) => { if (window.jarvisPet) window.jarvisPet.setState(st); },
+        ingestToken: (tok) => { if (window.jarvisPet) window.jarvisPet.onTyping(); },
+        parseAndStripPayload: (text) => text.replace(/\|\|\|\s*(\{[\s\S]*?\})\s*\|\|\|/g, '').trim(),
+        toggle: () => { if (window.jarvisPet) return window.jarvisPet.toggle(); }
+      };
     }
 
     if (window.customStore) {
