@@ -520,6 +520,61 @@
             badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-[#191919]/70 border border-[#8a99a5]/30 text-[#8a99a5] hover:text-[#fdd222] hover:border-[#fdd222]/40 font-mono transition-all cursor-pointer";
           }
         },
+        async enableMicAudio() {
+          try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return false;
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return false;
+            const audioCtx = new AudioCtx();
+            const source = audioCtx.createMediaStreamSource(stream);
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            source.connect(analyser);
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+            const updateAudio = () => {
+              if (state.enabled) {
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                  sum += dataArray[i];
+                }
+                const avg = sum / dataArray.length;
+                state.micEnergy = Math.min(avg / 110, 1.0);
+              }
+              requestAnimationFrame(updateAudio);
+            };
+            updateAudio();
+            return true;
+          } catch (e) {
+            console.warn("J.A.R.V.I.S. Mic audio access:", e);
+            return false;
+          }
+        },
+        speak(text) {
+          if (!('speechSynthesis' in window)) return;
+          window.speechSynthesis.cancel();
+          const clean = String(text || '').replace(PAYLOAD_REGEX, '').trim();
+          if (!clean) return;
+          const utter = new SpeechSynthesisUtterance(clean);
+          utter.rate = 1.05;
+          utter.pitch = 0.95;
+          let interval = null;
+          utter.onstart = () => {
+            state.lifecycle = 'STREAMING_RESPONSE';
+            interval = setInterval(() => {
+              state.micEnergy = 0.35 + Math.sin(Date.now() * 0.015) * 0.25;
+            }, 50);
+          };
+          utter.onend = utter.onerror = () => {
+            if (interval) clearInterval(interval);
+            state.micEnergy = 0.0;
+            state.lifecycle = 'IDLE';
+            this.updateHudBadge();
+          };
+          window.speechSynthesis.speak(utter);
+        },
         destroy() {
           if (state.rafId) cancelAnimationFrame(state.rafId);
           window.removeEventListener('resize', resize);
