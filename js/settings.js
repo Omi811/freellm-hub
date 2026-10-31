@@ -146,6 +146,11 @@ class SettingsManager {
       tokensSlider.value = this.maxTokens;
       tokensVal.textContent = this.maxTokens;
     }
+
+    const petToggle = document.getElementById("settings-codex-pet-toggle");
+    if (petToggle && window.codexPet) {
+      petToggle.checked = window.codexPet.enabled;
+    }
   }
 
   saveSettings() {

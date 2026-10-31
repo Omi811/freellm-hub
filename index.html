@@ -218,6 +218,16 @@
           <span>✦ J.A.R.V.I.S. // STANDARD_OPTICS</span>
         </button>
 
+        <!-- Codex Pet Companion Toggle Button -->
+        <button id="codex-pet-toggle-btn"
+                onclick="window.codexPet && window.codexPet.toggle()"
+                oncontextmenu="event.preventDefault(); window.codexPet && window.codexPet.cycleSpecies()"
+                title="Codex Pet: Click to toggle background pet ON/OFF • Right-click to switch species (Cat 🐱, Dog 🐶, Robot 🤖, Dragon 🐲, Duck 🦆)"
+                class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono bg-emerald-950/40 hover:bg-emerald-900/40 border border-emerald-500/50 text-emerald-300 hover:text-emerald-200 transition-all cursor-pointer shadow-sm">
+          <span class="pet-btn-icon text-xs">🐱</span>
+          <span id="codex-pet-btn-label">CAT: ON</span>
+        </button>
+
         <!-- Settings Button -->
         <button onclick="window.settings.openModal()"
                 title="Settings & API Keys"
@@ -756,6 +766,28 @@
             </div>
             <input id="thinking-autoexpand-toggle" type="checkbox" onchange="window.settings.onThinkingToggleChange(this.checked)" class="w-4 h-4 accent-amber-500 cursor-pointer" />
           </div>
+
+          <!-- Codex Pet Companion Customizer Card -->
+          <div class="pt-3 border-t border-stone-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-stone-200 flex items-center gap-1.5">
+                  <span>🐾 Codex Background Pet Companion</span>
+                </div>
+                <div class="text-[11px] text-stone-400">Virtual companion roaming your workspace background with interactive typing &amp; thinking reactions.</div>
+              </div>
+              <input id="settings-codex-pet-toggle" type="checkbox" onchange="window.codexPet && window.codexPet.toggle(this.checked)" class="w-4 h-4 accent-emerald-500 cursor-pointer" />
+            </div>
+
+            <div class="flex items-center gap-2 pt-1 flex-wrap">
+              <span class="text-xs text-stone-400">Pet Species:</span>
+              <button type="button" onclick="window.codexPet && window.codexPet.setSpecies('cat')" class="px-2.5 py-1 rounded-lg text-xs bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-300 hover:text-white transition-all cursor-pointer">🐱 Cyber Cat</button>
+              <button type="button" onclick="window.codexPet && window.codexPet.setSpecies('dog')" class="px-2.5 py-1 rounded-lg text-xs bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-300 hover:text-white transition-all cursor-pointer">🐶 Cyber Dog</button>
+              <button type="button" onclick="window.codexPet && window.codexPet.setSpecies('robot')" class="px-2.5 py-1 rounded-lg text-xs bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-300 hover:text-white transition-all cursor-pointer">🤖 ByteBot</button>
+              <button type="button" onclick="window.codexPet && window.codexPet.setSpecies('dragon')" class="px-2.5 py-1 rounded-lg text-xs bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-300 hover:text-white transition-all cursor-pointer">🐲 Neon Drake</button>
+              <button type="button" onclick="window.codexPet && window.codexPet.setSpecies('duck')" class="px-2.5 py-1 rounded-lg text-xs bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-300 hover:text-white transition-all cursor-pointer">🦆 Debug Duck</button>
+            </div>
+          </div>
         </div>
 
         <!-- PANE 3: Slash Presets Customizer -->
@@ -1029,6 +1061,7 @@
   <script src="./js/settings.js"></script>
   <script src="./js/osint_engine.js"></script>
   <script src="./js/jarvis_holographic.js"></script>
+  <script src="./js/codex_pet.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>
