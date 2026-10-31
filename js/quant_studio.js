@@ -1,26 +1,20 @@
 /**
  * ============================================================================
- * QUANT NEURAL NETWORK & MACHINE LEARNING VISUALIZATION STUDIO
+ * J.A.R.V.I.S. // AGE OF ULTRON PROCEDURAL HOLOGRAM & QUANT STUDIO KERNEL
  * ============================================================================
- * Features:
- *  1. 3D Spinning J.A.R.V.I.S. Neural Network & ML Visualizer:
- *     - Multi-Head Attention (MHA/GQA) rotating tensor heads & QKV vectors
- *     - Real-time Quantization representation: FP16, INT8, INT4 (AWQ), NF4
- *     - RoPE Rotary Positional Embedding helical geometry
- *     - Dynamic synapsing neuron pulses across LayerNorm / RMSNorm and SwiGLU FFN
- *     - Interactive 3D drag rotation and zoom
- *  2. Prompt-Submitting Toggle Chatbox (In-Studio Streaming Console):
- *     - Direct interactive prompt submission right inside the Neural Studio
- *     - Live token streaming with synchronized 3D neural activation flares
- *     - Toggle between Chatbox view and Multi-Model / Telemetry settings
- *     - Quick prompt chips (/ponytail, Unit Tests, Latency Optimization)
- *  3. Multi-Model Integration for Serious Developer Projects:
- *     - Parallel Ensemble & Mixture-of-Agents orchestration
- *     - Concurrent multi-model prompt dispatch (Claude + DeepSeek + Groq + Gemini)
- *  4. Double Turbo Mode:
- *     - Hyper-speed speculative decoupling stream routing (~800 tok/s)
- *  5. Smart Coping & Telemetry System:
- *     - KV-Cache compression telemetry, memory budgeting, and zero-loss error recovery
+ * Built following:
+ *  1. SideFX / Animal Logic "Avengers: Age of Ultron" Houdini SOP Workflow:
+ *     - Pre-baked spherical self-shadowing & core-glow attributes in a flat
+ *       Float32Array (zero per-frame lighting math, zero GC allocations).
+ *     - 5-Stage Transformer Cortical Clusters (Embeddings -> MHA/GQA -> RMSNorm
+ *       -> SwiGLU -> Logits) + Dual Spinning RoPE Helices + Synaptic Axon Curves
+ *       embedded inside an asymmetric Volumetric Point Cloud.
+ *     - Additive Volumetric Pass (globalCompositeOperation = 'lighter') with
+ *       bucketed LUT batches (~8 fillStyle switches per frame instead of 1,500).
+ *  2. DietrichGebert/ponytail ("Lazy Senior Dev") Low-Load Engineering Rules:
+ *     - 0.0% CPU/GPU load when modal is closed or tab is hidden (cancelAnimationFrame).
+ *     - Adaptive 30 FPS idle throttle -> instant 60 FPS wake on typing/drag/stream.
+ *     - Zero object or string creation inside renderFrame().
  * ============================================================================
  */
 
@@ -28,11 +22,55 @@
   'use strict';
 
   const STORAGE_KEY = 'freellm_quant_studio_config';
+  const PAYLOAD_REGEX = /\|\|\|\s*(\{[\s\S]*?\})\s*\|\|\|/g;
+  const STRIDE = 8; // [ux, uy, uz, bakedCoreGlow, layerId, phase, salience, size]
+  const BUCKETS = 8;
+  const POINT_COUNT = 1500;
+
+  const PALETTES = {
+    stark_amber: { r: 255, g: 170, b: 0, coreR: 255, coreG: 242, coreB: 200 },
+    ultron_red: { r: 255, g: 48, b: 12, coreR: 255, coreG: 185, coreB: 140 },
+    quantum_cyan: { r: 0, g: 235, b: 255, coreR: 210, coreG: 255, coreB: 255 },
+    matrix_purple: { r: 168, g: 85, b: 247, coreR: 240, coreG: 215, coreB: 255 },
+    emerald_tensor: { r: 16, g: 185, b: 129, coreR: 210, coreG: 255, coreB: 235 }
+  };
+
+  const STAGE_CENTERS = [
+    [-0.52, -0.12, 0.08], // 0: Input Token Embeddings
+    [-0.24, 0.16, -0.14], // 1: Multi-Head Attention (MHA/GQA)
+    [0.0, -0.05, 0.18],   // 2: RMSNorm Normalization Plane
+    [0.26, 0.14, -0.10],  // 3: SwiGLU Feed-Forward Dense Cluster
+    [0.54, -0.08, 0.06]   // 4: Dequantized Output Logits
+  ];
+
+  function buildLut(palKey, alertBlend) {
+    const base = PALETTES[palKey] || PALETTES.stark_amber;
+    const red = PALETTES.ultron_red;
+    const b = Math.min(Math.max(alertBlend, 0), 1);
+    const r = Math.round(base.r + (red.r - base.r) * b);
+    const g = Math.round(base.g + (red.g - base.g) * b);
+    const bl = Math.round(base.b + (red.b - base.b) * b);
+    const cr = Math.round(base.coreR + (red.coreR - base.coreR) * b);
+    const cg = Math.round(base.coreG + (red.coreG - base.coreG) * b);
+    const cb = Math.round(base.coreB + (red.coreB - base.coreB) * b);
+
+    const lut = new Array(BUCKETS);
+    for (let i = 0; i < BUCKETS; i++) {
+      const t = (i + 1) / BUCKETS; // 0.125 .. 1.0
+      const mr = Math.round(r + (cr - r) * (t * t));
+      const mg = Math.round(g + (cg - g) * (t * t));
+      const mb = Math.round(bl + (cb - bl) * (t * t));
+      const alpha = (0.12 + t * 0.78).toFixed(2);
+      lut[i] = `rgba(${mr},${mg},${mb},${alpha})`;
+    }
+    return lut;
+  }
 
   class QuantStudio {
     constructor() {
       const saved = this.loadConfig();
       this.isOpen = false;
+      this.active = true;
       this.activeTab = saved.activeTab || 'chat'; // 'chat' | 'ensemble'
       this.doubleTurbo = saved.doubleTurbo !== false;
       this.rotSpeed = saved.rotSpeed || 1.0;
@@ -46,22 +84,45 @@
       this.isStreaming = false;
       this.abortController = null;
 
-      // 3D Canvas State
+      // 3D Canvas & Pre-allocated Typed Buffers (Zero GC allocations in renderFrame)
       this.canvas = null;
       this.ctx = null;
       this.rafId = null;
-      this.time = 0;
-      this.angleY = 0;
-      this.angleX = 0.25;
-      this.surgeEnergy = 0.0;
+      this.width = 800;
+      this.height = 600;
+      this.cx = 400;
+      this.cy = 300;
+      this.pointCount = POINT_COUNT;
+      this.points = new Float32Array(this.pointCount * STRIDE);
+      this.bucketCoords = Array.from({ length: BUCKETS }, () => new Float32Array(this.pointCount * 3));
+      this.bucketCounts = new Int32Array(BUCKETS);
 
-      // Neural Architecture Graph Nodes
-      this.layers = [];
-      this.synapses = [];
-      this.ropeStrands = [];
+      // Tri-Axis Dynamics & VEX State
+      this.frameCount = 0;
+      this.lastInteractionTs = performance.now();
+      this.lastKeyTs = 0;
+      this.typingCps = 0;
+      this.lifecycle = 'IDLE'; // 'IDLE' | 'COMPUTATIONAL_THINKING' | 'STREAMING_RESPONSE'
+      this.matrixMode = 'STANDARD_OPTICS';
+      this.targetOmega = 1.0;
+      this.currentOmega = 1.0;
+      this.targetScale = 1.0;
+      this.currentScale = 1.0;
+      this.targetAlert = 0.0;
+      this.currentAlert = 0.0;
+      this.synapticPulse = 0.0;
+      this.rotY = 0.0;
+      this.rotX = 0.18;
+      this.targetTiltX = 0.0;
+      this.targetTiltY = 0.0;
+      this.currentTiltX = 0.0;
+      this.currentTiltY = 0.0;
+      this.time = 0;
+      this.lastFrameTs = performance.now();
+      this.lut = buildLut(this.theme, 0);
 
       this.initDom();
-      this.buildNeuralModel();
+      this.initGeometry();
       this.bindEvents();
     }
 
@@ -86,6 +147,75 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
     }
 
+    initGeometry() {
+      const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+      const N = this.pointCount;
+      const points = this.points;
+
+      for (let i = 0; i < N; i++) {
+        const offset = i * STRIDE;
+        let x, y, z, layerId;
+
+        if (i < N * 0.12) {
+          // 1. RoPE Double Helical Strand Geometry (12% of points)
+          const t = (i / (N * 0.12)) * 2 - 1; // -1 .. +1
+          const strand = i % 2 === 0 ? 0 : Math.PI;
+          const angle = t * Math.PI * 4 + strand;
+          x = t * 0.65;
+          y = Math.cos(angle) * 0.22;
+          z = Math.sin(angle) * 0.22;
+          layerId = 5;
+        } else if (i < N * 0.52) {
+          // 2. 5 Transformer Stage Cortical Clusters (40% of points)
+          // 0: Embeddings, 1: MHA/GQA, 2: RMSNorm, 3: SwiGLU, 4: Logits
+          const stageIdx = i % 5;
+          const sc = STAGE_CENTERS[stageIdx];
+          const u = Math.random() * Math.PI * 2;
+          const v = Math.acos(2 * Math.random() - 1);
+          const radScale = stageIdx === 1 ? Math.min(1.4, Math.max(0.7, this.attentionHeads / 16)) : 1.0;
+          const rad = (0.06 + Math.pow(Math.random(), 1.4) * 0.24) * radScale;
+          x = sc[0] + Math.sin(v) * Math.cos(u) * rad;
+          y = sc[1] + Math.sin(v) * Math.sin(u) * rad;
+          z = sc[2] + Math.cos(v) * rad;
+          layerId = stageIdx;
+        } else {
+          // 3. Asymmetric Age-of-Ultron Outer Neural Point Cloud Shell with Hollow Inner Cavity (48% of points)
+          const idx = i - Math.floor(N * 0.52);
+          const total = N - Math.floor(N * 0.52);
+          const yNorm = 1 - (idx / Math.max(total - 1, 1)) * 2;
+          const rAtY = Math.sqrt(Math.max(0, 1 - yNorm * yNorm));
+          const theta = goldenAngle * idx;
+          // Organic Houdini curl-like lobe modulation
+          const lobe =
+            0.44 +
+            0.48 * Math.pow((idx % 7) / 6, 0.8) +
+            0.08 * Math.sin(theta * 3 + yNorm * 4);
+          x = Math.cos(theta) * rAtY * lobe * 1.15;
+          y = yNorm * lobe * 0.88;
+          z = Math.sin(theta) * rAtY * lobe;
+          layerId = 6;
+        }
+
+        const distSq = x * x + y * y + z * z;
+        // Pre-baked Houdini SOP internal core illumination & self-shadow attribute
+        const bakedGlow = Math.min(1, Math.max(0.12, Math.exp(-distSq * 1.65) + (layerId < 5 ? 0.28 : 0)));
+        const salience = Math.random() > 0.86 ? 1.0 : 0.2; // Salient AWQ weight outlier flag
+
+        points[offset] = x;
+        points[offset + 1] = y;
+        points[offset + 2] = z;
+        points[offset + 3] = bakedGlow;
+        points[offset + 4] = layerId;
+        points[offset + 5] = (i * 0.13) % (Math.PI * 2);
+        points[offset + 6] = salience;
+        points[offset + 7] = layerId < 5 ? 2.2 : salience > 0.8 ? 2.5 : 1.4;
+      }
+    }
+
+    buildNeuralModel() {
+      this.initGeometry();
+    }
+
     initDom() {
       // 1. Studio Modal Overlay
       this.modal = document.createElement('div');
@@ -106,10 +236,10 @@
                 <div class="flex items-center gap-2">
                   <h2 class="text-sm sm:text-base font-bold font-mono tracking-wider text-cyan-300">J.A.R.V.I.S. QUANT NEURAL STUDIO</h2>
                   <span class="text-[10px] px-2 py-0.5 rounded-full font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                    ML VISUALIZER V3.5
+                    AGE OF ULTRON V4.0
                   </span>
                 </div>
-                <p class="text-[11px] text-stone-400">Spinning 3D Transformer Quantization, Multi-Model Ensemble, and Live Streaming Chatbox.</p>
+                <p class="text-[11px] text-stone-400">SideFX SOP Neural Hologram, Quantization Architecture, and Live Streaming Chatbox.</p>
               </div>
             </div>
 
@@ -142,7 +272,7 @@
           <!-- Studio Body: Split View -->
           <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
 
-            <!-- Left / Center Column (7 Cols): 3D Spinning Neural Canvas & Controls -->
+            <!-- Left Column (7 Cols): 3D Spinning Neural Canvas & Controls -->
             <div class="lg:col-span-7 flex flex-col border-b lg:border-b-0 lg:border-r border-stone-800 bg-black/60 relative overflow-hidden">
               
               <!-- 3D Canvas Container -->
@@ -152,8 +282,8 @@
                 <!-- Floating HUD Overlays -->
                 <div class="absolute top-3 left-3 text-[10px] font-mono text-cyan-400/80 space-y-0.5 pointer-events-none bg-stone-950/75 p-2 rounded-lg border border-cyan-500/20 backdrop-blur shadow">
                   <div>ROTARY EMBEDDING: <span class="text-cyan-300 font-bold">RoPE 3D HELIX</span></div>
-                  <div>ATTENTION HEADS: <span class="text-cyan-300 font-bold">${this.attentionHeads} HEADS (GQA)</span></div>
-                  <div>QUANTIZATION MODE: <span class="text-amber-300 font-bold">${this.quantPrecision} (AWQ SALIENT)</span></div>
+                  <div>ATTENTION HEADS: <span id="quant-hud-heads" class="text-cyan-300 font-bold">${this.attentionHeads} HEADS (GQA)</span></div>
+                  <div>QUANTIZATION MODE: <span id="quant-hud-precision" class="text-amber-300 font-bold">${this.quantPrecision} (${this.quantPrecision === 'INT4' ? 'AWQ SALIENT' : this.quantPrecision === 'NF4' ? 'QLORA 4-BIT' : this.quantPrecision === 'INT8' ? 'VECTOR QUANT' : 'FULL WEIGHT'})</span></div>
                   <div>SYNAPSE PULSE: <span id="quant-pulse-status" class="text-emerald-400 font-bold">READY</span></div>
                 </div>
 
@@ -167,8 +297,8 @@
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-mono text-stone-400">Rotation:</span>
                   <input type="range" min="0.2" max="3.0" step="0.1" value="${this.rotSpeed}"
-                         oninput="window.quantStudio.setRotSpeed(this.value)"
-                         class="w-20 sm:w-24 accent-cyan-400 cursor-pointer" />
+                          oninput="window.quantStudio.setRotSpeed(this.value)"
+                          class="w-20 sm:w-24 accent-cyan-400 cursor-pointer" />
                   <span id="quant-rotspeed-val" class="text-xs font-mono text-cyan-400">${this.rotSpeed}x</span>
                 </div>
 
@@ -401,7 +531,7 @@
           e.preventDefault();
           this.submitStudioPrompt();
         } else {
-          this.triggerSynapticSurge();
+          this.recordKeystroke();
         }
       });
     }
@@ -433,6 +563,7 @@
       const assistantMsg = { role: 'assistant', content: '', thinking: '', meta: null };
       this.studioMessages.push(assistantMsg);
       this.isStreaming = true;
+      this.lifecycle = 'COMPUTATIONAL_THINKING';
       this.renderStudioMessages();
 
       const activeModelId = (window.modelSelector && window.modelSelector.selectedModelId) || 'auto';
@@ -442,22 +573,29 @@
         const stream = window.clientEngine.streamChat({
           model_id: activeModelId,
           messages: this.studioMessages.slice(0, -1).map(m => ({ role: m.role, content: m.content })),
-          system_prompt: `You are the J.A.R.V.I.S. Quant Neural Copilot. Deliver mathematically rigorous, high-concurrency, zero-bloat code. Adhere strictly to the Ponytail safe-coding mandate: Correct -> Safe -> Holds under real load -> Tested -> Fast -> Lean.`,
+          system_prompt: `You are the J.A.R.V.I.S. Quant Neural Copilot. Deliver mathematically rigorous, high-concurrency, zero-bloat code. Adhere strictly to the Ponytail safe-coding mandate: Correct -> Safe -> Holds under real load -> Tested -> Fast -> Lean.\n\nAt the very end of your response, you may optionally append telemetry: |||{"pulse_intensity": 0.9, "matrix_mode": "STANDARD_OPTICS", "data_packet_size": 1024}|||`,
           turbo_mode: this.doubleTurbo,
           abortSignal: this.abortController.signal
         });
 
         for await (const chunk of stream) {
+          if (this.lifecycle !== 'STREAMING_RESPONSE') {
+            this.lifecycle = 'STREAMING_RESPONSE';
+          }
           if (chunk.type === 'thinking') {
             assistantMsg.thinking = (assistantMsg.thinking || '') + chunk.delta;
-            this.pulse3dCore(0.35);
+            this.ingestToken(chunk.delta);
           } else if (chunk.type === 'chunk') {
             assistantMsg.content += chunk.delta;
-            this.pulse3dCore(0.85);
+            this.ingestToken(chunk.delta);
           } else if (chunk.type === 'done') {
             assistantMsg.meta = chunk;
           }
           this.updateLatestAssistantMessage();
+        }
+
+        if (assistantMsg.content) {
+          assistantMsg.content = this.parseAndStripPayload(assistantMsg.content);
         }
       } catch (err) {
         if (err.name !== 'AbortError') {
@@ -466,6 +604,7 @@
         }
       } finally {
         this.isStreaming = false;
+        this.lifecycle = 'IDLE';
         this.renderStudioMessages();
       }
     }
@@ -476,6 +615,7 @@
         this.abortController = null;
       }
       this.isStreaming = false;
+      this.lifecycle = 'IDLE';
       this.renderStudioMessages();
     }
 
@@ -560,25 +700,37 @@
 
     formatText(raw) {
       if (!raw) return '';
-      // Escape HTML
       let escaped = raw
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
-      // Format code blocks ```
       escaped = escaped.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
         return `<pre class="my-2 p-2.5 rounded-xl bg-black/80 border border-stone-800 font-mono text-[11px] overflow-x-auto text-cyan-300"><code>${code}</code></pre>`;
       });
 
-      // Format inline code `
       escaped = escaped.replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 rounded bg-black/60 border border-stone-800 text-cyan-300 font-mono text-[11px]">$1</code>');
 
       return escaped;
     }
 
+    wakeUp() {
+      this.lastInteractionTs = performance.now();
+    }
+
+    recordKeystroke() {
+      const now = performance.now();
+      this.wakeUp();
+      const delta = this.lastKeyTs > 0 ? now - this.lastKeyTs : 160;
+      this.lastKeyTs = now;
+      const cps = Math.min(1000 / Math.max(delta, 25), 20);
+      this.typingCps += (cps - this.typingCps) * 0.45;
+      this.targetOmega = Math.min(1.0 + this.typingCps * 0.35, 6.0);
+      this.synapticPulse = Math.min(this.synapticPulse + 0.16, 1.0);
+    }
+
     triggerSynapticSurge() {
-      this.surgeEnergy = Math.min(this.surgeEnergy + 0.45, 1.0);
+      this.synapticPulse = Math.min(this.synapticPulse + 0.35, 1.0);
       const pulseStatus = document.getElementById('quant-pulse-status');
       if (pulseStatus) {
         pulseStatus.textContent = 'FIRING // SYNAPSE';
@@ -594,7 +746,32 @@
     }
 
     pulse3dCore(amount) {
-      this.surgeEnergy = Math.min(this.surgeEnergy + amount, 1.0);
+      this.synapticPulse = Math.min(this.synapticPulse + amount, 1.0);
+    }
+
+    ingestToken(word) {
+      this.wakeUp();
+      const len = String(word || '').trim().length;
+      if (!len) return;
+      this.synapticPulse = Math.min(1.0, this.synapticPulse + len * 0.045);
+      this.targetOmega = Math.min(5.5, this.targetOmega + len * 0.14);
+      this.triggerSynapticSurge();
+    }
+
+    parseAndStripPayload(fullText) {
+      let match;
+      while ((match = PAYLOAD_REGEX.exec(fullText)) !== null) {
+        try {
+          const meta = JSON.parse(match[1]);
+          if (typeof meta.pulse_intensity === 'number') {
+            this.synapticPulse = Math.max(this.synapticPulse, Math.min(meta.pulse_intensity, 1.0));
+          }
+          if (meta.matrix_mode) {
+            this.matrixMode = String(meta.matrix_mode).toUpperCase();
+          }
+        } catch (e) {}
+      }
+      return String(fullText || '').replace(PAYLOAD_REGEX, '').trim();
     }
 
     populateEnsembleModels() {
@@ -637,61 +814,6 @@
       this.saveConfig();
     }
 
-    buildNeuralModel() {
-      this.layers = [];
-      this.synapses = [];
-      this.ropeStrands = [];
-
-      const stageX = [-180, -90, 0, 90, 180];
-      const counts = [6, 12, this.attentionHeads, 14, 8];
-
-      for (let s = 0; s < stageX.length; s++) {
-        const x = stageX[s];
-        const count = counts[s];
-        const layerNodes = [];
-
-        for (let i = 0; i < count; i++) {
-          const angle = (i / count) * Math.PI * 2;
-          const radius = 35 + (s === 2 ? 25 : 12);
-          layerNodes.push({
-            x: x,
-            baseY: Math.sin(angle) * radius,
-            baseZ: Math.cos(angle) * radius,
-            stage: s,
-            pulse: Math.random() * Math.PI * 2,
-            weight: 0.5 + Math.random() * 0.5
-          });
-        }
-        this.layers.push(layerNodes);
-      }
-
-      for (let s = 0; s < this.layers.length - 1; s++) {
-        const fromLayer = this.layers[s];
-        const toLayer = this.layers[s + 1];
-
-        for (let f = 0; f < fromLayer.length; f++) {
-          for (let step = 0; step < 2; step++) {
-            const t = (f + step * 2) % toLayer.length;
-            this.synapses.push({
-              from: fromLayer[f],
-              to: toLayer[t],
-              weight: Math.random(),
-              activeTime: Math.random() * Math.PI * 2
-            });
-          }
-        }
-      }
-
-      for (let i = 0; i < 40; i++) {
-        const theta = i * 0.35;
-        this.ropeStrands.push({
-          x: (i - 20) * 10,
-          y: Math.sin(theta) * 22,
-          z: Math.cos(theta) * 22
-        });
-      }
-    }
-
     bindEvents() {
       let isDragging = false;
       let lastX = 0;
@@ -702,21 +824,47 @@
           isDragging = true;
           lastX = e.clientX;
           lastY = e.clientY;
+          this.wakeUp();
         }
       });
 
       window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        const dx = e.clientX - lastX;
-        const dy = e.clientY - lastY;
-        lastX = e.clientX;
-        lastY = e.clientY;
+        this.wakeUp();
+        if (this.canvas) {
+          this.targetTiltX = ((e.clientX - this.cx) / Math.max(this.width * 0.5, 1)) * 0.45;
+          this.targetTiltY = ((e.clientY - this.cy) / Math.max(this.height * 0.5, 1)) * 0.35;
+        }
+        if (isDragging) {
+          const dx = e.clientX - lastX;
+          const dy = e.clientY - lastY;
+          lastX = e.clientX;
+          lastY = e.clientY;
 
-        this.angleY += dx * 0.008;
-        this.angleX = Math.max(-1.2, Math.min(1.2, this.angleX + dy * 0.008));
+          this.rotY += dx * 0.008;
+          this.rotX = Math.max(-1.2, Math.min(1.2, this.rotX + dy * 0.008));
+        }
       });
 
       window.addEventListener('mouseup', () => { isDragging = false; });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')) {
+          this.recordKeystroke();
+        }
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          this.active = false;
+          this.stopLoop();
+        } else {
+          this.active = true;
+          this.wakeUp();
+          if (this.isOpen) {
+            this.startLoop();
+          }
+        }
+      });
     }
 
     toggle() {
@@ -729,6 +877,8 @@
 
     open() {
       this.isOpen = true;
+      this.active = true;
+      this.wakeUp();
       if (this.modal) {
         this.modal.classList.remove('hidden');
         this.modal.style.display = 'flex';
@@ -736,7 +886,7 @@
 
       this.canvas = document.getElementById('quant-neural-canvas');
       if (this.canvas) {
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d', { alpha: true });
         this.resize();
         this.startLoop();
       }
@@ -748,6 +898,7 @@
 
     close() {
       this.isOpen = false;
+      this.active = false;
       if (this.modal) {
         this.modal.classList.add('hidden');
         this.modal.style.display = 'none';
@@ -763,7 +914,9 @@
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       this.canvas.width = (rect.width || 600) * dpr;
       this.canvas.height = (rect.height || 400) * dpr;
-      this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (this.ctx) {
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
 
       this.width = rect.width || 600;
       this.height = rect.height || 400;
@@ -814,34 +967,41 @@
           b.className = 'quant-prec-btn px-2 py-0.5 rounded text-[11px] font-mono text-stone-400 cursor-pointer';
         }
       });
+      const hud = document.getElementById('quant-hud-precision');
+      if (hud) {
+        hud.textContent = `${this.quantPrecision} (${prec === 'INT4' ? 'AWQ SALIENT' : prec === 'NF4' ? 'QLORA 4-BIT' : prec === 'INT8' ? 'VECTOR QUANT' : 'FULL WEIGHT'})`;
+      }
       this.saveConfig();
     }
 
     setHeads(heads) {
       this.attentionHeads = parseInt(heads, 10);
-      this.buildNeuralModel();
+      const hud = document.getElementById('quant-hud-heads');
+      if (hud) {
+        hud.textContent = `${this.attentionHeads} HEADS (${this.attentionHeads === 8 ? 'MHA' : this.attentionHeads === 16 ? 'GQA' : 'WIDE'})`;
+      }
+      this.initGeometry();
       this.saveConfig();
     }
 
     setTheme(themeName) {
       this.theme = themeName;
+      this.lut = buildLut(this.theme, this.currentAlert);
       this.saveConfig();
       this.renderRightPanel();
     }
 
     startLoop() {
       if (this.rafId) return;
-      this.lastTs = performance.now();
+      this.lastFrameTs = performance.now();
 
       const loop = (now) => {
-        if (!this.isOpen) return;
-        const dt = Math.min((now - this.lastTs) / 1000, 0.1);
-        this.lastTs = now;
-
-        this.update(dt);
-        this.draw();
-
+        if (!this.isOpen || !this.active) {
+          this.rafId = null;
+          return;
+        }
         this.rafId = requestAnimationFrame(loop);
+        this.renderFrame(now);
       };
       this.rafId = requestAnimationFrame(loop);
     }
@@ -853,141 +1013,175 @@
       }
     }
 
-    update(dt) {
+    renderFrame(now) {
+      // Ponytail Low-Load Rule: Skip every other frame (30 FPS) when sitting idle >2.5s
+      this.frameCount++;
+      const isIdle =
+        this.lifecycle === 'IDLE' &&
+        this.synapticPulse < 0.03 &&
+        now - this.lastInteractionTs > 2500;
+      if (isIdle && this.frameCount % 2 === 1) return;
+
+      const dt = Math.min((now - this.lastFrameTs) * 0.001, 0.1);
+      this.lastFrameTs = now;
       this.time += dt;
-      this.surgeEnergy = Math.max(0, this.surgeEnergy - dt * 0.45);
-      const effectiveSpeed = this.rotSpeed + this.surgeEnergy * 1.5;
-      this.angleY += 0.45 * effectiveSpeed * dt;
+
+      // Fluid exponential decay: current += (target - current) * 0.08
+      const isThinking = this.lifecycle === 'COMPUTATIONAL_THINKING';
+      const isAlert = isThinking || this.matrixMode === 'TACTICAL_ALERT';
+      const prevAlertBucket = Math.round(this.currentAlert * 10);
+
+      this.synapticPulse += (0 - this.synapticPulse) * 0.07;
+      this.targetOmega += ((isThinking ? 2.8 : 1.0) - this.targetOmega) * 0.06;
+      this.currentOmega += (this.targetOmega - this.currentOmega) * 0.08;
+      this.currentScale += (1.0 + this.synapticPulse * 0.22 - this.currentScale) * 0.08;
+      this.currentAlert += ((isAlert ? 1.0 : 0.0) - this.currentAlert) * 0.08;
+      this.currentTiltX += (this.targetTiltX - this.currentTiltX) * 0.1;
+      this.currentTiltY += (this.targetTiltY - this.currentTiltY) * 0.1;
+
+      if (Math.round(this.currentAlert * 10) !== prevAlertBucket) {
+        this.lut = buildLut(this.theme, this.currentAlert);
+      }
+
+      this.rotY += 0.36 * this.rotSpeed * this.currentOmega * dt;
+      const cosY = Math.cos(this.rotY + this.currentTiltX);
+      const sinY = Math.sin(this.rotY + this.currentTiltX);
+      const cosX = Math.cos(0.2 + this.rotX + this.currentTiltY);
+      const sinX = Math.sin(0.2 + this.rotX + this.currentTiltY);
+
+      if (!this.ctx || !this.canvas) return;
+      const ctx = this.ctx;
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.clearRect(0, 0, this.width, this.height);
+
+      // Additive Volumetric Hologram Blending (Animal Logic SOP Look)
+      ctx.globalCompositeOperation = 'lighter';
+      this.bucketCounts.fill(0);
+
+      const cx = this.cx;
+      const cy = this.cy;
+      const radiusScale = Math.min(this.width, this.height) * 0.42 * this.currentScale;
+      const waveAmp = 0.025 + this.synapticPulse * 0.11 + (isThinking ? 0.08 : 0);
+      const isInt4 = this.quantPrecision === 'INT4';
+      const points = this.points;
+      const N = this.pointCount;
+
+      for (let i = 0; i < N; i++) {
+        const off = i * STRIDE;
+        const ux = points[off];
+        const uy = points[off + 1];
+        const uz = points[off + 2];
+        const bakedGlow = points[off + 3];
+        const layerId = points[off + 4];
+        const phase = points[off + 5];
+        const salience = points[off + 6];
+        let size = points[off + 7];
+
+        // Analytic VEX-style trigonometric displacement (zero simulation cost)
+        const wave =
+          1.0 +
+          Math.sin(this.time * 5.5 + phase + ux * 4.0) *
+            (layerId === 5 ? waveAmp * 1.4 : waveAmp);
+
+        const x0 = ux * wave;
+        const y0 = uy * wave;
+        const z0 = uz * wave;
+
+        const x1 = x0 * cosY - z0 * sinY;
+        const z1 = x0 * sinY + z0 * cosY;
+        const y2 = y0 * cosX - z1 * sinX;
+        const z2 = y0 * sinX + z1 * cosX;
+
+        const proj = 2.4 / Math.max(2.4 + z2, 0.6);
+        const sx = cx + x1 * radiusScale * proj;
+        const sy = cy + y2 * radiusScale * proj;
+
+        // Combine pre-baked SOP core glow + z-depth + AWQ salience into LUT bucket 0..7
+        const depthFactor = (z2 + 1.0) * 0.5;
+        let intensity = bakedGlow * 0.65 + depthFactor * 0.35 + this.synapticPulse * 0.25;
+        if (isInt4 && salience > 0.8) {
+          intensity = 1.0;
+          size *= 1.35;
+        } else if (this.quantPrecision === 'NF4') {
+          intensity = Math.min(1.0, intensity * 1.12);
+        }
+        const bIdx = Math.min(BUCKETS - 1, Math.max(0, (intensity * BUCKETS) | 0));
+        const cIdx = this.bucketCounts[bIdx] * 3;
+        this.bucketCoords[bIdx][cIdx] = sx;
+        this.bucketCoords[bIdx][cIdx + 1] = sy;
+        this.bucketCoords[bIdx][cIdx + 2] = size * proj;
+        this.bucketCounts[bIdx]++;
+      }
+
+      // Render all 1,500 points in 8 batched fill calls with zero string allocations
+      for (let b = 0; b < BUCKETS; b++) {
+        const count = this.bucketCounts[b];
+        if (count === 0) continue;
+        ctx.fillStyle = this.lut[b];
+        const coords = this.bucketCoords[b];
+        ctx.beginPath();
+        for (let j = 0; j < count; j++) {
+          const k = j * 3;
+          const s = coords[k + 2];
+          ctx.rect(coords[k] - s * 0.5, coords[k + 1] - s * 0.5, s, s);
+        }
+        ctx.fill();
+      }
+
+      // Render 3D Synaptic Axon Curves & Traveling Energy Packets Between the 5 Transformer Hubs
+      ctx.strokeStyle = this.lut[3];
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      for (let s = 0; s < STAGE_CENTERS.length - 1; s++) {
+        const a = STAGE_CENTERS[s];
+        const b = STAGE_CENTERS[s + 1];
+
+        const ax1 = a[0] * cosY - a[2] * sinY;
+        const az1 = a[0] * sinY + a[2] * cosY;
+        const ay2 = a[1] * cosX - az1 * sinX;
+        const az2 = a[1] * sinX + az1 * cosX;
+        const aproj = 2.4 / Math.max(2.4 + az2, 0.6);
+        const asx = cx + ax1 * radiusScale * aproj;
+        const asy = cy + ay2 * radiusScale * aproj;
+
+        const bx1 = b[0] * cosY - b[2] * sinY;
+        const bz1 = b[0] * sinY + b[2] * cosY;
+        const by2 = b[1] * cosX - bz1 * sinX;
+        const bz2 = b[1] * sinX + bz1 * cosX;
+        const bproj = 2.4 / Math.max(2.4 + bz2, 0.6);
+        const bsx = cx + bx1 * radiusScale * bproj;
+        const bsy = cy + by2 * radiusScale * bproj;
+
+        const cpx = (asx + bsx) * 0.5;
+        const cpy = (asy + bsy) * 0.5 - 28 * aproj;
+        ctx.moveTo(asx, asy);
+        ctx.quadraticCurveTo(cpx, cpy, bsx, bsy);
+
+        // Traveling synaptic energy spark along the curve
+        const sparkT = (this.time * (1.2 + this.currentOmega * 0.5) + s * 0.25) % 1;
+        const invT = 1 - sparkT;
+        const spx = invT * invT * asx + 2 * invT * sparkT * cpx + sparkT * sparkT * bsx;
+        const spy = invT * invT * asy + 2 * invT * sparkT * cpy + sparkT * sparkT * bsy;
+        ctx.fillStyle = this.lut[BUCKETS - 1];
+        ctx.fillRect(spx - 2.5, spy - 2.5, 5, 5);
+      }
+      ctx.stroke();
     }
 
     draw() {
-      if (!this.ctx || !this.canvas) return;
-      const ctx = this.ctx;
-      ctx.clearRect(0, 0, this.width, this.height);
-
-      const cosY = Math.cos(this.angleY);
-      const sinY = Math.sin(this.angleY);
-      const cosX = Math.cos(this.angleX);
-      const sinX = Math.sin(this.angleX);
-      const fov = 420;
-
-      // Color Theme Selection
-      let nodeColor = '#06b6d4';
-      let synapseColor = '6, 182, 212';
-      let quantHighlight = '#38bdf8';
-
-      if (this.theme === 'stark_amber') {
-        nodeColor = '#f59e0b';
-        synapseColor = '245, 158, 11';
-        quantHighlight = '#fdd222';
-      } else if (this.theme === 'matrix_purple') {
-        nodeColor = '#a855f7';
-        synapseColor = '168, 85, 247';
-        quantHighlight = '#c084fc';
-      } else if (this.theme === 'emerald_tensor') {
-        nodeColor = '#10b981';
-        synapseColor = '16, 185, 129';
-        quantHighlight = '#34d399';
-      }
-
-      // 1. Draw RoPE Helical Strands
-      ctx.save();
-      ctx.strokeStyle = `rgba(${synapseColor}, ${0.22 + this.surgeEnergy * 0.35})`;
-      ctx.lineWidth = 1.2 + this.surgeEnergy * 1.0;
-      ctx.beginPath();
-      for (let i = 0; i < this.ropeStrands.length; i++) {
-        const s = this.ropeStrands[i];
-        const x1 = s.x * cosY - s.z * sinY;
-        const z1 = s.x * sinY + s.z * cosY;
-        const y2 = s.y * cosX - z1 * sinX;
-        const z2 = s.y * sinX + z1 * cosX;
-        const scale = fov / (fov + z2 + 180);
-        const px = this.cx + x1 * scale;
-        const py = this.cy + y2 * scale;
-        if (i === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      }
-      ctx.stroke();
-      ctx.restore();
-
-      // 2. Draw Synapses with Firing Pulses
-      for (const syn of this.synapses) {
-        const f = syn.from;
-        const t = syn.to;
-
-        // Project From
-        const fx1 = f.x * cosY - f.baseZ * sinY;
-        const fz1 = f.x * sinY + f.baseZ * cosY;
-        const fy2 = f.baseY * cosX - fz1 * sinX;
-        const fz2 = f.baseY * sinX + fz1 * cosX;
-        const fScale = fov / (fov + fz2 + 180);
-        const fpx = this.cx + fx1 * fScale;
-        const fpy = this.cy + fy2 * fScale;
-
-        // Project To
-        const tx1 = t.x * cosY - t.baseZ * sinY;
-        const tz1 = t.x * sinY + t.baseZ * cosY;
-        const ty2 = t.baseY * cosX - tz1 * sinX;
-        const tz2 = t.baseY * sinX + tz1 * cosX;
-        const tScale = fov / (fov + tz2 + 180);
-        const tpx = this.cx + tx1 * tScale;
-        const tpy = this.cy + ty2 * tScale;
-
-        // Synapse Line
-        const pulse = Math.sin(this.time * 4 + syn.activeTime) * 0.5 + 0.5 + this.surgeEnergy * 0.5;
-        ctx.strokeStyle = `rgba(${synapseColor}, ${0.12 + pulse * 0.35})`;
-        ctx.lineWidth = 0.8 + pulse * 0.8;
-        ctx.beginPath();
-        ctx.moveTo(fpx, fpy);
-        ctx.lineTo(tpx, tpy);
-        ctx.stroke();
-
-        // Traveling Activation Spark
-        const progress = (this.time * (1.5 + this.surgeEnergy * 2.5) + syn.activeTime) % 1.0;
-        const sparkX = fpx + (tpx - fpx) * progress;
-        const sparkY = fpy + (tpy - fpy) * progress;
-        ctx.fillStyle = quantHighlight;
-        ctx.fillRect(sparkX - 1.5, sparkY - 1.5, 3 + this.surgeEnergy * 2, 3 + this.surgeEnergy * 2);
-      }
-
-      // 3. Draw Neurons / Quantization Weight Tensor Blocks
-      for (const layer of this.layers) {
-        for (const n of layer) {
-          const x1 = n.x * cosY - n.baseZ * sinY;
-          const z1 = n.x * sinY + n.baseZ * cosY;
-          const y2 = n.baseY * cosX - z1 * sinX;
-          const z2 = n.baseY * sinX + z1 * cosX;
-
-          const scale = fov / (fov + z2 + 180);
-          const px = this.cx + x1 * scale;
-          const py = this.cy + y2 * scale;
-
-          ctx.save();
-          if (this.quantPrecision === 'INT4') {
-            ctx.fillStyle = quantHighlight;
-            ctx.shadowColor = nodeColor;
-            ctx.shadowBlur = (6 + this.surgeEnergy * 10) * scale;
-            ctx.fillRect(px - 3.5 * scale, py - 3.5 * scale, 7 * scale, 7 * scale);
-          } else if (this.quantPrecision === 'INT8') {
-            ctx.fillStyle = nodeColor;
-            ctx.beginPath();
-            ctx.arc(px, py, (4 + this.surgeEnergy * 2) * scale, 0, Math.PI * 2);
-            ctx.fill();
-          } else {
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowColor = quantHighlight;
-            ctx.shadowBlur = (10 + this.surgeEnergy * 14) * scale;
-            ctx.beginPath();
-            ctx.arc(px, py, (3 + this.surgeEnergy * 1.5) * scale, 0, Math.PI * 2);
-            ctx.fill();
-          }
-          ctx.restore();
-        }
-      }
+      this.renderFrame(performance.now());
     }
   }
 
   global.QuantStudio = QuantStudio;
+  global.JarvisHolographicSuite = {
+    mount: function(opts) {
+      if (!global.quantStudio) {
+        global.quantStudio = new QuantStudio();
+      }
+      return global.quantStudio;
+    }
+  };
 
   function autoMountQuantStudio() {
     if (!global.quantStudio) {
