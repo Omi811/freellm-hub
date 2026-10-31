@@ -21,11 +21,12 @@ class SettingsManager {
       "adam-map-trivia-sound.trycloudflare.com",
       "generates-meter-instrument-atm.trycloudflare.com",
       "resolved-grand-treat-pasta.trycloudflare.com",
-      "minutes-engineering-jersey-atlanta.trycloudflare.com"
+      "minutes-engineering-jersey-atlanta.trycloudflare.com",
+      "marvel-baking-das-snap.trycloudflare.com"
     ];
     let savedBackend = localStorage.getItem("freellm_backend_url") || localStorage.getItem("selfHostedUrl");
     if (savedBackend && oldTunnels.some(t => savedBackend.includes(t))) {
-      savedBackend = cfg.defaultBackendUrl || "https://marvel-baking-das-snap.trycloudflare.com";
+      savedBackend = cfg.defaultBackendUrl || "https://norman-guided-independently-interventions.trycloudflare.com";
       localStorage.setItem("freellm_backend_url", savedBackend);
       localStorage.setItem("selfHostedUrl", savedBackend);
     }
@@ -35,7 +36,7 @@ class SettingsManager {
       this.backendUrl = window.location.origin.includes("5000") ? window.location.origin : "http://localhost:5000";
       localStorage.setItem("freellm_backend_url", this.backendUrl);
     } else if (!savedBackend || savedBackend.includes("trycloudflare.com")) {
-      this.backendUrl = cfg.defaultBackendUrl || "https://marvel-baking-das-snap.trycloudflare.com";
+      this.backendUrl = cfg.defaultBackendUrl || "https://norman-guided-independently-interventions.trycloudflare.com";
       if (this.backendUrl) {
         localStorage.setItem("freellm_backend_url", this.backendUrl);
       }
