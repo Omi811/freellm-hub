@@ -72,10 +72,21 @@ class App {
     this.setupArtifactsPanel();
     this.setupPasteAndDrop();
 
+    // Harmonize J.A.R.V.I.S. Pet Companion & background to initial model color
+    if (this.modelSelector && window.jarvisPet && window.jarvisPet.adaptToModel) {
+      window.jarvisPet.adaptToModel(this.modelSelector.getSelectedModel());
+    }
+
     if (this.chats.length > 0) {
       this.selectChat(this.chats[0].id);
     } else {
       this.newChat();
+    }
+  }
+
+  onModelChange(selectedModel) {
+    if (window.jarvisPet && window.jarvisPet.adaptToModel) {
+      window.jarvisPet.adaptToModel(selectedModel);
     }
   }
 
@@ -1391,12 +1402,12 @@ Output the combined, perfected synthesis directly:`;
         assistantMsg.content = "";
       }
 
-      // J.A.R.V.I.S. Holographic Suite: Trigger Computational Thinking state
+      // J.A.R.V.I.S. Holographic Suite & Pet Companion: Trigger Computational Thinking state
       if (window.jarvis) {
         window.jarvis.setState('COMPUTATIONAL_THINKING');
       }
-      if (window.codexPet) {
-        window.codexPet.setState('THINKING');
+      if (window.jarvisPet) {
+        window.jarvisPet.setState('COMPUTATIONAL_THINKING');
       }
       if (window.JarvisHolographicSuite && window.JarvisHolographicSuite.SYSTEM_PROMPT_ADDON) {
         activeSystemPrompt = `${activeSystemPrompt}\n\n${window.JarvisHolographicSuite.SYSTEM_PROMPT_ADDON}`.trim();
@@ -1447,6 +1458,9 @@ Output the combined, perfected synthesis directly:`;
             window.jarvis.setState('STREAMING_RESPONSE');
             window.jarvis.ingestToken(chunk.delta);
           }
+          if (window.jarvisPet) {
+            window.jarvisPet.setState('STREAMING_RESPONSE');
+          }
           const cEl = document.getElementById(`msg-content-${assistantIndex}`);
           if (cEl) {
             cEl.innerHTML = this.formatMarkdown(fullText);
@@ -1472,8 +1486,8 @@ Output the combined, perfected synthesis directly:`;
         window.jarvis.setState('IDLE');
         this.renderMessages();
       }
-      if (window.codexPet) {
-        window.codexPet.setState('IDLE');
+      if (window.jarvisPet) {
+        window.jarvisPet.setState('IDLE');
       }
 
       // Update active branch cache in the preceding user message if variants exist
@@ -1508,7 +1522,7 @@ Output the combined, perfected synthesis directly:`;
       }
     } finally {
       if (window.jarvis) window.jarvis.setState('IDLE');
-      if (window.codexPet) window.codexPet.setState('IDLE');
+      if (window.jarvisPet) window.jarvisPet.setState('IDLE');
       this.isStreaming = false;
       this.toggleStreamButtons(false);
       const input = document.getElementById("chat-input-textarea");

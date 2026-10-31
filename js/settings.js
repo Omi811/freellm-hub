@@ -147,9 +147,9 @@ class SettingsManager {
       tokensVal.textContent = this.maxTokens;
     }
 
-    const petToggle = document.getElementById("settings-codex-pet-toggle");
-    if (petToggle && window.codexPet) {
-      petToggle.checked = window.codexPet.enabled;
+    const petToggle = document.getElementById("settings-jarvis-pet-toggle") || document.getElementById("settings-codex-pet-toggle");
+    if (petToggle && window.jarvisPet) {
+      petToggle.checked = window.jarvisPet.enabled;
     }
   }
 
