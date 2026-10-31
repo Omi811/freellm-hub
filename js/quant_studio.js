@@ -2,19 +2,24 @@
  * ============================================================================
  * QUANT NEURAL NETWORK & MACHINE LEARNING VISUALIZATION STUDIO
  * ============================================================================
- * Spec Features:
+ * Features:
  *  1. 3D Spinning J.A.R.V.I.S. Neural Network & ML Visualizer:
- *     - Multi-Head Attention (MHA/GQA) rotating tensor heads & query-key-value vectors
+ *     - Multi-Head Attention (MHA/GQA) rotating tensor heads & QKV vectors
  *     - Real-time Quantization representation: FP16, INT8, INT4 (AWQ), NF4
  *     - RoPE Rotary Positional Embedding helical geometry
  *     - Dynamic synapsing neuron pulses across LayerNorm / RMSNorm and SwiGLU FFN
- *     - Interactive personalization: rotation speed, bit-depth, heads, and color themes
- *  2. Multi-Model Integration for Serious Developer Projects:
+ *     - Interactive 3D drag rotation and zoom
+ *  2. Prompt-Submitting Toggle Chatbox (In-Studio Streaming Console):
+ *     - Direct interactive prompt submission right inside the Neural Studio
+ *     - Live token streaming with synchronized 3D neural activation flares
+ *     - Toggle between Chatbox view and Multi-Model / Telemetry settings
+ *     - Quick prompt chips (/ponytail, Unit Tests, Latency Optimization)
+ *  3. Multi-Model Integration for Serious Developer Projects:
  *     - Parallel Ensemble & Mixture-of-Agents orchestration
  *     - Concurrent multi-model prompt dispatch (Claude + DeepSeek + Groq + Gemini)
- *  3. Double Turbo Mode:
+ *  4. Double Turbo Mode:
  *     - Hyper-speed speculative decoupling stream routing (~800 tok/s)
- *  4. Smart Coping & Telemetry System:
+ *  5. Smart Coping & Telemetry System:
  *     - KV-Cache compression telemetry, memory budgeting, and zero-loss error recovery
  * ============================================================================
  */
@@ -28,12 +33,18 @@
     constructor() {
       const saved = this.loadConfig();
       this.isOpen = false;
+      this.activeTab = saved.activeTab || 'chat'; // 'chat' | 'ensemble'
       this.doubleTurbo = saved.doubleTurbo !== false;
       this.rotSpeed = saved.rotSpeed || 1.0;
       this.quantPrecision = saved.quantPrecision || 'INT4'; // FP16 | INT8 | INT4 | NF4
       this.attentionHeads = saved.attentionHeads || 16;
       this.theme = saved.theme || 'quantum_cyan'; // quantum_cyan | stark_amber | matrix_purple | emerald_tensor
       this.selectedModels = saved.selectedModels || ['claude-3-7-sonnet', 'deepseek-r1', 'groq/llama-3.3-70b-versatile'];
+
+      // In-Studio Chatbox State
+      this.studioMessages = [];
+      this.isStreaming = false;
+      this.abortController = null;
 
       // 3D Canvas State
       this.canvas = null;
@@ -42,11 +53,11 @@
       this.time = 0;
       this.angleY = 0;
       this.angleX = 0.25;
+      this.surgeEnergy = 0.0;
 
       // Neural Architecture Graph Nodes
       this.layers = [];
       this.synapses = [];
-      this.attentionArcs = [];
       this.ropeStrands = [];
 
       this.initDom();
@@ -64,6 +75,7 @@
 
     saveConfig() {
       const cfg = {
+        activeTab: this.activeTab,
         doubleTurbo: this.doubleTurbo,
         rotSpeed: this.rotSpeed,
         quantPrecision: this.quantPrecision,
@@ -78,13 +90,13 @@
       // 1. Studio Modal Overlay
       this.modal = document.createElement('div');
       this.modal.id = 'quant-studio-modal';
-      this.modal.className = 'fixed inset-0 z-50 bg-black/80 backdrop-blur-xl hidden flex items-center justify-center p-3 sm:p-6 transition-all';
+      this.modal.className = 'fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden flex items-center justify-center p-2 sm:p-5 transition-all';
       this.modal.innerHTML = `
-        <div class="w-full max-w-6xl h-[92vh] rounded-3xl bg-stone-950/95 border border-cyan-500/40 shadow-2xl flex flex-col overflow-hidden font-sans text-stone-100"
+        <div class="w-full max-w-6xl h-[94vh] rounded-3xl bg-stone-950/95 border border-cyan-500/40 shadow-2xl flex flex-col overflow-hidden font-sans text-stone-100"
              style="box-shadow: 0 24px 60px -12px rgba(6, 182, 212, 0.25);">
 
           <!-- Top Studio Header -->
-          <div class="px-5 py-3.5 border-b border-stone-800 bg-stone-900/60 flex items-center justify-between">
+          <div class="px-5 py-3 border-b border-stone-800 bg-stone-900/60 flex items-center justify-between flex-wrap gap-2">
             <div class="flex items-center gap-3">
               <span class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center text-cyan-400 text-lg shadow-inner">
                 ⚛️
@@ -93,23 +105,33 @@
                 <div class="flex items-center gap-2">
                   <h2 class="text-sm sm:text-base font-bold font-mono tracking-wider text-cyan-300">J.A.R.V.I.S. QUANT NEURAL STUDIO</h2>
                   <span class="text-[10px] px-2 py-0.5 rounded-full font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                    ML VISUALIZER V3.2
+                    ML VISUALIZER V3.5
                   </span>
                 </div>
-                <p class="text-[11px] text-stone-400">Spinning 3D Transformer Quantization, Multi-Model Ensemble, and Smart Coping Architecture.</p>
+                <p class="text-[11px] text-stone-400">Spinning 3D Transformer Quantization, Multi-Model Ensemble, and Live Streaming Chatbox.</p>
               </div>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2.5">
+              <!-- Prompt Submitting Toggle Chatbox Button -->
+              <button id="quant-chatbox-toggle-btn" onclick="window.quantStudio.toggleChatbox()"
+                      title="Toggle Prompt Submitting Chatbox inside the Neural Studio"
+                      class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-semibold border transition-all cursor-pointer shadow-sm ${this.activeTab === 'chat' ? 'bg-cyan-500/25 text-cyan-300 border-cyan-500/50' : 'bg-stone-900 text-stone-400 border-stone-800 hover:text-stone-200'}">
+                <span>💬</span>
+                <span id="quant-chatbox-toggle-label">${this.activeTab === 'chat' ? 'Chatbox: ON' : 'Toggle Chatbox'}</span>
+              </button>
+
               <!-- Double Turbo Toggle Pill -->
               <button id="quant-double-turbo-toggle" onclick="window.quantStudio.toggleDoubleTurbo()"
+                      title="Toggle Double Turbo 800 tok/s accelerated inference"
                       class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-semibold border transition-all cursor-pointer shadow-sm ${this.doubleTurbo ? 'bg-orange-500/20 text-orange-400 border-orange-500/50' : 'bg-stone-900 text-stone-400 border-stone-800'}">
                 <span>⚡</span>
-                <span id="quant-double-turbo-label">Double Turbo: ${this.doubleTurbo ? 'ACTIVE (800 tok/s)' : 'STANDBY'}</span>
+                <span id="quant-double-turbo-label">Double Turbo: ${this.doubleTurbo ? 'ACTIVE' : 'OFF'}</span>
               </button>
 
               <!-- Close Button -->
               <button onclick="window.quantStudio.close()"
+                      title="Close Studio"
                       class="p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition-all cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
@@ -127,25 +149,25 @@
                 <canvas id="quant-neural-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
 
                 <!-- Floating HUD Overlays -->
-                <div class="absolute top-3 left-3 text-[10px] font-mono text-cyan-400/70 space-y-0.5 pointer-events-none bg-stone-950/60 p-2 rounded-lg border border-cyan-500/20 backdrop-blur">
-                  <div>ROTARY EMBEDDING: <span class="text-cyan-300 font-bold">RoPE 3D TENSOR</span></div>
-                  <div>ATTENTION MECHANISM: <span class="text-cyan-300 font-bold">${this.attentionHeads} HEADS (GQA)</span></div>
+                <div class="absolute top-3 left-3 text-[10px] font-mono text-cyan-400/80 space-y-0.5 pointer-events-none bg-stone-950/75 p-2 rounded-lg border border-cyan-500/20 backdrop-blur shadow">
+                  <div>ROTARY EMBEDDING: <span class="text-cyan-300 font-bold">RoPE 3D HELIX</span></div>
+                  <div>ATTENTION HEADS: <span class="text-cyan-300 font-bold">${this.attentionHeads} HEADS (GQA)</span></div>
                   <div>QUANTIZATION MODE: <span class="text-amber-300 font-bold">${this.quantPrecision} (AWQ SALIENT)</span></div>
-                  <div>KV CACHE STATUS: <span class="text-emerald-300 font-bold">COMPACTED // ZERO RETENTION</span></div>
+                  <div>SYNAPSE PULSE: <span id="quant-pulse-status" class="text-emerald-400 font-bold">READY</span></div>
                 </div>
 
-                <div class="absolute bottom-3 right-3 text-[10px] font-mono text-stone-500 pointer-events-none bg-stone-950/60 px-2.5 py-1 rounded border border-stone-800">
-                  DRAG TO ROTATE 3D • SCROLL TO ZOOM
+                <div class="absolute bottom-3 right-3 text-[10px] font-mono text-stone-400 pointer-events-none bg-stone-950/70 px-2.5 py-1 rounded border border-stone-800">
+                  DRAG TO ROTATE 3D • TOKENS FIRE SYNAPSES
                 </div>
               </div>
 
               <!-- Canvas Bottom Personalization Toolbar -->
-              <div class="p-3.5 border-t border-stone-800 bg-stone-900/40 backdrop-blur flex items-center justify-between gap-3 flex-wrap">
+              <div class="p-3 border-t border-stone-800 bg-stone-900/40 backdrop-blur flex items-center justify-between gap-2.5 flex-wrap">
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-mono text-stone-400">Rotation:</span>
                   <input type="range" min="0.2" max="3.0" step="0.1" value="${this.rotSpeed}"
                          oninput="window.quantStudio.setRotSpeed(this.value)"
-                         class="w-24 accent-cyan-400 cursor-pointer" />
+                         class="w-20 sm:w-24 accent-cyan-400 cursor-pointer" />
                   <span id="quant-rotspeed-val" class="text-xs font-mono text-cyan-400">${this.rotSpeed}x</span>
                 </div>
 
@@ -172,101 +194,400 @@
               </div>
             </div>
 
-            <!-- Right Column (5 Cols): Multi-Model Integration & Smart Coping -->
-            <div class="lg:col-span-5 flex flex-col overflow-y-auto p-5 space-y-5 bg-stone-950/40">
-
-              <!-- Section 1: Serious Developer Multi-Model Integration -->
-              <div class="space-y-3">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <span class="text-amber-400">🛠️</span>
-                    <h3 class="text-sm font-bold text-stone-200">Multi-Model Project Integration</h3>
-                  </div>
-                  <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30 font-mono">
-                    MoA ENSEMBLE
-                  </span>
-                </div>
-                <p class="text-xs text-stone-400 leading-relaxed">
-                  Compose high-stakes engineering prompts across multiple specialized models simultaneously. The Quant Router executes parallel speculative drafts and synthesizes the optimal code diff.
-                </p>
-
-                <!-- Model Selection Pills Grid -->
-                <div id="quant-model-ensemble-grid" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                  <!-- Populated dynamically with available high-power developer models -->
-                </div>
-
-                <button onclick="window.quantStudio.dispatchEnsemblePrompt()"
-                        class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:brightness-110 text-stone-950 font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20">
-                  <span>✨ Dispatch Developer Ensemble Prompt</span>
-                </button>
-              </div>
-
-              <!-- Section 2: Smart Coping & Telemetry System -->
-              <div class="space-y-3 pt-4 border-t border-stone-800">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <span class="text-emerald-400">🧠</span>
-                    <h3 class="text-sm font-bold text-stone-200">Smart Coping &amp; Context Telemetry</h3>
-                  </div>
-                  <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-mono">
-                    ACTIVE MONITOR
-                  </span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-                  <div class="p-3 rounded-xl bg-stone-900/60 border border-stone-800/80 space-y-1">
-                    <span class="text-[10px] text-stone-500 uppercase">KV-Cache Pruning</span>
-                    <div class="text-base font-bold text-emerald-400">42.8% Saved</div>
-                    <span class="text-[10px] text-stone-400">Attention sink preserved</span>
-                  </div>
-                  <div class="p-3 rounded-xl bg-stone-900/60 border border-stone-800/80 space-y-1">
-                    <span class="text-[10px] text-stone-500 uppercase">Quant Memory Bandwidth</span>
-                    <div class="text-base font-bold text-cyan-400">3.4x Faster</div>
-                    <span class="text-[10px] text-stone-400">Zero-error FP4 dequant</span>
-                  </div>
-                  <div class="p-3 rounded-xl bg-stone-900/60 border border-stone-800/80 space-y-1">
-                    <span class="text-[10px] text-stone-500 uppercase">Speculative Decoupling</span>
-                    <div class="text-base font-bold text-amber-400">820 tok/s</div>
-                    <span class="text-[10px] text-stone-400">Draft verification active</span>
-                  </div>
-                  <div class="p-3 rounded-xl bg-stone-900/60 border border-stone-800/80 space-y-1">
-                    <span class="text-[10px] text-stone-500 uppercase">Context Budget Guard</span>
-                    <div class="text-base font-bold text-purple-400">128k Safe</div>
-                    <span class="text-[10px] text-stone-400">Auto trust-boundary hold</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Section 3: J.A.R.V.I.S. Core Animation Color Customizer -->
-              <div class="space-y-2.5 pt-4 border-t border-stone-800">
-                <span class="text-xs font-mono text-stone-400 font-semibold uppercase">Personalize J.A.R.V.I.S. Visualizer Theme:</span>
-                <div class="grid grid-cols-4 gap-2">
-                  <button onclick="window.quantStudio.setTheme('quantum_cyan')"
-                          class="p-2 rounded-xl text-xs font-mono border text-center transition-all cursor-pointer ${this.theme === 'quantum_cyan' ? 'border-cyan-400 bg-cyan-500/20 text-cyan-300' : 'border-stone-800 bg-stone-900 text-stone-400'}">
-                    Cyan ⚛️
-                  </button>
-                  <button onclick="window.quantStudio.setTheme('stark_amber')"
-                          class="p-2 rounded-xl text-xs font-mono border text-center transition-all cursor-pointer ${this.theme === 'stark_amber' ? 'border-amber-400 bg-amber-500/20 text-amber-300' : 'border-stone-800 bg-stone-900 text-stone-400'}">
-                    Amber ✦
-                  </button>
-                  <button onclick="window.quantStudio.setTheme('matrix_purple')"
-                          class="p-2 rounded-xl text-xs font-mono border text-center transition-all cursor-pointer ${this.theme === 'matrix_purple' ? 'border-purple-400 bg-purple-500/20 text-purple-300' : 'border-stone-800 bg-stone-900 text-stone-400'}">
-                    Deep 🧠
-                  </button>
-                  <button onclick="window.quantStudio.setTheme('emerald_tensor')"
-                          class="p-2 rounded-xl text-xs font-mono border text-center transition-all cursor-pointer ${this.theme === 'emerald_tensor' ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300' : 'border-stone-800 bg-stone-900 text-stone-400'}">
-                    Tensor ⚡
-                  </button>
-                </div>
-              </div>
-
+            <!-- Right Column (5 Cols): Dynamic Switchable Panel (Chatbox OR Multi-Model Workbench) -->
+            <div id="quant-right-panel" class="lg:col-span-5 flex flex-col h-full overflow-hidden bg-stone-950/70">
+              <!-- Content rendered dynamically by renderRightPanel -->
             </div>
+
           </div>
         </div>
       `;
       document.body.appendChild(this.modal);
 
-      this.populateEnsembleModels();
+      this.renderRightPanel();
+    }
+
+    toggleChatbox() {
+      this.activeTab = this.activeTab === 'chat' ? 'ensemble' : 'chat';
+      this.saveConfig();
+
+      const btn = document.getElementById('quant-chatbox-toggle-btn');
+      const label = document.getElementById('quant-chatbox-toggle-label');
+      if (btn && label) {
+        if (this.activeTab === 'chat') {
+          btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-semibold border transition-all cursor-pointer shadow-sm bg-cyan-500/25 text-cyan-300 border-cyan-500/50';
+          label.textContent = 'Chatbox: ON';
+        } else {
+          btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-semibold border transition-all cursor-pointer shadow-sm bg-stone-900 text-stone-400 border-stone-800 hover:text-stone-200';
+          label.textContent = 'Toggle Chatbox';
+        }
+      }
+
+      this.renderRightPanel();
+    }
+
+    renderRightPanel() {
+      const container = document.getElementById('quant-right-panel');
+      if (!container) return;
+
+      if (this.activeTab === 'chat') {
+        // --- 1. PROMPT SUBMITTING CHATBOX VIEW ---
+        container.innerHTML = `
+          <div class="flex-1 flex flex-col h-full overflow-hidden">
+            <!-- Chatbox Header Toolbar -->
+            <div class="px-4 py-2.5 border-b border-stone-800 bg-stone-900/50 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                <span class="text-xs font-mono font-bold text-stone-200">PROMPT STREAMING CONSOLE</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="window.quantStudio.clearStudioMessages()"
+                        title="Clear console messages"
+                        class="p-1 rounded text-stone-400 hover:text-stone-200 hover:bg-stone-800 transition-all cursor-pointer text-xs font-mono">
+                  🗑️ Clear
+                </button>
+                <button type="button" onclick="window.quantStudio.toggleChatbox()"
+                        title="Switch to Multi-Model &amp; Telemetry settings"
+                        class="px-2 py-0.5 rounded text-[11px] font-mono bg-stone-900 text-stone-400 hover:text-stone-200 border border-stone-800 transition-all cursor-pointer">
+                  ⚙️ Settings
+                </button>
+              </div>
+            </div>
+
+            <!-- Messages Stream Area -->
+            <div id="quant-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3.5 font-sans text-xs">
+              ${this.studioMessages.length === 0 ? `
+                <div class="h-full flex flex-col items-center justify-center text-center p-6 text-stone-400 space-y-3">
+                  <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-300 text-2xl shadow-inner">
+                    💬
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-stone-200 text-sm">Neural Studio Interactive Chatbox</h4>
+                    <p class="text-[11px] text-stone-400 max-w-xs mt-1">Submit developer prompts directly inside the studio. Watch the 3D Quant Neural Network react live to tokens!</p>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5 justify-center pt-2 max-w-sm">
+                    <button type="button" onclick="window.quantStudio.applyPromptChip('/ponytail Optimize for minimal diff: ')"
+                            class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 hover:border-amber-500/40 text-amber-300 text-[11px] font-mono transition-all cursor-pointer">
+                      ⚡ /ponytail
+                    </button>
+                    <button type="button" onclick="window.quantStudio.applyPromptChip('Write comprehensive unit tests with edge-case coverage: ')"
+                            class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 hover:border-emerald-500/40 text-emerald-300 text-[11px] transition-all cursor-pointer">
+                      🧪 Unit Tests
+                    </button>
+                    <button type="button" onclick="window.quantStudio.applyPromptChip('Analyze quantization latency and memory bandwidth: ')"
+                            class="px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 hover:border-cyan-500/40 text-cyan-300 text-[11px] transition-all cursor-pointer">
+                      ⚛️ Quant Analysis
+                    </button>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Prompt Submission Box -->
+            <div class="p-3 border-t border-stone-800 bg-stone-900/40 space-y-2">
+              <div class="relative">
+                <textarea id="quant-chat-input" rows="2"
+                          placeholder="Type developer prompt (Enter to submit, Shift+Enter for new line)..."
+                          class="w-full bg-stone-950 border border-stone-800 focus:border-cyan-500/60 rounded-xl px-3 py-2 text-xs font-mono text-stone-100 placeholder-stone-500 focus:outline-none resize-none transition-all"></textarea>
+              </div>
+
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[10px] font-mono text-stone-400">Router:</span>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">
+                    ${(window.modelSelector && window.modelSelector.selectedModelId) || 'OmniRoute Auto'}
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  ${this.isStreaming ? `
+                    <button type="button" onclick="window.quantStudio.abortStream()"
+                            class="px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 text-xs font-mono font-semibold transition-all cursor-pointer">
+                      ⏹️ Abort
+                    </button>
+                  ` : `
+                    <button type="button" onclick="window.quantStudio.submitStudioPrompt()"
+                            class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:brightness-110 text-stone-950 text-xs font-mono font-bold transition-all cursor-pointer shadow-md shadow-cyan-500/20 flex items-center gap-1.5">
+                      <span>✨ Submit</span>
+                      <kbd class="text-[9px] opacity-75 font-sans">↵</kbd>
+                    </button>
+                  `}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        this.renderStudioMessages();
+        this.bindChatInputEvents();
+
+      } else {
+        // --- 2. MULTI-MODEL INTEGRATION & TELEMETRY VIEW ---
+        container.innerHTML = `
+          <div class="flex-1 flex flex-col h-full overflow-y-auto p-5 space-y-5">
+            <!-- Header with Quick Switch to Chatbox -->
+            <div class="flex items-center justify-between pb-3 border-b border-stone-800">
+              <div class="flex items-center gap-2">
+                <span class="text-amber-400">🛠️</span>
+                <h3 class="text-sm font-bold text-stone-200">Multi-Model Project Integration</h3>
+              </div>
+              <button type="button" onclick="window.quantStudio.toggleChatbox()"
+                      class="px-2.5 py-1 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1">
+                <span>💬</span><span>Open Chatbox</span>
+              </button>
+            </div>
+
+            <!-- Model Selection Grid -->
+            <p class="text-xs text-stone-400 leading-relaxed">
+              Compose high-stakes developer prompts across multiple specialized models simultaneously. The Quant Router executes parallel speculative drafts and synthesizes the optimal code diff.
+            </p>
+
+            <div id="quant-model-ensemble-grid" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
+
+            <!-- Smart Coping & Telemetry -->
+            <div class="space-y-3 pt-3 border-t border-stone-800">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="text-emerald-400">🧠</span>
+                  <h3 class="text-sm font-bold text-stone-200">Smart Coping &amp; Context Telemetry</h3>
+                </div>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-mono">
+                  ACTIVE
+                </span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                <div class="p-3 rounded-xl bg-stone-900/60 border border-stone-800/80 space-y-1">
+                  <span class="text-[10px] text-stone-500 uppercase">KV-Cache Pruning</span>
+                  <div class="text-base font-bold text-emerald-400">42.8% Saved</div>
+                  <span class="text-[10px] text-stone-400">Attention sink hold</span>
+                </div>
+                <div class="p-3 rounded-xl bg-stone-900/60 border border-stone-800/80 space-y-1">
+                  <span class="text-[10px] text-stone-500 uppercase">Quant Memory Bandwidth</span>
+                  <div class="text-base font-bold text-cyan-400">3.4x Faster</div>
+                  <span class="text-[10px] text-stone-400">FP4 dequant fast-path</span>
+                </div>
+                <div class="p-3 rounded-xl bg-stone-900/60 border border-stone-800/80 space-y-1">
+                  <span class="text-[10px] text-stone-500 uppercase">Speculative Decoupling</span>
+                  <div class="text-base font-bold text-amber-400">820 tok/s</div>
+                  <span class="text-[10px] text-stone-400">Groq LPU target</span>
+                </div>
+                <div class="p-3 rounded-xl bg-stone-900/60 border border-stone-800/80 space-y-1">
+                  <span class="text-[10px] text-stone-500 uppercase">Context Budget Guard</span>
+                  <div class="text-base font-bold text-purple-400">128k Safe</div>
+                  <span class="text-[10px] text-stone-400">Trust-boundary active</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Theme Options -->
+            <div class="space-y-2.5 pt-3 border-t border-stone-800">
+              <span class="text-xs font-mono text-stone-400 font-semibold uppercase">Personalize 3D J.A.R.V.I.S. Theme:</span>
+              <div class="grid grid-cols-4 gap-2">
+                <button onclick="window.quantStudio.setTheme('quantum_cyan')"
+                        class="p-2 rounded-xl text-xs font-mono border text-center transition-all cursor-pointer ${this.theme === 'quantum_cyan' ? 'border-cyan-400 bg-cyan-500/20 text-cyan-300' : 'border-stone-800 bg-stone-900 text-stone-400'}">
+                  Cyan ⚛️
+                </button>
+                <button onclick="window.quantStudio.setTheme('stark_amber')"
+                        class="p-2 rounded-xl text-xs font-mono border text-center transition-all cursor-pointer ${this.theme === 'stark_amber' ? 'border-amber-400 bg-amber-500/20 text-amber-300' : 'border-stone-800 bg-stone-900 text-stone-400'}">
+                  Amber ✦
+                </button>
+                <button onclick="window.quantStudio.setTheme('matrix_purple')"
+                        class="p-2 rounded-xl text-xs font-mono border text-center transition-all cursor-pointer ${this.theme === 'matrix_purple' ? 'border-purple-400 bg-purple-500/20 text-purple-300' : 'border-stone-800 bg-stone-900 text-stone-400'}">
+                  Deep 🧠
+                </button>
+                <button onclick="window.quantStudio.setTheme('emerald_tensor')"
+                        class="p-2 rounded-xl text-xs font-mono border text-center transition-all cursor-pointer ${this.theme === 'emerald_tensor' ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300' : 'border-stone-800 bg-stone-900 text-stone-400'}">
+                  Tensor ⚡
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        this.populateEnsembleModels();
+      }
+    }
+
+    bindChatInputEvents() {
+      const textarea = document.getElementById('quant-chat-input');
+      if (!textarea) return;
+
+      textarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          this.submitStudioPrompt();
+        } else {
+          this.triggerSynapticSurge();
+        }
+      });
+    }
+
+    applyPromptChip(text) {
+      const textarea = document.getElementById('quant-chat-input');
+      if (textarea) {
+        textarea.value = text;
+        textarea.focus();
+      }
+      this.triggerSynapticSurge();
+    }
+
+    async submitStudioPrompt() {
+      const textarea = document.getElementById('quant-chat-input');
+      if (!textarea || !textarea.value.trim() || this.isStreaming) return;
+
+      const userText = textarea.value.trim();
+      textarea.value = '';
+
+      // Append user message
+      this.studioMessages.push({ role: 'user', content: userText });
+      this.renderStudioMessages();
+
+      // Trigger 3D neural activation burst
+      this.triggerSynapticSurge();
+
+      // Append assistant placeholder
+      const assistantMsg = { role: 'assistant', content: '', thinking: '', meta: null };
+      this.studioMessages.push(assistantMsg);
+      this.isStreaming = true;
+      this.renderStudioMessages();
+
+      const activeModelId = (window.modelSelector && window.modelSelector.selectedModelId) || 'auto';
+      this.abortController = new AbortController();
+
+      try {
+        const stream = window.clientEngine.streamChat({
+          model_id: activeModelId,
+          messages: this.studioMessages.slice(0, -1).map(m => ({ role: m.role, content: m.content })),
+          system_prompt: `You are the J.A.R.V.I.S. Quant Neural Copilot. Deliver mathematically rigorous, high-concurrency, zero-bloat code. Adhere strictly to the Ponytail safe-coding mandate: Correct -> Safe -> Holds under real load -> Tested -> Fast -> Lean.`,
+          turbo_mode: this.doubleTurbo,
+          abortSignal: this.abortController.signal
+        });
+
+        for await (const chunk of stream) {
+          if (chunk.type === 'thinking') {
+            assistantMsg.thinking = (assistantMsg.thinking || '') + chunk.delta;
+            this.pulse3dCore(0.35);
+          } else if (chunk.type === 'chunk') {
+            assistantMsg.content += chunk.delta;
+            this.pulse3dCore(0.85);
+          } else if (chunk.type === 'done') {
+            assistantMsg.meta = chunk;
+          }
+          this.updateLatestAssistantMessage();
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          assistantMsg.content += `\n\n> ⚠️ Notice: ${err.message || err}`;
+          this.updateLatestAssistantMessage();
+        }
+      } finally {
+        this.isStreaming = false;
+        this.renderStudioMessages();
+      }
+    }
+
+    abortStream() {
+      if (this.abortController) {
+        this.abortController.abort();
+        this.abortController = null;
+      }
+      this.isStreaming = false;
+      this.renderStudioMessages();
+    }
+
+    clearStudioMessages() {
+      this.studioMessages = [];
+      this.renderStudioMessages();
+    }
+
+    renderStudioMessages() {
+      const container = document.getElementById('quant-chat-messages');
+      if (!container) return;
+
+      if (this.studioMessages.length === 0) {
+        this.renderRightPanel();
+        return;
+      }
+
+      container.innerHTML = this.studioMessages.map((m, idx) => {
+        const isUser = m.role === 'user';
+        return `
+          <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-1">
+            <span class="text-[10px] font-mono text-stone-500 uppercase px-1">
+              ${isUser ? '👤 Developer' : '⚛️ Quant Copilot'}
+            </span>
+            <div class="max-w-[92%] rounded-2xl px-3.5 py-2.5 ${isUser ? 'bg-cyan-600/30 border border-cyan-500/40 text-cyan-100' : 'bg-stone-900 border border-stone-800 text-stone-200'} shadow">
+              ${m.thinking ? `
+                <div class="mb-2 p-2 rounded-lg bg-black/40 border border-purple-500/30 text-[11px] font-mono text-purple-300">
+                  <div class="text-[9px] uppercase font-bold text-purple-400 mb-1">🧠 Deep Reasoning:</div>
+                  ${this.formatText(m.thinking)}
+                </div>
+              ` : ''}
+              <div class="leading-relaxed break-words whitespace-pre-wrap font-sans text-xs">
+                ${this.formatText(m.content) || (this.isStreaming && idx === this.studioMessages.length - 1 ? '<span class="inline-block w-2 h-3.5 bg-cyan-400 animate-pulse ml-0.5 align-middle"></span>' : '')}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    updateLatestAssistantMessage() {
+      const container = document.getElementById('quant-chat-messages');
+      if (!container) return;
+      const lastMsg = this.studioMessages[this.studioMessages.length - 1];
+      if (!lastMsg || lastMsg.role !== 'assistant') return;
+
+      const lastEl = container.lastElementChild;
+      if (lastEl) {
+        const textContainer = lastEl.querySelector('.leading-relaxed');
+        if (textContainer) {
+          textContainer.innerHTML = this.formatText(lastMsg.content) + (this.isStreaming ? '<span class="inline-block w-2 h-3.5 bg-cyan-400 animate-pulse ml-0.5 align-middle"></span>' : '');
+        }
+      }
+      container.scrollTop = container.scrollHeight;
+    }
+
+    formatText(raw) {
+      if (!raw) return '';
+      // Escape HTML
+      let escaped = raw
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      // Format code blocks ```
+      escaped = escaped.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+        return `<pre class="my-2 p-2.5 rounded-xl bg-black/80 border border-stone-800 font-mono text-[11px] overflow-x-auto text-cyan-300"><code>${code}</code></pre>`;
+      });
+
+      // Format inline code `
+      escaped = escaped.replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 rounded bg-black/60 border border-stone-800 text-cyan-300 font-mono text-[11px]">$1</code>');
+
+      return escaped;
+    }
+
+    triggerSynapticSurge() {
+      this.surgeEnergy = Math.min(this.surgeEnergy + 0.45, 1.0);
+      const pulseStatus = document.getElementById('quant-pulse-status');
+      if (pulseStatus) {
+        pulseStatus.textContent = 'FIRING // SYNAPSE';
+        pulseStatus.className = 'text-amber-400 font-bold animate-pulse';
+        clearTimeout(this.pulseTimeout);
+        this.pulseTimeout = setTimeout(() => {
+          if (pulseStatus) {
+            pulseStatus.textContent = 'STEADY // SYNAPSE';
+            pulseStatus.className = 'text-emerald-400 font-bold';
+          }
+        }, 1200);
+      }
+    }
+
+    pulse3dCore(amount) {
+      this.surgeEnergy = Math.min(this.surgeEnergy + amount, 1.0);
     }
 
     populateEnsembleModels() {
@@ -312,15 +633,8 @@
     buildNeuralModel() {
       this.layers = [];
       this.synapses = [];
-      this.attentionArcs = [];
       this.ropeStrands = [];
 
-      // 5-Stage Transformer Stages
-      // 0: Token Embedding Input
-      // 1: Multi-Head Attention QKV projection
-      // 2: RMSNorm / Attention Matrix
-      // 3: SwiGLU Feed Forward Dense Layer
-      // 4: Dequantized Output Logits
       const stageX = [-180, -90, 0, 90, 180];
       const counts = [6, 12, this.attentionHeads, 14, 8];
 
@@ -344,13 +658,11 @@
         this.layers.push(layerNodes);
       }
 
-      // Synaptic Connections between adjacent stages
       for (let s = 0; s < this.layers.length - 1; s++) {
         const fromLayer = this.layers[s];
         const toLayer = this.layers[s + 1];
 
         for (let f = 0; f < fromLayer.length; f++) {
-          // Connect to 2-3 forward neurons
           for (let step = 0; step < 2; step++) {
             const t = (f + step * 2) % toLayer.length;
             this.synapses.push({
@@ -363,7 +675,6 @@
         }
       }
 
-      // RoPE Rotary Helical Strands
       for (let i = 0; i < 40; i++) {
         const theta = i * 0.35;
         this.ropeStrands.push({
@@ -375,7 +686,6 @@
     }
 
     bindEvents() {
-      // Drag rotation on canvas
       let isDragging = false;
       let lastX = 0;
       let lastY = 0;
@@ -459,10 +769,10 @@
       if (btn && label) {
         if (this.doubleTurbo) {
           btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-semibold border transition-all cursor-pointer shadow-sm bg-orange-500/20 text-orange-400 border-orange-500/50';
-          label.textContent = 'Double Turbo: ACTIVE (800 tok/s)';
+          label.textContent = 'Double Turbo: ACTIVE';
         } else {
           btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-semibold border transition-all cursor-pointer shadow-sm bg-stone-900 text-stone-400 border-stone-800';
-          label.textContent = 'Double Turbo: STANDBY';
+          label.textContent = 'Double Turbo: OFF';
         }
       }
 
@@ -471,7 +781,7 @@
       }
 
       if (window.app && window.app.showCommandToast) {
-        window.app.showCommandToast(this.doubleTurbo ? '⚡ Double Turbo Mode Enabled: Speculative decoding active' : 'Double Turbo Mode: Standby');
+        window.app.showCommandToast(this.doubleTurbo ? '⚡ Double Turbo Mode: Speculative decoding active (~800 tok/s)' : 'Double Turbo Mode: Off');
       }
     }
 
@@ -503,11 +813,7 @@
     setTheme(themeName) {
       this.theme = themeName;
       this.saveConfig();
-      this.renderThemeButtons();
-    }
-
-    renderThemeButtons() {
-      // Re-trigger visual updates
+      this.renderRightPanel();
     }
 
     startLoop() {
@@ -536,7 +842,9 @@
 
     update(dt) {
       this.time += dt;
-      this.angleY += 0.45 * this.rotSpeed * dt;
+      this.surgeEnergy = Math.max(0, this.surgeEnergy - dt * 0.45);
+      const effectiveSpeed = this.rotSpeed + this.surgeEnergy * 1.5;
+      this.angleY += 0.45 * effectiveSpeed * dt;
     }
 
     draw() {
@@ -569,10 +877,10 @@
         quantHighlight = '#34d399';
       }
 
-      // 1. Draw RoPE Helical Strands (Rotary Positional Embeddings)
+      // 1. Draw RoPE Helical Strands
       ctx.save();
-      ctx.strokeStyle = `rgba(${synapseColor}, 0.22)`;
-      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = `rgba(${synapseColor}, ${0.22 + this.surgeEnergy * 0.35})`;
+      ctx.lineWidth = 1.2 + this.surgeEnergy * 1.0;
       ctx.beginPath();
       for (let i = 0; i < this.ropeStrands.length; i++) {
         const s = this.ropeStrands[i];
@@ -613,7 +921,7 @@
         const tpy = this.cy + ty2 * tScale;
 
         // Synapse Line
-        const pulse = Math.sin(this.time * 4 + syn.activeTime) * 0.5 + 0.5;
+        const pulse = Math.sin(this.time * 4 + syn.activeTime) * 0.5 + 0.5 + this.surgeEnergy * 0.5;
         ctx.strokeStyle = `rgba(${synapseColor}, ${0.12 + pulse * 0.35})`;
         ctx.lineWidth = 0.8 + pulse * 0.8;
         ctx.beginPath();
@@ -622,11 +930,11 @@
         ctx.stroke();
 
         // Traveling Activation Spark
-        const progress = (this.time * 1.5 + syn.activeTime) % 1.0;
+        const progress = (this.time * (1.5 + this.surgeEnergy * 2.5) + syn.activeTime) % 1.0;
         const sparkX = fpx + (tpx - fpx) * progress;
         const sparkY = fpy + (tpy - fpy) * progress;
         ctx.fillStyle = quantHighlight;
-        ctx.fillRect(sparkX - 1.5, sparkY - 1.5, 3, 3);
+        ctx.fillRect(sparkX - 1.5, sparkY - 1.5, 3 + this.surgeEnergy * 2, 3 + this.surgeEnergy * 2);
       }
 
       // 3. Draw Neurons / Quantization Weight Tensor Blocks
@@ -640,44 +948,27 @@
           const scale = fov / (fov + z2 + 180);
           const px = this.cx + x1 * scale;
           const py = this.cy + y2 * scale;
-          const depthAlpha = Math.min(1, Math.max(0.3, (z2 + 180) / 360));
 
           ctx.save();
           if (this.quantPrecision === 'INT4') {
-            // Discrete Quantized Blocks
             ctx.fillStyle = quantHighlight;
             ctx.shadowColor = nodeColor;
-            ctx.shadowBlur = 6 * scale;
+            ctx.shadowBlur = (6 + this.surgeEnergy * 10) * scale;
             ctx.fillRect(px - 3.5 * scale, py - 3.5 * scale, 7 * scale, 7 * scale);
           } else if (this.quantPrecision === 'INT8') {
-            // Round Quantized Nodes
             ctx.fillStyle = nodeColor;
             ctx.beginPath();
-            ctx.arc(px, py, 4 * scale, 0, Math.PI * 2);
+            ctx.arc(px, py, (4 + this.surgeEnergy * 2) * scale, 0, Math.PI * 2);
             ctx.fill();
           } else {
-            // FP16 Continuous Glowing Spark
             ctx.fillStyle = '#ffffff';
             ctx.shadowColor = quantHighlight;
-            ctx.shadowBlur = 10 * scale;
+            ctx.shadowBlur = (10 + this.surgeEnergy * 14) * scale;
             ctx.beginPath();
-            ctx.arc(px, py, 3 * scale, 0, Math.PI * 2);
+            ctx.arc(px, py, (3 + this.surgeEnergy * 1.5) * scale, 0, Math.PI * 2);
             ctx.fill();
           }
           ctx.restore();
-        }
-      }
-    }
-
-    dispatchEnsemblePrompt() {
-      const input = document.getElementById('chat-input-textarea');
-      const sample = `[QUANT ENSEMBLE SPEC]\nExecute multi-model speculative consensus using: ${this.selectedModels.join(', ')}.\nArchitecture Directive: Deliver rigorous, zero-bloat production code.`;
-      if (input) {
-        input.value = sample;
-        input.focus();
-        this.close();
-        if (window.app && window.app.showCommandToast) {
-          window.app.showCommandToast('⚛️ Ensemble developer prompt populated in chat box!');
         }
       }
     }
